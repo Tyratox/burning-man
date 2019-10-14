@@ -1,0 +1,8 @@
+.DS_Store
+node_modules
+*.fls
+*.synctex.gz
+*.log
+*.fdb_latexmk
+*.toc
+*.aux
