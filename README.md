@@ -1,9 +1,8 @@
-# MATLAB Fall 2014 – Research Plan (Template)
-(text between brackets to be removed)
+# Burning man – Simulating the behaviour of people in the event of fire
 
-> * Group Name: (be creative!)
-> * Group participants names: (alphabetically sorted by last name)
-> * Project Title: (can be changed later)
+> * Group Name: Fire Brigade
+> * Group participants names: Nico Hauser, Andri Horat, Elias Schmid, Jonas Spieler
+> * Project Title: Burning Man 🔥
 
 ## General Introduction
 
