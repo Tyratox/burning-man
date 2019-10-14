@@ -1,8 +1,8 @@
-# Burning man – Simulating the behaviour of people in the event of fire
+# Burning man 🔥💀 – Simulating the behaviour of people in the event of fire
 
 > * Group Name: Fire Brigade
 > * Group participants names: Nico Hauser, Andri Horat, Elias Schmid, Jonas Spieler
-> * Project Title: Burning Man 🔥
+> * Project Title: Burning Man 🔥💀
 
 ## General Introduction
 
