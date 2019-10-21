@@ -1,0 +1,47 @@
+goal of an agent:
+    arrive at shelter/escape the building
+
+signs:
+    probability P(agent takes the right path):
+        clearness
+        visibility (smoke)
+    activation of fire alarm (time)
+    gravity
+
+paths:
+    shortest path
+    detour 
+    dead end -> change direction
+    obstacle -> detour (fire destroied some part of the building)
+
+agent:
+    fitness
+    position
+    stress level
+    weight
+    diameter
+    direction
+    speed
+    acceleration
+    determination -> drops after a while not seeing a sign
+    group
+
+groups:
+    nr of agents
+    determination
+    direction
+    average speed
+    acceleration
+
+fire:
+    starting area
+    growing rate
+    growing direction
+
+smoke:
+    changes direction of an agent/destroys group
+    source (fire)
+    growing rate
+
+area next to fire:
+    probability P(taking fire) -> dependent of direction of fire, material,...
