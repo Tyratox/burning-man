@@ -40,6 +40,8 @@
   },
   "dependencies": {
     "@babel/preset-typescript": "^7.6.0",
+    "@types/lodash": "^4.14.144",
+    "lodash": "^4.17.15",
     "phaser": "^3.16.2"
   }
 }

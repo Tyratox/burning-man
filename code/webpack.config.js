@@ -8,6 +8,10 @@ module.exports = {
   devtool: "eval-source-map",
   context: __dirname,
   entry: [path.join(__dirname, "src/index.ts")],
+  resolve: {
+    modules: [path.resolve(__dirname, "src"), "node_modules"],
+    extensions: [".js", ".jsx", ".ts", ".tsx", ".scss"]
+  },
   module: {
     rules: [
       {
