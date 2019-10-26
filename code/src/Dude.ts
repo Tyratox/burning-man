@@ -41,8 +41,7 @@ class Dude {
       )
       //.setVelocity(Math.random() * 100, Math.random() * 100)
       .setCollideWorldBounds(true)
-      .setTintFill()
-      .setBounce(0.8);
+      .setTintFill();
 
     this.sprite = sprite;
     return sprite;

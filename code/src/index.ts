@@ -38,30 +38,46 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 };
 
 const calculateForces = throttle(() => {
-  dudes.forEach(dude1 => {
-    dudes.forEach(dude2 => {
-      if (dude1 === dude2) {
-        return;
-      }
+  const accelerations = new Array(dudes.length)
+    .fill(null)
+    .map(_ => ({ x: 0, y: 0 }));
+
+  for (let i = 0; i < dudes.length; i++) {
+    for (let j = i + 1; j < dudes.length; j++) {
+      const dude1 = dudes[i],
+        dude2 = dudes[j];
 
       const diffX = dude1.getBody().x - dude2.getBody().x;
       const diffY = dude1.getBody().y - dude2.getBody().y;
 
       const distance = Math.sqrt(diffX * diffX + diffY * diffY);
-      const force =
-        5 *
+      const pushingForce =
+        0.5 *
         Math.exp(
-          (dude1.getBody().radius + dude2.getBody().radius - distance) * 10e5
+          (distance - (dude1.getBody().radius + dude2.getBody().radius)) / 10e15
         );
 
-      const directionX = (dude1.getBody().x - dude2.getBody().x) / distance;
-      const directionY = (dude1.getBody().y - dude2.getBody().y) / distance;
+      const pullingForce = distance / 10e1;
 
-      console.log(force, directionX, (force * directionX) / dude1.weight);
-      dude1.getBody().setAccelerationX((force * directionX) / dude1.weight);
-      dude1.getBody().setAccelerationY((force * directionY) / dude1.weight);
-    });
-  });
+      const force = pushingForce + pullingForce * -1;
+
+      const directionXForDude1 =
+        (dude1.getBody().x - dude2.getBody().x) / distance;
+      const directionYForDude1 =
+        (dude1.getBody().y - dude2.getBody().y) / distance;
+
+      accelerations[i].x += (force * directionXForDude1) / dude1.weight;
+      accelerations[i].y += (force * directionYForDude1) / dude1.weight;
+
+      accelerations[j].x += (force * directionXForDude1 * -1) / dude2.weight;
+      accelerations[j].y += (force * directionYForDude1 * -1) / dude2.weight;
+    }
+  }
+
+  accelerations.forEach((acceleration, index) =>
+    dudes[index].getBody().setAcceleration(acceleration.x, acceleration.y)
+  );
+  console.log("accelerations after", accelerations);
 }, 1000);
 
 const update = () => {
@@ -83,7 +99,8 @@ const config: GameConfig = {
   physics: {
     default: "arcade",
     arcade: {
-      gravity: { x: 0, y: 0 }
+      gravity: { x: 0, y: 0 },
+      fps: 30
     }
   }
 };
