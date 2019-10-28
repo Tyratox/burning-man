@@ -2,14 +2,12 @@ import * as Phaser from "phaser";
 import { throttle } from "lodash";
 
 import Dude from "./Dude";
+import map from "./map";
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
 type CreateSceneFromObjectConfig = Phaser.Types.Scenes.CreateSceneFromObjectConfig;
 type GameConfig = Phaser.Types.Core.GameConfig;
-
-const WIDTH = 800;
-const HEIGHT = 600;
 
 export const getBody = (
   obj: Phaser.GameObjects.GameObject
@@ -24,17 +22,36 @@ const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
 };
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
+  //generate map, yehei
+
+  const walls = this.physics.add.staticGroup();
+  const halfThickness = map.wallThickness / 2;
+
+  for (let i = 0; i < map.walls.length; i++) {
+    const [from, to] = map.walls[i];
+    const rect = this.add.rectangle(
+      from.x + (to.x - from.x) / 2,
+      from.y + (to.y - from.y) / 2,
+      to.x - from.x + halfThickness,
+      to.y - from.y + halfThickness,
+      0xff0000
+    );
+
+    walls.add(rect);
+  }
+
   const dudeGroup = this.add.group();
 
   for (let i = 0; i < 5; i++) {
-    const dude = new Dude(Math.random(), Math.random(), Math.random());
-    dudeGroup.add(dude.generateSprite(this));
+    const dude = new Dude(Math.random(), Math.random(), Math.random(), this);
+    dudeGroup.add(dude.object);
     dudes.push(dude);
   }
 
   this.physics.add.collider(dudeGroup, dudeGroup, (p1, p2) => {
     //collision callback
   });
+  this.physics.add.collider(dudeGroup, walls);
 };
 
 const calculateForces = throttle(() => {
@@ -77,8 +94,7 @@ const calculateForces = throttle(() => {
   accelerations.forEach((acceleration, index) =>
     dudes[index].getBody().setAcceleration(acceleration.x, acceleration.y)
   );
-  console.log("accelerations after", accelerations);
-}, 1000);
+}, 300);
 
 const update = () => {
   calculateForces();
@@ -93,8 +109,8 @@ const scene: CreateSceneFromObjectConfig = {
 const config: GameConfig = {
   type: Phaser.AUTO,
   parent: "burning-man",
-  width: WIDTH,
-  height: HEIGHT,
+  width: map.width,
+  height: map.height,
   scene,
   physics: {
     default: "arcade",

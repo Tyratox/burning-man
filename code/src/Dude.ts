@@ -12,14 +12,19 @@ class Dude {
   stressLevel: number;
   visualRange: number;
 
-  sprite: Phaser.GameObjects.GameObject;
+  object: Phaser.GameObjects.GameObject;
 
   //should't be changed, just informational
   fitness: number;
   weight: number;
   age: number;
 
-  constructor(fitness: number, weight: number, age: number) {
+  constructor(
+    fitness: number,
+    weight: number,
+    age: number,
+    scene: Phaser.Scene
+  ) {
     this.fitness = fitness;
     this.weight = weight;
     this.age = age;
@@ -29,26 +34,21 @@ class Dude {
     this.radius = MAX_RADIUS * (weight / fitness);
     this.stressLevel = Math.random();
     this.visualRange = MAX_VISUAL_RANGE / age;
-  }
 
-  generateSprite(scene: Phaser.Scene) {
-    const sprite = scene.physics.add
-      .sprite(
-        10 + Math.random() * 780,
-        10 + Math.random() * 580,
-        Math.random().toString(),
-        null
-      )
-      //.setVelocity(Math.random() * 100, Math.random() * 100)
-      .setCollideWorldBounds(true)
-      .setTintFill();
+    const circle = scene.add.circle(
+      10 + Math.random() * 780,
+      10 + Math.random() * 580,
+      10,
+      0xffffff
+    );
 
-    this.sprite = sprite;
-    return sprite;
+    scene.physics.world.enable(circle); //adds body / enables physics
+    this.object = circle;
+    this.getBody().setCollideWorldBounds(true);
   }
 
   getBody() {
-    return getBody(this.sprite);
+    return getBody(this.object);
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "burning-man",
-  "version": "1.0",
+  "version": "1.0.0",
   "description": "Simulating the behaviour of people in the event of fire",
   "main": "src/index.ts",
   "scripts": {
