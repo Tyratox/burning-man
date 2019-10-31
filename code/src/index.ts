@@ -42,11 +42,18 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
   const dudeGroup = this.add.group();
 
-  for (let i = 0; i < 5; i++) {
-    const dude = new Dude(Math.random(), Math.random(), Math.random(), this);
+  map.spawnPoints.forEach(point => {
+    const dude = new Dude(
+      point.x,
+      point.y,
+      Math.random(),
+      0.3 + Math.random() * 0.7,
+      Math.random(),
+      this
+    );
     dudeGroup.add(dude.object);
     dudes.push(dude);
-  }
+  });
 
   this.physics.add.collider(dudeGroup, dudeGroup, (p1, p2) => {
     //collision callback
@@ -54,7 +61,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   this.physics.add.collider(dudeGroup, walls);
 };
 
-const calculateForces = throttle(() => {
+const calculateForces = () => {
   const accelerations = new Array(dudes.length)
     .fill(null)
     .map(_ => ({ x: 0, y: 0 }));
@@ -67,16 +74,20 @@ const calculateForces = throttle(() => {
       const diffX = dude1.getBody().x - dude2.getBody().x;
       const diffY = dude1.getBody().y - dude2.getBody().y;
 
-      const distance = Math.sqrt(diffX * diffX + diffY * diffY);
-      const pushingForce =
-        0.5 *
-        Math.exp(
-          (distance - (dude1.getBody().radius + dude2.getBody().radius)) / 10e15
-        );
+      const distance =
+        Math.sqrt(diffX * diffX + diffY * diffY) -
+        (dude1.getBody().radius + dude2.getBody().radius);
 
-      const pullingForce = distance / 10e1;
+      //the smaller the distance the bigger the force
+      //the bigger the distance the smaller the force
+      //force ~ e^{-distance} = 1/(e^{distance}) (exponentially falling with distance)
+      //OR => force ~ e^{1/distance} => exponentially increasing with small distances
+      const pushingForce = (1 / 1000) * Math.exp(205 / distance);
 
-      const force = pushingForce + pullingForce * -1;
+      //the bigger the distance the smaller the pulling force
+      const pullingForce = 1 / (distance * 5000);
+
+      const force = pushingForce - pullingForce;
 
       const directionXForDude1 =
         (dude1.getBody().x - dude2.getBody().x) / distance;
@@ -94,7 +105,7 @@ const calculateForces = throttle(() => {
   accelerations.forEach((acceleration, index) =>
     dudes[index].getBody().setAcceleration(acceleration.x, acceleration.y)
   );
-}, 300);
+};
 
 const update = () => {
   calculateForces();
