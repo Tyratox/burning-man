@@ -105,6 +105,37 @@ const calculateForces = () => {
     .fill(null)
     .map(_ => ({ x: 0, y: 0 }));
 
+  //calculate directioncorrecting force
+  const reactionTime =5;
+  const desiredVelocity=100;
+  var Vel = new Phaser.Math.Vector2();//current velocity
+  var DVel = new Phaser.Math.Vector2();//desired Velocity, with |DVel| = desired speed
+  for (let i = 0; i < dudes.length; i++) {
+    // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
+    const [SignX,SignY] = [170,250]// rayTrace(dudes[i]);
+    
+    //calculate here the desired velocity from the target value
+    var DirectionOfSign = new Phaser.Math.Vector2({x:SignX, y:SignY});
+    DirectionOfSign.subtract(dudes[i].getBody().position);
+    DirectionOfSign.normalize();
+    DVel = DirectionOfSign.scale(desiredVelocity);
+    Vel = dudes[i].getBody().velocity;
+    var fcorrect = DVel.clone();
+    fcorrect.subtract(Vel);
+    fcorrect.scale(dudes[i].weight/reactionTime);
+    accelerations[i].x+=fcorrect.x;
+    accelerations[i].y+=fcorrect.y;
+  }
+
+  //calculate push force on every agent from the nearest piece of wall
+  /*for (let i = 0; i < dudes.length; i++) {
+    let distToWall= Number.MAX_VALUE;
+    var Pos = dudes[i].getBody().position;
+    for(let j=0; j<map.walls.length;j++){
+      map.walls[j].
+    }
+  }*/
+
   for (let i = 0; i < dudes.length; i++) {
     for (let j = i + 1; j < dudes.length; j++) {
       const dude1 = dudes[i],
