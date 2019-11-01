@@ -101,6 +101,12 @@ export default {
     { x: 395, y: 218 }
     // room 7 bottom (empty)
   ],
+  // p_1 = Center of sign, p_2 = alignment vector
+  signs: [
+    // Floor Rescue Sign
+    [{ x: 170, y: 250 }, { x: 1, y: 0 }],
+    [{ x: 170, y: 850 }, { x: 1, y: 0 }]
+  ],
   walls: [
     //upper part
     [{ x: 0, y: 0 }, { x: 0, y: 100 }],

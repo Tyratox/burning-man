@@ -3,6 +3,7 @@ import { throttle } from "lodash";
 
 import Dude from "./Dude";
 import map from "./map";
+import { sign } from "crypto";
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
@@ -60,6 +61,38 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
   this.physics.add.collider(dudeGroup, walls);
 };
+
+const rayTrace = (dude) => {
+  let target;
+  let targetDist;
+  let currentDist;
+  let [sign, vec];
+  let [from, to];
+  let signToAgent;
+  let wall;
+  
+  for (let i = 0; i < map.signs.length; i++) {
+    const [sign, vec] = map.signs[i];
+    if ((vec.x * (dude.x + sign.x) + vec.y * (dude.y + sign.y)) < 0) {
+      let set = true;
+      signToAgent = new Phaser.Geom.Line(dude.x, dude.y, sign.x, sign.y);
+      currentDist = Math.sqrt((sign.x - dude.x) * (sign.x - dude.x) + (sign.y - dude.y) * (sign.y - dude.y));
+
+      for (let k = 0; k < map.walls.length; k++) {
+        [from, to] = map.walls[k]; // faster when outside loops??
+        wall = new Phaser.Geom.Line(from.x, from.y, to.x, to.y);
+        if (Phaser.Geom.Intersects.LineToLine(wall, signToAgent)) {
+          set = false;
+          break
+        } 
+      }
+      if (set) {
+        targetDist = Math.min(targetDist, currentDist)
+        }
+      }
+    }
+  }
+}
 
 const calculateForces = () => {
   const accelerations = new Array(dudes.length)
