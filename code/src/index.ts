@@ -18,11 +18,11 @@ export const getBody = (
 
 const dudes: Dude[] = [];
 
-const preload: ScenePreloadCallback = function (this: Phaser.Scene) {
+const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
   //load images if needed
 };
 
-const create: SceneCreateCallback = function (this: Phaser.Scene) {
+const create: SceneCreateCallback = function(this: Phaser.Scene) {
   //generate map, yehei
 
   const walls = this.physics.add.staticGroup();
@@ -62,43 +62,39 @@ const create: SceneCreateCallback = function (this: Phaser.Scene) {
   this.physics.add.collider(dudeGroup, walls);
 };
 
-const rayTrace = (dude: Dude) => {
-  let target;
-  let targetDist = Number.MAX_VALUE;
-  let currentDist;
-  let sign, vec;
-  let from, to;
-  let signToAgent;
-  let wall;
+const rayTrace = (dude: Dude) =>
+  map.signs.reduce(
+    (best, element) => {
+      const [sign, vec] = element;
+      const { x: dudeX, y: dudeY } = dude.getBody();
 
-  for (let i = 0; i < map.signs.length; i++) {
-    [sign, vec] = map.signs[i];
-    const dudeX = dude.getBody().x;
-    const dudeY = dude.getBody().y;
+      if (vec.x * (dudeX + sign.x) + vec.y * (dudeY + sign.y) < 0) {
+        const signToAgent = new Phaser.Geom.Line(dudeX, dudeY, sign.x, sign.y);
+        const currentDist = Math.sqrt(
+          (sign.x - dudeX) * (sign.x - dudeX) +
+            (sign.y - dudeY) * (sign.y - dudeY)
+        );
 
-    if ((vec.x * (dudeX + sign.x) + vec.y * (dudeY + sign.y)) < 0) {
-      let set = true;
-      signToAgent = new Phaser.Geom.Line(dudeX, dudeY, sign.x, sign.y);
-      currentDist = Math.sqrt((sign.x - dudeX) * (sign.x - dudeX) + (sign.y - dudeY) * (sign.y - dudeY));
+        const intersect = map.walls.find(coordinates => {
+          const [from, to] = coordinates;
+          const wall = new Phaser.Geom.Line(from.x, from.y, to.x, to.y);
+          if (Phaser.Geom.Intersects.LineToLine(wall, signToAgent)) {
+            return true;
+          }
 
-      for (let k = 0; k < map.walls.length; k++) {
-        [from, to] = map.walls[k];
-        wall = new Phaser.Geom.Line(from.x, from.y, to.x, to.y);
-        if (Phaser.Geom.Intersects.LineToLine(wall, signToAgent)) {
-          set = false;
-          break;
-        }
+          return false;
+        });
+
+        //if the sight isn't intersected and the distance is shorter return the new one
+        return intersect === undefined && best.distance > currentDist
+          ? { distance: currentDist, sign }
+          : best;
       }
-      if (set) {
-        if (targetDist > currentDist) {
-          targetDist = currentDist;
-          target = sign;
-        }
-      }
-    }
-  }
-  return target;
-};
+
+      return best;
+    },
+    { distance: Number.MAX_VALUE, sign: { x: 0, y: 0 } }
+  ).sign;
 
 const calculateForces = () => {
   const accelerations = new Array(dudes.length)
@@ -106,25 +102,25 @@ const calculateForces = () => {
     .map(_ => ({ x: 0, y: 0 }));
 
   //calculate directioncorrecting force
-  const reactionTime =5;
-  const desiredVelocity=100;
-  var Vel = new Phaser.Math.Vector2();//current velocity
-  var DVel = new Phaser.Math.Vector2();//desired Velocity, with |DVel| = desired speed
+  const reactionTime = 5;
+  const desiredVelocity = 100;
+  var Vel = new Phaser.Math.Vector2(); //current velocity
+  var DVel = new Phaser.Math.Vector2(); //desired Velocity, with |DVel| = desired speed
   for (let i = 0; i < dudes.length; i++) {
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
-    const [SignX,SignY] = [170,250]// rayTrace(dudes[i]);
-    
+    const [SignX, SignY] = [170, 250]; // rayTrace(dudes[i]);
+
     //calculate here the desired velocity from the target value
-    var DirectionOfSign = new Phaser.Math.Vector2({x:SignX, y:SignY});
+    var DirectionOfSign = new Phaser.Math.Vector2({ x: SignX, y: SignY });
     DirectionOfSign.subtract(dudes[i].getBody().position);
     DirectionOfSign.normalize();
     DVel = DirectionOfSign.scale(desiredVelocity);
     Vel = dudes[i].getBody().velocity;
     var fcorrect = DVel.clone();
     fcorrect.subtract(Vel);
-    fcorrect.scale(dudes[i].weight/reactionTime);
-    accelerations[i].x+=fcorrect.x;
-    accelerations[i].y+=fcorrect.y;
+    fcorrect.scale(dudes[i].weight / reactionTime);
+    accelerations[i].x += fcorrect.x;
+    accelerations[i].y += fcorrect.y;
   }
 
   //calculate push force on every agent from the nearest piece of wall
