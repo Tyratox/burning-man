@@ -6,6 +6,10 @@ export default {
   height: 350,
   wallThickness: 10,
   spawnPoints: [
+    // freddy
+    { x: 15, y: 130 },
+    // freddy 2.0
+    { x: 300, y: 130 },
     //table of 6
     { x: 15, y: 15 },
     { x: 15, y: 30 },
@@ -103,9 +107,32 @@ export default {
   ],
   // p_1 = Center of sign, p_2 = alignment vector
   signs: [
-    // Floor Rescue Sign
-    [{ x: 170, y: 250 }, { x: 1, y: 0 }],
-    [{ x: 170, y: 850 }, { x: 1, y: 0 }]
+    // Floor Rescue Sign. orientation: visibility, direction: forces
+    {
+      position: { x: 250, y: 137 },
+      orientation: { x: -1, y: 0 },
+      direction: { x: 1, y: 0 }
+    },
+    {
+      position: { x: 770, y: 137 },
+      orientation: { x: -1, y: 0 },
+      direction: { x: 1, y: 0 }
+    }
+    /*{
+      position: { x: 770, y: 50 },
+      orientation: { x: 1, y: 0 },
+      direction: { x: -1, y: 0 }
+    },
+    {
+      position: { x: 113, y: 110 },
+      orientation: { x: 0, y: -1 },
+      direction: { x: 0, y: 1 }
+    },
+    {
+      position: { x: 315, y: 110 },
+      orientation: { x: 0, y: -1 },
+      direction: { x: 0, y: 1 }
+    }*/
   ],
   walls: [
     //upper part

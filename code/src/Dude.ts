@@ -37,7 +37,7 @@ class Dude {
     this.stressLevel = Math.random();
     this.visualRange = MAX_VISUAL_RANGE / age;
 
-    const circle = scene.add.circle(x, y, 7.5, 0xffffff);
+    const circle = scene.add.circle(x, y, 7.5, 0x3498db);
 
     scene.physics.world.enable(circle); //adds body / enables physics
     this.object = circle;

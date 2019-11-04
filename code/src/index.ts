@@ -3,7 +3,9 @@ import { throttle } from "lodash";
 
 import Dude from "./Dude";
 import map from "./map";
-import { sign } from "crypto";
+
+const TRIANGLE_HEIGHT = 20;
+const TRIANGLE_SIZE = 10;
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
@@ -35,11 +37,30 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       from.y + (to.y - from.y) / 2,
       to.x - from.x + halfThickness,
       to.y - from.y + halfThickness,
-      0xff0000
+      0x000000
     );
 
     walls.add(rect);
   }
+
+  map.signs.forEach(({ position, direction }) => {
+    const triangle = this.add.isotriangle(
+      position.x,
+      position.y,
+      TRIANGLE_SIZE,
+      TRIANGLE_HEIGHT,
+      false,
+      0x237f52,
+      0x2ecc71,
+      0x27ae60
+    );
+    const directionNorm = Math.sqrt(
+      direction.x * direction.x + direction.y * direction.y
+    );
+
+    triangle.rotation =
+      (direction.x > 0 ? 1 : -1) * Math.acos(-direction.y / directionNorm);
+  });
 
   const dudeGroup = this.add.group();
 
@@ -62,13 +83,13 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   this.physics.add.collider(dudeGroup, walls);
 };
 
-const rayTrace = (dude: Dude) =>
+const rayTrace = (dude: Dude, scene: Phaser.Scene) =>
   map.signs.reduce(
     (best, element) => {
-      const [sign, vec] = element;
+      const { position: sign, orientation: vec } = element;
       const { x: dudeX, y: dudeY } = dude.getBody();
 
-      if (vec.x * (dudeX + sign.x) + vec.y * (dudeY + sign.y) < 0) {
+      if (vec.x * (sign.x - dudeX) + vec.y * (sign.y - dudeY) < 0) {
         const signToAgent = new Phaser.Geom.Line(dudeX, dudeY, sign.x, sign.y);
         const currentDist = Math.sqrt(
           (sign.x - dudeX) * (sign.x - dudeX) +
@@ -85,6 +106,12 @@ const rayTrace = (dude: Dude) =>
           return false;
         });
 
+        /*if (intersect === undefined) {
+          scene.add
+            .line(0, 0, dudeX, dudeY, sign.x, sign.y, 0x000000, 0.1)
+            .setOrigin(0, 0);
+        }*/
+
         //if the sight isn't intersected and the distance is shorter return the new one
         return intersect === undefined && best.distance > currentDist
           ? { distance: currentDist, sign }
@@ -93,10 +120,10 @@ const rayTrace = (dude: Dude) =>
 
       return best;
     },
-    { distance: Number.MAX_VALUE, sign: { x: 0, y: 0 } }
+    { distance: Number.MAX_VALUE, sign: null }
   ).sign;
 
-const calculateForces = () => {
+const calculateForces = (scene: Phaser.Scene) => {
   const accelerations = new Array(dudes.length)
     .fill(null)
     .map(_ => ({ x: 0, y: 0 }));
@@ -104,20 +131,28 @@ const calculateForces = () => {
   //calculate directioncorrecting force
   const reactionTime = 5;
   const desiredVelocity = 100;
-  var Vel = new Phaser.Math.Vector2(); //current velocity
-  var DVel = new Phaser.Math.Vector2(); //desired Velocity, with |DVel| = desired speed
+  let vel = new Phaser.Math.Vector2(); //current velocity
+  let dVel = new Phaser.Math.Vector2(); //desired Velocity, with |DVel| = desired speed
   for (let i = 0; i < dudes.length; i++) {
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
-    const [SignX, SignY] = [170, 250]; // rayTrace(dudes[i]);
+    const sign = rayTrace(dudes[i], scene);
+    let signX: number, signY: number;
+
+    if (sign !== null) {
+      signX = sign.x;
+      signY = sign.y;
+    } else {
+      continue;
+    }
 
     //calculate here the desired velocity from the target value
-    var DirectionOfSign = new Phaser.Math.Vector2({ x: SignX, y: SignY });
-    DirectionOfSign.subtract(dudes[i].getBody().position);
-    DirectionOfSign.normalize();
-    DVel = DirectionOfSign.scale(desiredVelocity);
-    Vel = dudes[i].getBody().velocity;
-    var fcorrect = DVel.clone();
-    fcorrect.subtract(Vel);
+    const directionOfSign = new Phaser.Math.Vector2({ x: signX, y: signY });
+    directionOfSign.subtract(dudes[i].getBody().position);
+    directionOfSign.normalize();
+    dVel = directionOfSign.scale(desiredVelocity);
+    vel = dudes[i].getBody().velocity;
+    const fcorrect = dVel.clone();
+    fcorrect.subtract(vel);
     fcorrect.scale(dudes[i].weight / reactionTime);
     accelerations[i].x += fcorrect.x;
     accelerations[i].y += fcorrect.y;
@@ -148,7 +183,7 @@ const calculateForces = () => {
       //the bigger the distance the smaller the force
       //force ~ e^{-distance} = 1/(e^{distance}) (exponentially falling with distance)
       //OR => force ~ e^{1/distance} => exponentially increasing with small distances
-      const pushingForce = (1 / 1000) * Math.exp(205 / distance);
+      const pushingForce = Math.min((1 / 1000) * Math.exp(205 / distance), 100);
 
       //the bigger the distance the smaller the pulling force
       const pullingForce = 1 / (distance * 5000);
@@ -173,8 +208,8 @@ const calculateForces = () => {
   );
 };
 
-const update = () => {
-  calculateForces();
+const update = function(this: Phaser.Scene) {
+  calculateForces(this);
 };
 
 const scene: CreateSceneFromObjectConfig = {
@@ -192,10 +227,11 @@ const config: GameConfig = {
   physics: {
     default: "arcade",
     arcade: {
-      gravity: { x: 0, y: 0 },
-      fps: 30
+      gravity: { x: 0, y: 0 }
     }
-  }
+  },
+
+  backgroundColor: 0xffffff
 };
 
 const game = new Phaser.Game(config);
