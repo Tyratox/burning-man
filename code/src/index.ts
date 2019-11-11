@@ -124,71 +124,50 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
 
       return best;
     },
-    { distance: Number.MAX_VALUE, sign: null }
+    { distance: Number.MAX_VALUE, sign: { x: -1, y: -1 } }
   ).sign;
 
   setTimeout(() => {
     trackingRays.destroy(true);
   }, 300);
 
-  return res;
+  return new Phaser.Math.Vector2({ x: res.x, y: res.y });
 };
 
 const calculateForces = (scene: Phaser.Scene) => {
   const accelerations = new Array(dudes.length)
     .fill(null)
-    .map(_ => ({ x: 0, y: 0 }));
+    .map(_ => new Phaser.Math.Vector2({ x: 0, y: 0 }));
 
   //calculate directioncorrecting force
-  const reactionTime = 5;
+  const reactionTime = 5; //depends on dude
   const desiredVelocity = 100;
-  let vel = new Phaser.Math.Vector2(); //current velocity
-  let dVel = new Phaser.Math.Vector2(); //desired Velocity, with |DVel| = desired speed
+
   for (let i = 0; i < dudes.length; i++) {
+    //calculate push force on every agent from the nearest piece of wall
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
     const sign = rayTrace(dudes[i], scene);
-    let signX: number, signY: number;
 
-    if (sign !== null) {
-      signX = sign.x;
-      signY = sign.y;
-    } else {
-      continue;
+    //calculate here the desired velocity from the target value only if we have a target
+    if (sign.x > 0) {
+      accelerations[i].add(
+        sign
+          .subtract(dudes[i].getBody().position)
+          .normalize()
+          .scale(desiredVelocity)
+          .subtract(dudes[i].getBody().velocity) // subtract current velocity
+          .scale(dudes[i].weight / reactionTime)
+      );
     }
 
-    //calculate here the desired velocity from the target value
-    const directionOfSign = new Phaser.Math.Vector2({ x: signX, y: signY });
-    directionOfSign.subtract(dudes[i].getBody().position);
-    directionOfSign.normalize();
-    dVel = directionOfSign.scale(desiredVelocity);
-    vel = dudes[i].getBody().velocity;
-    const fcorrect = dVel.clone();
-    fcorrect.subtract(vel);
-    fcorrect.scale(dudes[i].weight / reactionTime);
-    accelerations[i].x += fcorrect.x;
-    accelerations[i].y += fcorrect.y;
-  }
-
-  //calculate push force on every agent from the nearest piece of wall
-  /*for (let i = 0; i < dudes.length; i++) {
-    let distToWall= Number.MAX_VALUE;
-    var Pos = dudes[i].getBody().position;
-    for(let j=0; j<map.walls.length;j++){
-      map.walls[j].
-    }
-  }*/
-
-  for (let i = 0; i < dudes.length; i++) {
+    //calculate repulsion and attraction between dudes, start at j=i+1 to prevent doing it twice
     for (let j = i + 1; j < dudes.length; j++) {
       const dude1 = dudes[i],
         dude2 = dudes[j];
 
-      const diffX = dude1.getBody().x - dude2.getBody().x;
-      const diffY = dude1.getBody().y - dude2.getBody().y;
-
-      const distance =
-        Math.sqrt(diffX * diffX + diffY * diffY) -
-        (dude1.getBody().radius + dude2.getBody().radius);
+      const distance = dude1
+        .getBody()
+        .position.distance(dude2.getBody().position);
 
       //the smaller the distance the bigger the force
       //the bigger the distance the smaller the force
@@ -201,16 +180,18 @@ const calculateForces = (scene: Phaser.Scene) => {
 
       const force = pushingForce - pullingForce;
 
-      const directionXForDude1 =
-        (dude1.getBody().x - dude2.getBody().x) / distance;
-      const directionYForDude1 =
-        (dude1.getBody().y - dude2.getBody().y) / distance;
+      const directionForDude1 = dude1
+        .getBody()
+        .position.clone()
+        .subtract(dude2.getBody().position)
+        .normalize();
 
-      accelerations[i].x += (force * directionXForDude1) / dude1.weight;
-      accelerations[i].y += (force * directionYForDude1) / dude1.weight;
-
-      accelerations[j].x += (force * directionXForDude1 * -1) / dude2.weight;
-      accelerations[j].y += (force * directionYForDude1 * -1) / dude2.weight;
+      accelerations[i].add(
+        directionForDude1.clone().scale(force / dude1.weight)
+      );
+      accelerations[j].add(
+        directionForDude1.negate().scale(force / dude2.weight)
+      );
     }
   }
 
