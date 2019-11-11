@@ -83,8 +83,10 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   this.physics.add.collider(dudeGroup, walls);
 };
 
-const rayTrace = (dude: Dude, scene: Phaser.Scene) =>
-  map.signs.reduce(
+const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
+  const trackingRays = scene.add.group();
+
+  const res = map.signs.reduce(
     (best, element) => {
       const { position: sign, orientation: vec } = element;
       const { x: dudeX, y: dudeY } = dude.getBody();
@@ -106,11 +108,13 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) =>
           return false;
         });
 
-        /*if (intersect === undefined) {
-          scene.add
-            .line(0, 0, dudeX, dudeY, sign.x, sign.y, 0x000000, 0.1)
-            .setOrigin(0, 0);
-        }*/
+        if (intersect === undefined) {
+          trackingRays.add(
+            scene.add
+              .line(0, 0, dudeX, dudeY, sign.x, sign.y, 0xff0000, 0.1)
+              .setOrigin(0, 0)
+          );
+        }
 
         //if the sight isn't intersected and the distance is shorter return the new one
         return intersect === undefined && best.distance > currentDist
@@ -122,6 +126,13 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) =>
     },
     { distance: Number.MAX_VALUE, sign: null }
   ).sign;
+
+  setTimeout(() => {
+    trackingRays.destroy(true);
+  }, 300);
+
+  return res;
+};
 
 const calculateForces = (scene: Phaser.Scene) => {
   const accelerations = new Array(dudes.length)
