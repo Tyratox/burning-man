@@ -1,14 +1,21 @@
 import * as Phaser from "phaser";
 import { throttle } from "lodash";
 
+import {
+  TRIANGLE_HEIGHT,
+  TRIANGLE_SIZE,
+  DUDE_REPULSION_LINEAR,
+  DUDE_REPULSION_EXPONENTIAL,
+  DUDE_GROUP_ATTRACTION,
+  ACCEPTABLE_WALL_DISTANCE,
+  WALL_REPULSION,
+  DEFAULT_REACTION_TIME,
+  DEFAULT_DESIRED_VELOCITY
+} from "./controls";
 import Dude from "./Dude";
 import map from "./map";
 import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
-
-const TRIANGLE_HEIGHT = 20;
-const TRIANGLE_SIZE = 10;
-const CLOSEST_ACCEPTABLE_WALL_DISTANCE = 30;
-const WALL_REPULSION = 500;
+import { onDOMReadyControlSetup } from "./controls";
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
@@ -142,15 +149,11 @@ const calculateForces = (scene: Phaser.Scene) => {
     .fill(null)
     .map(_ => new Phaser.Math.Vector2({ x: 0, y: 0 }));
 
-  //calculate directioncorrecting force
-  const reactionTime = 5; //depends on dude
-  const desiredVelocity = 100;
-
   for (let i = 0; i < dudes.length; i++) {
     //calculate push force on every agent from the nearest piece of wall
 
     const dudeBody = dudes[i].getBody();
-    const wallDebuggingLines = scene.add.group();
+    //const wallDebuggingLines = scene.add.group();
 
     const {
       distance: closestWallDistance,
@@ -172,8 +175,8 @@ const calculateForces = (scene: Phaser.Scene) => {
       { distance: Number.MAX_VALUE, wall: [{ x: 0, y: 0 }, { x: 0, y: 0 }] }
     );
 
-    //if the wall is far away, that's okey
-    if (closestWallDistance < CLOSEST_ACCEPTABLE_WALL_DISTANCE) {
+    //if the wall is far away, that's okay
+    if (closestWallDistance < ACCEPTABLE_WALL_DISTANCE) {
       //vector perpendicular to the wall
       const wallRepulsion = new Phaser.Math.Vector2({
         y: closestWall[1].x - closestWall[0].x,
@@ -184,7 +187,7 @@ const calculateForces = (scene: Phaser.Scene) => {
         wallRepulsion.negate();
       }
 
-      wallDebuggingLines.add(
+      /*wallDebuggingLines.add(
         scene.add.line(
           0,
           0,
@@ -194,16 +197,20 @@ const calculateForces = (scene: Phaser.Scene) => {
           dudeBody.y + wallRepulsion.y * 10,
           0xff0000
         )
-      );
+      );*/
 
       accelerations[i].add(
         wallRepulsion.scale(WALL_REPULSION / closestWallDistance)
       ); //how strong is the repulsion
     }
 
-    setTimeout(() => {
+    /*setTimeout(() => {
       wallDebuggingLines.destroy(true);
-    }, 100);
+    }, 100);*/
+
+    //calculate directioncorrecting force
+    const reactionTime = DEFAULT_REACTION_TIME; //depends on dude
+    const desiredVelocity = DEFAULT_DESIRED_VELOCITY;
 
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
     const sign = rayTrace(dudes[i], scene);
@@ -233,10 +240,13 @@ const calculateForces = (scene: Phaser.Scene) => {
       //the bigger the distance the smaller the force
       //force ~ e^{-distance} = 1/(e^{distance}) (exponentially falling with distance)
       //OR => force ~ e^{1/distance} => exponentially increasing with small distances
-      const pushingForce = Math.min((1 / 1000) * Math.exp(205 / distance), 100);
+      const pushingForce = Math.min(
+        DUDE_REPULSION_LINEAR * Math.exp(DUDE_REPULSION_EXPONENTIAL / distance),
+        100
+      );
 
       //the bigger the distance the smaller the pulling force
-      const pullingForce = 1 / (distance * 5000);
+      const pullingForce = 1 / (distance * DUDE_GROUP_ATTRACTION);
 
       const force = pushingForce - pullingForce;
 
@@ -287,3 +297,5 @@ const config: GameConfig = {
 };
 
 const game = new Phaser.Game(config);
+
+document.addEventListener("DOMContentLoaded", onDOMReadyControlSetup);
