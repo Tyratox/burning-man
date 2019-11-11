@@ -5,21 +5,24 @@
     <meta charset="utf-8" />
   </head>
   <body>
+    <div id="game"></div>
+
     <div id="sliders">
       <div>
+          <label>Linear factor for group repulsion</label>
         <input
           id="dude-repulsion-linear"
           type="range"
           autocomplete="off"
           min="0.001"
-          max="0.01"
+          max="10"
           value="0.001"
           step="0.0001"
         />
         <input type="text" autocomplete="off" readonly />
-        <label>Linear factor for group repulsion</label>
       </div>
       <div>
+        <label>Exponential factor for group repulsion</label>
         <input
           id="dude-repulsion-exponential"
           type="range"
@@ -30,9 +33,9 @@
           step="1"
         />
         <input type="text" autocomplete="off" readonly />
-        <label>Exponential factor for group repulsion</label>
       </div>
       <div>
+        <label>Linear factor for group attraction</label>
         <input
           id="dude-group-attraction"
           type="range"
@@ -42,11 +45,10 @@
           value="5000"
           step="500"
         />
-        <input type="text" autocomplete="off" readonly /><label
-          >Linear factor for group attraction</label
-        >
+        <input type="text" autocomplete="off" readonly />
       </div>
       <div>
+        <label>Acceptable wall distance</label>
         <input
           id="acceptable-wall-distance"
           type="range"
@@ -56,11 +58,10 @@
           value="30"
           step="1"
         />
-        <input type="text" autocomplete="off" readonly /><label
-          >Acceptable wall distance</label
-        >
+        <input type="text" autocomplete="off" readonly />
       </div>
       <div>
+        <label>Wall repulsion force</label>
         <input
           id="wall-repulsion-force"
           type="range"
@@ -70,11 +71,10 @@
           value="500"
           step="10"
         />
-        <input type="text" autocomplete="off" readonly /><label
-          >Wall repulsion force</label
-        >
+        <input type="text" autocomplete="off" readonly />
       </div>
       <div>
+        <label>Default reaction time (pathfinding)</label>
         <input
           id="default-reaction-time"
           type="range"
@@ -84,11 +84,10 @@
           value="5"
           step="5"
         />
-        <input type="text" autocomplete="off" readonly /><label>
-          Default reaction time (pathfinding)</label
-        >
+        <input type="text" autocomplete="off" readonly />
       </div>
       <div>
+        <label>Default desired velocity (pathfinding)</label>
         <input
           id="default-desired-velocity"
           type="range"
@@ -98,9 +97,7 @@
           value="100"
           step="10"
         />
-        <input type="text" autocomplete="off" readonly /><label
-          >Default desired velocity (pathfinding)</label
-        >
+        <input type="text" autocomplete="off" readonly />
       </div>
     </div>
   </body>

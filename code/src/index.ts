@@ -240,7 +240,8 @@ const calculateForces = (scene: Phaser.Scene) => {
       //the bigger the distance the smaller the force
       //force ~ e^{-distance} = 1/(e^{distance}) (exponentially falling with distance)
       //OR => force ~ e^{1/distance} => exponentially increasing with small distances
-      const pushingForce = Math.min(
+
+      const pushingForce = distance > 50 ? 0 : Math.min(
         DUDE_REPULSION_LINEAR * Math.exp(DUDE_REPULSION_EXPONENTIAL / distance),
         100
       );
@@ -282,7 +283,7 @@ const scene: CreateSceneFromObjectConfig = {
 
 const config: GameConfig = {
   type: Phaser.AUTO,
-  parent: "burning-man",
+  parent: "game",
   width: map.width,
   height: map.height,
   scene,
