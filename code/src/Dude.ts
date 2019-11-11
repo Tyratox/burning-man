@@ -2,7 +2,7 @@ import { getBody } from "./index";
 
 const MAX_VELOCITY = 150;
 const MAX_ACCELERATION = 50;
-const MAX_RADIUS = 50;
+const MAX_RADIUS = 9;
 const MAX_VISUAL_RANGE = 50;
 
 class Dude {
@@ -27,17 +27,17 @@ class Dude {
     age: number,
     scene: Phaser.Scene
   ) {
-    this.fitness = fitness;
-    this.weight = weight;
-    this.age = age;
+    this.fitness = fitness; // Math.random(),
+    this.weight = weight;   // 0.3 + Math.random() * 0.7
+    this.age = age;         // Math.random()
 
     this.maxVelocity = MAX_VELOCITY * ((fitness * weight) / age);
     this.maxAcceleration = MAX_ACCELERATION * ((fitness * weight) / age);
-    this.radius = MAX_RADIUS * (weight / fitness);
+    this.radius = Math.min(MAX_RADIUS, MAX_RADIUS * (weight / fitness));
     this.stressLevel = Math.random();
     this.visualRange = MAX_VISUAL_RANGE / age;
 
-    const circle = scene.add.circle(x, y, 7.5, 0x3498db);
+    const circle = scene.add.circle(x, y, this.radius, 0x3498db);
 
     scene.physics.world.enable(circle); //adds body / enables physics
     this.object = circle;
