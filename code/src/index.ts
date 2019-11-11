@@ -3,9 +3,12 @@ import { throttle } from "lodash";
 
 import Dude from "./Dude";
 import map from "./map";
+import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
 
 const TRIANGLE_HEIGHT = 20;
 const TRIANGLE_SIZE = 10;
+const CLOSEST_ACCEPTABLE_WALL_DISTANCE = 30;
+const WALL_REPULSION = 500;
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
@@ -83,8 +86,10 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   this.physics.add.collider(dudeGroup, walls);
 };
 
-const rayTrace = (dude: Dude, scene: Phaser.Scene) =>
-  map.signs.reduce(
+const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
+  const trackingRays = scene.add.group();
+
+  const res = map.signs.reduce(
     (best, element) => {
       const { position: sign, orientation: vec } = element;
       const { x: dudeX, y: dudeY } = dude.getBody();
@@ -106,11 +111,13 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) =>
           return false;
         });
 
-        /*if (intersect === undefined) {
-          scene.add
-            .line(0, 0, dudeX, dudeY, sign.x, sign.y, 0x000000, 0.1)
-            .setOrigin(0, 0);
-        }*/
+        if (intersect === undefined) {
+          trackingRays.add(
+            scene.add
+              .line(0, 0, dudeX, dudeY, sign.x, sign.y, 0xff0000, 0.1)
+              .setOrigin(0, 0)
+          );
+        }
 
         //if the sight isn't intersected and the distance is shorter return the new one
         return intersect === undefined && best.distance > currentDist
@@ -120,64 +127,107 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) =>
 
       return best;
     },
-    { distance: Number.MAX_VALUE, sign: null }
+    { distance: Number.MAX_VALUE, sign: { x: -1, y: -1 } }
   ).sign;
+
+  setTimeout(() => {
+    trackingRays.destroy(true);
+  }, 100);
+
+  return new Phaser.Math.Vector2({ x: res.x, y: res.y });
+};
 
 const calculateForces = (scene: Phaser.Scene) => {
   const accelerations = new Array(dudes.length)
     .fill(null)
-    .map(_ => ({ x: 0, y: 0 }));
+    .map(_ => new Phaser.Math.Vector2({ x: 0, y: 0 }));
 
   //calculate directioncorrecting force
-  const reactionTime = 5;
+  const reactionTime = 5; //depends on dude
   const desiredVelocity = 100;
-  let vel = new Phaser.Math.Vector2(); //current velocity
-  let dVel = new Phaser.Math.Vector2(); //desired Velocity, with |DVel| = desired speed
+
   for (let i = 0; i < dudes.length; i++) {
+    //calculate push force on every agent from the nearest piece of wall
+
+    const dudeBody = dudes[i].getBody();
+    const wallDebuggingLines = scene.add.group();
+
+    const {
+      distance: closestWallDistance,
+      wall: closestWall
+    } = map.walls.reduce(
+      (bestResult, wall) => {
+        const distance = distanceToLineSegment(
+          { x: dudeBody.x, y: dudeBody.y },
+          wall[0],
+          wall[1]
+        );
+
+        if (distance < bestResult.distance) {
+          return { distance, wall };
+        }
+
+        return bestResult;
+      },
+      { distance: Number.MAX_VALUE, wall: [{ x: 0, y: 0 }, { x: 0, y: 0 }] }
+    );
+
+    //if the wall is far away, that's okey
+    if (closestWallDistance < CLOSEST_ACCEPTABLE_WALL_DISTANCE) {
+      //vector perpendicular to the wall
+      const wallRepulsion = new Phaser.Math.Vector2({
+        y: closestWall[1].x - closestWall[0].x,
+        x: -(closestWall[1].y - closestWall[0].y)
+      }).normalize();
+
+      if (!isLeftOfLine(dudeBody.position, closestWall[0], closestWall[1])) {
+        wallRepulsion.negate();
+      }
+
+      wallDebuggingLines.add(
+        scene.add.line(
+          0,
+          0,
+          dudeBody.x,
+          dudeBody.y,
+          dudeBody.x + wallRepulsion.x * 10,
+          dudeBody.y + wallRepulsion.y * 10,
+          0xff0000
+        )
+      );
+
+      accelerations[i].add(
+        wallRepulsion.scale(WALL_REPULSION / closestWallDistance)
+      ); //how strong is the repulsion
+    }
+
+    setTimeout(() => {
+      wallDebuggingLines.destroy(true);
+    }, 100);
+
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
     const sign = rayTrace(dudes[i], scene);
-    let signX: number, signY: number;
 
-    if (sign !== null) {
-      signX = sign.x;
-      signY = sign.y;
-    } else {
-      continue;
+    //calculate here the desired velocity from the target value only if we have a target
+    if (sign.x > 0) {
+      accelerations[i].add(
+        sign
+          .subtract(dudes[i].getBody().position)
+          .normalize()
+          .scale(desiredVelocity)
+          .subtract(dudes[i].getBody().velocity) // subtract current velocity
+          .scale(dudes[i].weight / reactionTime)
+      );
     }
 
-    //calculate here the desired velocity from the target value
-    const directionOfSign = new Phaser.Math.Vector2({ x: signX, y: signY });
-    directionOfSign.subtract(dudes[i].getBody().position);
-    directionOfSign.normalize();
-    dVel = directionOfSign.scale(desiredVelocity);
-    vel = dudes[i].getBody().velocity;
-    const fcorrect = dVel.clone();
-    fcorrect.subtract(vel);
-    fcorrect.scale(dudes[i].weight / reactionTime);
-    accelerations[i].x += fcorrect.x;
-    accelerations[i].y += fcorrect.y;
-  }
-
-  //calculate push force on every agent from the nearest piece of wall
-  /*for (let i = 0; i < dudes.length; i++) {
-    let distToWall= Number.MAX_VALUE;
-    var Pos = dudes[i].getBody().position;
-    for(let j=0; j<map.walls.length;j++){
-      map.walls[j].
-    }
-  }*/
-
-  for (let i = 0; i < dudes.length; i++) {
+    //calculate repulsion and attraction between dudes, start at j=i+1 to prevent doing it twice
     for (let j = i + 1; j < dudes.length; j++) {
       const dude1 = dudes[i],
         dude2 = dudes[j];
 
-      const diffX = dude1.getBody().x - dude2.getBody().x;
-      const diffY = dude1.getBody().y - dude2.getBody().y;
-
-      const distance =
-        Math.sqrt(diffX * diffX + diffY * diffY) -
-        (dude1.getBody().radius + dude2.getBody().radius);
+      const distance = dude1
+        .getBody()
+        .position.distance(dude2.getBody().position);
 
       //the smaller the distance the bigger the force
       //the bigger the distance the smaller the force
@@ -190,16 +240,18 @@ const calculateForces = (scene: Phaser.Scene) => {
 
       const force = pushingForce - pullingForce;
 
-      const directionXForDude1 =
-        (dude1.getBody().x - dude2.getBody().x) / distance;
-      const directionYForDude1 =
-        (dude1.getBody().y - dude2.getBody().y) / distance;
+      const directionForDude1 = dude1
+        .getBody()
+        .position.clone()
+        .subtract(dude2.getBody().position)
+        .normalize();
 
-      accelerations[i].x += (force * directionXForDude1) / dude1.weight;
-      accelerations[i].y += (force * directionYForDude1) / dude1.weight;
-
-      accelerations[j].x += (force * directionXForDude1 * -1) / dude2.weight;
-      accelerations[j].y += (force * directionYForDude1 * -1) / dude2.weight;
+      accelerations[i].add(
+        directionForDude1.clone().scale(force / dude1.weight)
+      );
+      accelerations[j].add(
+        directionForDude1.negate().scale(force / dude2.weight)
+      );
     }
   }
 
