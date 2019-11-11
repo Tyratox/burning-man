@@ -2,6 +2,201 @@ const doorWidth = 30;
 const doorIndicatorWidth = 15;
 
 export default {
+  width: 1900,
+  height: 1100,
+  wallThickness: 10,
+  
+
+  walls: [
+    // bounding box
+    [{ x:0, y: 0 }, { x:1900, y: 0 }],
+    [{ x:0, y: 1100 }, { x:1900, y: 1100 }],
+    [{ x:0, y: 0 }, { x:0, y: 1100 }],
+    [{ x:1900, y: 0 }, { x:1900, y: 1100 }],
+
+
+    // horizontal walls
+    // walls at y=425
+    [{ x:0, y: 425 }, { x:60, y: 425 }],
+    [{ x:110, y: 425 }, { x:420, y: 425 }],
+    [{ x:470, y: 425 }, { x:1000, y: 425 }],
+    [{ x:1050, y: 425 }, { x:1700, y: 425 }],
+
+    // walls at y=650
+    [{ x:0, y: 650 }, { x:70, y: 650 }],
+    [{ x:120, y: 650 }, { x:610, y: 650 }],
+    [{ x:660, y: 650 }, { x:800, y: 650 }],
+    [{ x:850, y: 650 }, { x:980, y: 650 }],
+    [{ x:1030, y: 650 }, { x:1160, y: 650 }],
+    [{ x:1210, y: 650 }, { x:1330, y: 650 }],
+    [{ x:1380, y: 650 }, { x:1700, y: 650 }],
+
+    // vertical walls from y=650 to y=1100
+    [{ x:200, y: 650 }, { x:200, y: 1100 }],
+    [{ x:720, y: 650 }, { x:720, y: 1100 }],
+    [{ x:900, y: 650 }, { x:900, y: 1100 }],
+    [{ x:1090, y: 650 }, { x:1090, y: 1100 }],
+    [{ x:1270, y: 650 }, { x:1270, y: 1100 }],
+    [{ x:1700, y: 650 }, { x:1700, y: 1100 }],
+
+    // despwan/target zone
+    [{ x:1700, y: 0 }, { x:1700, y: 200 }],
+    [{ x:1700, y: 300 }, { x:1700, y: 425 }],
+    [{ x:1270, y: 110 }, { x:1700, y: 110 }],
+    [{ x:1270, y: 110 }, { x:1270, y: 425 }],
+
+    // kitchen
+    [{ x:1090, y: 0 }, { x:1090, y: 425 }],
+
+    // restroom
+    [{ x:0, y: 750 }, { x:90, y: 750 }],
+    [{ x:0, y: 802 }, { x:90, y: 802 }],
+    [{ x:0, y: 854 }, { x:90, y: 854 }],
+    [{ x:0, y: 906 }, { x:90, y: 906 }],
+    [{ x:0, y: 960 }, { x:90, y: 960 }],
+    [{ x:140, y: 750 }, { x:200, y: 750 }],
+    [{ x:175, y: 802 }, { x:200, y: 802 }],
+    [{ x:175, y: 854 }, { x:200, y: 854 }],
+    [{ x:175, y: 906 }, { x:200, y: 906 }],
+    [{ x:160, y: 960 }, { x:200, y: 960 }],
+    
+
+
+    /////// tables ///////
+    [{ x:70, y: 70 }, { x:100, y: 170 }],
+    [{ x:70, y: 190 }, { x:100, y: 290 }],
+  ],
+
+  doors: [
+  ],
+
+  signs: [
+    {
+      position: { x: 550, y: 538 },
+      orientation: { x: -1, y: 0 },
+      direction: { x: 1, y: 0 }
+    },
+    {
+      position: { x: 1700, y: 538 },
+      orientation: { x: -1, y: 0 },
+      direction: { x: 1, y: 0 }
+    },
+
+
+
+    //////// doors //////////
+    // doors at y=425
+    {
+      position: { x: 85, y: 425 },
+      orientation: { x: 0, y: -1 },
+      direction: { x: 0, y: 1 }
+    },
+    {
+      position: { x: 445, y: 425 },
+      orientation: { x: 0, y: -1 },
+      direction: { x: 0, y: 1 }
+    },
+    {
+      position: { x: 1025, y: 425 },
+      orientation: { x: 0, y: -1 },
+      direction: { x: 0, y: 1 }
+    },
+
+    // doors at y=650
+    {
+      position: { x: 95, y: 650 },
+      orientation: { x: 0, y: 1 },
+      direction: { x: 0, y: -1 }
+    },
+    {
+      position: { x: 635, y: 650 },
+      orientation: { x: 0, y: 1 },
+      direction: { x: 0, y: -1 }
+    },
+    {
+      position: { x: 825, y: 650 },
+      orientation: { x: 0, y: 1 },
+      direction: { x: 0, y: -1 }
+    },
+    {
+      position: { x: 1005, y: 650 },
+      orientation: { x: 0, y: 1 },
+      direction: { x: 0, y: -1 }
+    },
+    {
+      position: { x: 1185, y: 650 },
+      orientation: { x: 0, y: 1 },
+      direction: { x: 0, y: -1 }
+    },
+    {
+      position: { x: 1355, y: 650 },
+      orientation: { x: 0, y: 1 },
+      direction: { x: 0, y: -1 }
+    },
+    
+    
+    // door into despawn/target zone
+    {
+      position: { x: 1700, y: 250 },
+      orientation: { x: 1, y: 0 },
+      direction: { x: -1, y: 0 }
+    },
+    
+    
+    // doors inside restroom
+    {
+      position: { x: 115, y: 750 },
+      orientation: { x: 0, y: 1 },
+      direction: { x: 0, y: -1 }
+    },
+    {
+      position: { x: 90, y: 776 },
+      orientation: { x: -1, y: 0 },
+      direction: { x: 1, y: 0 }
+    },
+    {
+      position: { x: 90, y: 828 },
+      orientation: { x: -1, y: 0 },
+      direction: { x: 1, y: 0 }
+    },
+    {
+      position: { x: 90, y: 880 },
+      orientation: { x: -1, y: 0 },
+      direction: { x: 1, y: 0 }
+    },
+    {
+      position: { x: 90, y: 932 },
+      orientation: { x: -1, y: 0 },
+      direction: { x: 1, y: 0 }
+    },
+    {
+      position: { x: 125, y: 960 },
+      orientation: { x: 0, y: 1 },
+      direction: { x: 0, y: -1 }
+    },
+  ],
+
+  spawnPoints: [
+    // freddy
+    { x: 200, y: 538 },
+    // moaning myrtles
+    { x: 20, y: 776 },
+    { x: 20, y: 880 },
+    { x: 20, y: 932 },
+  ],
+
+  table_size: 100,
+  tables: [
+    [{ x:70, y: 70 }, { x:90, y: 750 }],
+  ],
+
+};
+
+
+
+/*
+
+export default {
   width: 900,
   height: 350,
   wallThickness: 10,
@@ -132,7 +327,7 @@ export default {
       position: { x: 315, y: 110 },
       orientation: { x: 0, y: -1 },
       direction: { x: 0, y: 1 }
-    }*/
+    }
   ],
   walls: [
     //upper part
@@ -212,4 +407,4 @@ export default {
     [{ x: 670, y: 300 }, { x: 700, y: 315 }],
     [{ x: 720, y: 300 }, { x: 750, y: 315 }]
   ]
-};
+}; */
