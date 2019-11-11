@@ -46,6 +46,10 @@ class Dude {
       .setBounce(0, 0);
   }
 
+  getRadius() {
+    return this.radius;
+  }
+
   getBody() {
     return getBody(this.object);
   }

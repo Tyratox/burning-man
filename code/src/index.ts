@@ -119,9 +119,10 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
         });
 
         if (intersect === undefined) {
+          const offset = dude.getRadius();
           trackingRays.add(
             scene.add
-              .line(0, 0, dudeX, dudeY, sign.x, sign.y, 0xff0000, 0.1)
+              .line(0, 0, dudeX + offset, dudeY + offset, sign.x, sign.y, 0xff0000, 0.1)
               .setOrigin(0, 0)
           );
         }
