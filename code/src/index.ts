@@ -1,11 +1,21 @@
 import * as Phaser from "phaser";
 import { throttle } from "lodash";
 
+import {
+  TRIANGLE_HEIGHT,
+  TRIANGLE_SIZE,
+  DUDE_REPULSION_LINEAR,
+  DUDE_REPULSION_EXPONENTIAL,
+  DUDE_GROUP_ATTRACTION,
+  ACCEPTABLE_WALL_DISTANCE,
+  WALL_REPULSION,
+  DEFAULT_REACTION_TIME,
+  DEFAULT_DESIRED_VELOCITY
+} from "./controls";
 import Dude from "./Dude";
 import map from "./map";
-
-const TRIANGLE_HEIGHT = 20;
-const TRIANGLE_SIZE = 10;
+import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
+import { onDOMReadyControlSetup } from "./controls";
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
@@ -109,9 +119,10 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
         });
 
         if (intersect === undefined) {
+          const offset = dude.getRadius();
           trackingRays.add(
             scene.add
-              .line(0, 0, dudeX, dudeY, sign.x, sign.y, 0xff0000, 0.1)
+              .line(0, 0, dudeX + offset, dudeY + offset, sign.x, sign.y, 0xff0000, 0.1)
               .setOrigin(0, 0)
           );
         }
@@ -129,7 +140,7 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
 
   setTimeout(() => {
     trackingRays.destroy(true);
-  }, 300);
+  }, 100);
 
   return new Phaser.Math.Vector2({ x: res.x, y: res.y });
 };
@@ -139,12 +150,69 @@ const calculateForces = (scene: Phaser.Scene) => {
     .fill(null)
     .map(_ => new Phaser.Math.Vector2({ x: 0, y: 0 }));
 
-  //calculate directioncorrecting force
-  const reactionTime = 5; //depends on dude
-  const desiredVelocity = 100;
-
   for (let i = 0; i < dudes.length; i++) {
     //calculate push force on every agent from the nearest piece of wall
+
+    const dudeBody = dudes[i].getBody();
+    //const wallDebuggingLines = scene.add.group();
+
+    const {
+      distance: closestWallDistance,
+      wall: closestWall
+    } = map.walls.reduce(
+      (bestResult, wall) => {
+        const distance = distanceToLineSegment(
+          { x: dudeBody.x, y: dudeBody.y },
+          wall[0],
+          wall[1]
+        );
+
+        if (distance < bestResult.distance) {
+          return { distance, wall };
+        }
+
+        return bestResult;
+      },
+      { distance: Number.MAX_VALUE, wall: [{ x: 0, y: 0 }, { x: 0, y: 0 }] }
+    );
+
+    //if the wall is far away, that's okay
+    if (closestWallDistance < ACCEPTABLE_WALL_DISTANCE) {
+      //vector perpendicular to the wall
+      const wallRepulsion = new Phaser.Math.Vector2({
+        y: closestWall[1].x - closestWall[0].x,
+        x: -(closestWall[1].y - closestWall[0].y)
+      }).normalize();
+
+      if (!isLeftOfLine(dudeBody.position, closestWall[0], closestWall[1])) {
+        wallRepulsion.negate();
+      }
+
+      /*wallDebuggingLines.add(
+        scene.add.line(
+          0,
+          0,
+          dudeBody.x,
+          dudeBody.y,
+          dudeBody.x + wallRepulsion.x * 10,
+          dudeBody.y + wallRepulsion.y * 10,
+          0xff0000
+        )
+      );*/
+
+      accelerations[i].add(
+        wallRepulsion.scale(WALL_REPULSION / closestWallDistance)
+      ); //how strong is the repulsion
+    }
+
+    /*setTimeout(() => {
+      wallDebuggingLines.destroy(true);
+    }, 100);*/
+
+    //calculate directioncorrecting force
+    const reactionTime = DEFAULT_REACTION_TIME; //depends on dude
+    const desiredVelocity = DEFAULT_DESIRED_VELOCITY;
+
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
     const sign = rayTrace(dudes[i], scene);
 
@@ -173,10 +241,14 @@ const calculateForces = (scene: Phaser.Scene) => {
       //the bigger the distance the smaller the force
       //force ~ e^{-distance} = 1/(e^{distance}) (exponentially falling with distance)
       //OR => force ~ e^{1/distance} => exponentially increasing with small distances
-      const pushingForce = Math.min((1 / 1000) * Math.exp(205 / distance), 100);
+
+      const pushingForce = distance > 50 ? 0 : Math.min(
+        DUDE_REPULSION_LINEAR * Math.exp(DUDE_REPULSION_EXPONENTIAL / distance),
+        100
+      );
 
       //the bigger the distance the smaller the pulling force
-      const pullingForce = 1 / (distance * 5000);
+      const pullingForce = 1 / (distance * DUDE_GROUP_ATTRACTION);
 
       const force = pushingForce - pullingForce;
 
@@ -212,7 +284,7 @@ const scene: CreateSceneFromObjectConfig = {
 
 const config: GameConfig = {
   type: Phaser.AUTO,
-  parent: "burning-man",
+  parent: "game",
   width: map.width,
   height: map.height,
   scene,
@@ -227,3 +299,5 @@ const config: GameConfig = {
 };
 
 const game = new Phaser.Game(config);
+
+document.addEventListener("DOMContentLoaded", onDOMReadyControlSetup);

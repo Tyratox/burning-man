@@ -1,6 +1,7 @@
 html,
 body {
   font-size: 16px;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 * {
@@ -9,7 +10,62 @@ body {
 
 canvas {
   border: #aaa 5px solid;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  display: block;
+  margin: 0 auto;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  /* margin: 3em; */
+  height: 15px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+input[type="range"]:hover {
+  opacity: 1;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 15px;
+  background: rgb(59, 128, 185);
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 25px;
+  height: 15px;
+  background: rgb(59, 128, 185);
+  cursor: pointer;
+}
+
+#sliders {
+  width: 900px;
+  margin: 2rem auto 0 auto;
+}
+
+#sliders {
+  column-count: 2;
+}
+
+#sliders > div {
+  break-inside: avoid;
+  margin: 1rem 0;
+}
+
+#sliders > div label {
+  font-size: 1.5rem;
+  display: block;
+}
+
+#sliders > div input[type="text"] {
+  font-size: 1.2rem;
+  border: none;
 }
