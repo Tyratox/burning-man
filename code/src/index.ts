@@ -3,9 +3,12 @@ import { throttle } from "lodash";
 
 import Dude from "./Dude";
 import map from "./map";
+import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
 
 const TRIANGLE_HEIGHT = 20;
 const TRIANGLE_SIZE = 10;
+const CLOSEST_ACCEPTABLE_WALL_DISTANCE = 30;
+const WALL_REPULSION = 500;
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
@@ -129,7 +132,7 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
 
   setTimeout(() => {
     trackingRays.destroy(true);
-  }, 300);
+  }, 100);
 
   return new Phaser.Math.Vector2({ x: res.x, y: res.y });
 };
@@ -145,6 +148,63 @@ const calculateForces = (scene: Phaser.Scene) => {
 
   for (let i = 0; i < dudes.length; i++) {
     //calculate push force on every agent from the nearest piece of wall
+
+    const dudeBody = dudes[i].getBody();
+    const wallDebuggingLines = scene.add.group();
+
+    const {
+      distance: closestWallDistance,
+      wall: closestWall
+    } = map.walls.reduce(
+      (bestResult, wall) => {
+        const distance = distanceToLineSegment(
+          { x: dudeBody.x, y: dudeBody.y },
+          wall[0],
+          wall[1]
+        );
+
+        if (distance < bestResult.distance) {
+          return { distance, wall };
+        }
+
+        return bestResult;
+      },
+      { distance: Number.MAX_VALUE, wall: [{ x: 0, y: 0 }, { x: 0, y: 0 }] }
+    );
+
+    //if the wall is far away, that's okey
+    if (closestWallDistance < CLOSEST_ACCEPTABLE_WALL_DISTANCE) {
+      //vector perpendicular to the wall
+      const wallRepulsion = new Phaser.Math.Vector2({
+        y: closestWall[1].x - closestWall[0].x,
+        x: -(closestWall[1].y - closestWall[0].y)
+      }).normalize();
+
+      if (!isLeftOfLine(dudeBody.position, closestWall[0], closestWall[1])) {
+        wallRepulsion.negate();
+      }
+
+      wallDebuggingLines.add(
+        scene.add.line(
+          0,
+          0,
+          dudeBody.x,
+          dudeBody.y,
+          dudeBody.x + wallRepulsion.x * 10,
+          dudeBody.y + wallRepulsion.y * 10,
+          0xff0000
+        )
+      );
+
+      accelerations[i].add(
+        wallRepulsion.scale(WALL_REPULSION / closestWallDistance)
+      ); //how strong is the repulsion
+    }
+
+    setTimeout(() => {
+      wallDebuggingLines.destroy(true);
+    }, 100);
+
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
     const sign = rayTrace(dudes[i], scene);
 
