@@ -6,6 +6,14 @@ export default {
   height: 1100,
   wallThickness: 10,
   
+  fireBlock: 10,
+  fireGridWidth: 190,
+  fireGridHeigth: 110,
+
+  fireStartPoints: [
+    { x: 50, y: 200 },
+    { x: 200, y: 400 },
+  ],
 
   walls: [
     // bounding box

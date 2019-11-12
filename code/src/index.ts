@@ -31,6 +31,11 @@ export const getBody = (
   const traceable = [...map.signs, ...map.doors];
 
 const dudes: Dude[] = [];
+let fireGrid = [[],[]];
+let fire = [];
+const fireRadius = 13;
+const fireOffset = 30;
+const fireSpreadRate = 0.05;
 
 const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
   //load images if needed
@@ -293,8 +298,38 @@ const calculateForces = (scene: Phaser.Scene) => {
   );
 };
 
+const fireExpansion = (scene: Phaser.Scene) => {
+  let {x, y} = fire.pop();
+  let set = false;
+  if (Math.random() < fireSpreadRate) {
+    scene.add.circle(x - fireOffset, y, fireRadius, 0xFF5733);
+    fire.push({x: x - fireOffset, y: y});
+    set = true;
+  }
+  if (Math.random() < fireSpreadRate) {
+    scene.add.circle(x - fireOffset, y, fireRadius, 0xFF5733);
+    fire.push({x: x - fireOffset, y: y});
+    set = true;
+  }
+  if (Math.random() < fireSpreadRate) {
+    scene.add.circle(x, y - fireOffset, fireRadius, 0xFF5733);
+    fire.push({x: x, y: y - fireOffset});
+    set = true;
+  }
+  if (Math.random() < fireSpreadRate) {
+    scene.add.circle(x, y + fireOffset, fireRadius, 0xFF5733);
+    fire.push({x: x, y: y + fireOffset});
+    set = true;
+  }
+
+  if (!set) {
+    fire.push({x: x, y: y});
+  }
+}
+
 const update = function(this: Phaser.Scene) {
   calculateForces(this);
+  //fireExpansion(this);
 };
 
 const scene: CreateSceneFromObjectConfig = {
@@ -318,6 +353,12 @@ const config: GameConfig = {
 
   backgroundColor: 0xffffff
 };
+
+ // Add fire statrign point
+ map.fireStartPoints.forEach(({x , y}) => {
+  fire.push({x, y});
+  // this.add.circle(x + 1, y, fireRadius, 0xFF5733);
+});
 
 const game = new Phaser.Game(config);
 
