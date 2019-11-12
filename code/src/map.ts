@@ -82,22 +82,6 @@ export default {
   ],
 
   doors: [
-  ],
-
-  signs: [
-    {
-      position: { x: 550, y: 538 },
-      orientation: { x: -1, y: 0 },
-      direction: { x: 1, y: 0 }
-    },
-    {
-      position: { x: 1700, y: 538 },
-      orientation: { x: -1, y: 0 },
-      direction: { x: 1, y: 0 }
-    },
-
-
-
     //////// doors //////////
     // doors at y=425
     {
@@ -205,6 +189,19 @@ export default {
       orientation: { x: 0, y: -1 },
       direction: { x: 0, y: 1 }
     },
+  ],
+
+  signs: [
+    {
+      position: { x: 550, y: 538 },
+      orientation: { x: -1, y: 0 },
+      direction: { x: 1, y: 0 }
+    },
+    {
+      position: { x: 1700, y: 538 },
+      orientation: { x: -1, y: 0 },
+      direction: { x: 1, y: 0 }
+    },    
   ],
 
   spawnPoints: [

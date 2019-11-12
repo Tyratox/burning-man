@@ -28,6 +28,8 @@ export const getBody = (
   //@ts-ignore
   obj.body;
 
+  const traceable = [...map.signs, ...map.doors];
+
 const dudes: Dude[] = [];
 
 const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
@@ -72,6 +74,25 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       (direction.x > 0 ? 1 : -1) * Math.acos(-direction.y / directionNorm);
   });
 
+  map.doors.forEach(({ position, direction }) => {
+    const triangle = this.add.isotriangle(
+      position.x,
+      position.y,
+      TRIANGLE_SIZE,
+      TRIANGLE_HEIGHT,
+      false,
+      0x3498db,
+      0x3498db,
+      0x2980b9
+    );
+    const directionNorm = Math.sqrt(
+      direction.x * direction.x + direction.y * direction.y
+    );
+
+    triangle.rotation =
+      (direction.x > 0 ? 1 : -1) * Math.acos(-direction.y / directionNorm);
+  });
+
   const dudeGroup = this.add.group();
 
   map.spawnPoints.forEach(point => {
@@ -96,16 +117,16 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
   const trackingRays = scene.add.group();
 
-  const res = map.signs.reduce(
+  const res = traceable.reduce(
     (best, element) => {
-      const { position: sign, orientation: vec } = element;
+      const { position, orientation } = element;
       const { x: dudeX, y: dudeY } = dude.getBody();
 
-      if (vec.x * (sign.x - dudeX) + vec.y * (sign.y - dudeY) < 0) {
-        const signToAgent = new Phaser.Geom.Line(dudeX, dudeY, sign.x, sign.y);
+      if (orientation.x * (position.x - dudeX) + orientation.y * (position.y - dudeY) < 0) {
+        const signToAgent = new Phaser.Geom.Line(dudeX, dudeY, position.x, position.y);
         const currentDist = Math.sqrt(
-          (sign.x - dudeX) * (sign.x - dudeX) +
-            (sign.y - dudeY) * (sign.y - dudeY)
+          (position.x - dudeX) * (position.x - dudeX) +
+            (position.y - dudeY) * (position.y - dudeY)
         );
 
         const intersect = map.walls.find(coordinates => {
@@ -122,14 +143,14 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
           const offset = dude.getRadius();
           trackingRays.add(
             scene.add
-              .line(0, 0, dudeX + offset, dudeY + offset, sign.x, sign.y, 0xff0000, 0.1)
+              .line(0, 0, dudeX + offset, dudeY + offset, position.x, position.y, 0xff0000, 0.1)
               .setOrigin(0, 0)
           );
         }
 
         //if the sight isn't intersected and the distance is shorter return the new one
         return intersect === undefined && best.distance > currentDist
-          ? { distance: currentDist, sign }
+          ? { distance: currentDist, sign: position }
           : best;
       }
 
