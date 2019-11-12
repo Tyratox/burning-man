@@ -40,6 +40,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   //generate map, yehei
 
   const walls = this.physics.add.staticGroup();
+  const tables = this.physics.add.staticGroup();
   const halfThickness = map.wallThickness / 2;
 
   for (let i = 0; i < map.walls.length; i++) {
@@ -53,6 +54,19 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     );
 
     walls.add(rect);
+  }
+
+  for (let i = 0; i < map.tables.length; i++) {
+    const [from, to] = map.tables[i];
+    const rect = this.add.rectangle(
+      from.x + (to.x - from.x) / 2,
+      from.y + (to.y - from.y) / 2,
+      to.x - from.x + halfThickness,
+      to.y - from.y + halfThickness,
+      0x000000
+    );
+
+    tables.add(rect);
   }
 
   map.signs.forEach(({ position, direction }) => {
@@ -112,6 +126,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     //collision callback
   });
   this.physics.add.collider(dudeGroup, walls);
+  this.physics.add.collider(dudeGroup, tables);
 };
 
 const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
