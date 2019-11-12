@@ -9,6 +9,9 @@ body {
 }
 
 canvas {
+  width:80vw;
+  height: auto;
+
   border: #aaa 5px solid;
   display: block;
   margin: 0 auto;
@@ -47,7 +50,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 #sliders {
-  width: 900px;
+  width: 80vw;
   margin: 2rem auto 0 auto;
 }
 
