@@ -340,11 +340,23 @@ const fireExpansion = (scene: Phaser.Scene) => {
   if (!set) {
     fire.push({x: x, y: y});
   }
-}
+};
+
+const randomWalk = () => {
+  dudes.forEach((dude: Dude) => {
+    const curr = dude.getBody();
+    if (curr.speed < 10) {
+      var sign = (Math.random() > 0.5) ? 1 : -1;
+      curr.setAccelerationX(sign * 50 * Math.random());
+      curr.setAccelerationY(sign * 50 * Math.random());
+    }
+  }
+)};
 
 const update = function(this: Phaser.Scene) {
   calculateForces(this);
-  //fireExpansion(this);
+  fireExpansion(this);
+  randomWalk();
 };
 
 const scene: CreateSceneFromObjectConfig = {
