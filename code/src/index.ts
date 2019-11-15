@@ -362,8 +362,14 @@ const unstuckDudes = () => {
     let accelerationVector = curr.acceleration;
     if (curr.speed < speedThreshold && accelerationVector.length() > accelerationThreshold) {
       let changeDirection = new Phaser.Math.Vector2(accelerationVector.y, -accelerationVector.x).normalize();
-      if ((curr.x < sign.x && curr.y < sign.y) || (curr.x > sign.x && curr.y > sign.y)) { //Math.abs(accelerationVector.x) < Math.abs(accelerationVector.y
+      if (Math.abs(accelerationVector.x) < Math.abs(accelerationVector.y)) {
+        if ((curr.x < sign.x && curr.y < sign.y) || (curr.x > sign.x && curr.y > sign.y)) { //Math.abs(accelerationVector.x) < Math.abs(accelerationVector.y
         changeDirection.negate();
+        }
+      } else {
+        if ((curr.x > sign.x && curr.y < sign.y) || (curr.x > sign.x && curr.y < sign.y)) {
+          changeDirection.negate();
+          }
       }
       changeDirection.scale(accelerationValue);
       curr.acceleration.add(changeDirection);
