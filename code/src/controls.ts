@@ -6,7 +6,7 @@ export let DUDE_REPULSION_EXPONENTIAL = 205;
 export let DUDE_GROUP_ATTRACTION = 5000;
 export let ACCEPTABLE_WALL_DISTANCE = 30;
 export let WALL_REPULSION = 500;
-export let DEFAULT_REACTION_TIME = 5;
+export let DEFAULT_REACTION_TIME = 1;
 export let DEFAULT_DESIRED_VELOCITY = 100;
 
 const onSliderChange = (e: InputEvent) => {

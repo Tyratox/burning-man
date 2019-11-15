@@ -138,11 +138,11 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
 const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
   const trackingRays = scene.add.group();
+  const { x: dudeX, y: dudeY } = dude.getBody();
 
   const res = traceable.reduce(
     (best, element) => {
       const { position, orientation } = element;
-      const { x: dudeX, y: dudeY } = dude.getBody();
 
       if (orientation.x * (position.x - dudeX) + orientation.y * (position.y - dudeY) < 0) {
         const signToAgent = new Phaser.Geom.Line(dudeX, dudeY, position.x, position.y);
@@ -161,15 +161,6 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
           return false;
         });
 
-        if (intersect === undefined) {
-          const offset = dude.getRadius();
-          trackingRays.add(
-            scene.add
-              .line(0, 0, dudeX + offset, dudeY + offset, position.x, position.y, 0xff0000, 0.1)
-              .setOrigin(0, 0)
-          );
-        }
-
         //if the sight isn't intersected and the distance is shorter return the new one
         return intersect === undefined && best.distance > currentDist
           ? { distance: currentDist, sign: position }
@@ -180,6 +171,15 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
     },
     { distance: Number.MAX_VALUE, sign: { x: -1, y: -1 } }
   ).sign;
+
+  if(res.x > 0){
+    const offset = dude.getRadius();
+    trackingRays.add(
+      scene.add
+        .line(0, 0, dudeX + offset, dudeY + offset, res.x, res.y, 0xff0000, 0.1)
+        .setOrigin(0, 0)
+    );
+  }
 
   setTimeout(() => {
     trackingRays.destroy(true);
@@ -219,8 +219,8 @@ const calculateForces = (scene: Phaser.Scene) => {
       { distance: Number.MAX_VALUE, wall: [{ x: 0, y: 0 }, { x: 0, y: 0 }] }
     );
 
-    //if the wall is far away, that's okay
-    if (closestWallDistance < ACCEPTABLE_WALL_DISTANCE) {
+    //if the wall is far away, that's okay. ALSO CHECK WHETHER THE DUDE IS IN FRONT OF THE WALL (easy for rectangular walls)
+    if (closestWallDistance < ACCEPTABLE_WALL_DISTANCE && ((closestWall[0].x <= dudeBody.x && closestWall[1].x >= dudeBody.x) || (closestWall[0].y <= dudeBody.y && closestWall[1].y >= dudeBody.y))) {
       //vector perpendicular to the wall
       const wallRepulsion = new Phaser.Math.Vector2({
         y: closestWall[1].x - closestWall[0].x,
@@ -365,7 +365,7 @@ const randomWalk = () => {
 const update = function(this: Phaser.Scene) {
   calculateForces(this);
   fireExpansion(this);
-  randomWalk();
+  //randomWalk();
 };
 
 const scene: CreateSceneFromObjectConfig = {
