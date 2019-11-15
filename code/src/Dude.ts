@@ -20,6 +20,7 @@ class Dude {
   fitness: number;
   weight: number;
   age: number;
+  sign: {x: number, y: number};
 
   constructor(
     x: number,
@@ -29,6 +30,7 @@ class Dude {
     age: number,
     scene: Phaser.Scene
   ) {
+    this.sign = {x: 0, y: 0};
     this.fitness = fitness; // Math.random(),
     this.weight = weight;   // 0.3 + Math.random() * 0.7
     this.age = age;         // Math.random()
@@ -56,6 +58,15 @@ class Dude {
 
   getBody() {
     return getBody(this.object);
+  }
+
+  getSign() {
+    return this.sign;
+  }
+
+  setSign(x: number, y: number) {
+    this.sign.x = x;
+    this.sign.y = y;
   }
 }
 

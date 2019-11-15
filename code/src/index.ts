@@ -37,7 +37,7 @@ const fireRadius = 13;
 const fireOffset = 30;
 const fireSpreadRate = 0.05;
 const accelerationThreshold = 0;
-const accelerationValue = 1000;
+const accelerationValue = 2000;
 
 const speedThreshold = 7;
 
@@ -136,6 +136,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
   this.physics.add.collider(dudeGroup, walls);
   this.physics.add.collider(dudeGroup, tables);
+
 };
 
 const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
@@ -260,6 +261,7 @@ const calculateForces = (scene: Phaser.Scene) => {
 
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
     const sign = rayTrace(dudes[i], scene);
+    dudes[i].setSign(sign.x, sign.y);
 
     //calculate here the desired velocity from the target value only if we have a target
     if (sign.x > 0) {
@@ -356,11 +358,11 @@ const fireExpansion = (scene: Phaser.Scene) => {
 const unstuckDudes = () => {
   dudes.forEach((dude: Dude) => {
     const curr = dude.getBody();
+    const sign = dude.getSign();
     let accelerationVector = curr.acceleration;
     if (curr.speed < speedThreshold && accelerationVector.length() > accelerationThreshold) {
-      let sign = (Math.random() > 0.5) ? 1 : -1;
       let changeDirection = new Phaser.Math.Vector2(accelerationVector.y, -accelerationVector.x).normalize();
-      if (Math.abs(accelerationVector.x) < Math.abs(accelerationVector.y)) {
+      if ((curr.x < sign.x && curr.y < sign.y) || (curr.x > sign.x && curr.y > sign.y)) { //Math.abs(accelerationVector.x) < Math.abs(accelerationVector.y
         changeDirection.negate();
       }
       changeDirection.scale(accelerationValue);
