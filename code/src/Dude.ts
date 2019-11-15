@@ -11,6 +11,8 @@ class Dude {
   radius: number;
   stressLevel: number;
   visualRange: number;
+  health: number;
+  out: boolean;
 
   object: Phaser.GameObjects.GameObject;
 
@@ -36,6 +38,8 @@ class Dude {
     this.radius = Math.min(MAX_RADIUS, MAX_RADIUS * (weight / fitness));
     this.stressLevel = Math.random();
     this.visualRange = MAX_VISUAL_RANGE / age;
+    this.health = 1;
+    this.out = false;
 
     const circle = scene.add.circle(x, y, this.radius, 0xf1c40f);
 

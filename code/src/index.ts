@@ -31,11 +31,13 @@ export const getBody = (
   const traceable = [...map.signs, ...map.doors];
 
 const dudes: Dude[] = [];
-let fireGrid = [[],[]];
+let fireGrid = new Array(map.fireGridHeigth).fill(0).map(() => new Array(map.fireGridWidth).fill(false));
 let fire = [];
 const fireRadius = 13;
 const fireOffset = 30;
 const fireSpreadRate = 0.05;
+
+const speedThreshold = 7;
 
 const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
   //load images if needed
@@ -314,38 +316,45 @@ const calculateForces = (scene: Phaser.Scene) => {
 };
 
 const fireExpansion = (scene: Phaser.Scene) => {
-  let {x, y} = fire.pop();
-  let set = false;
-  if (Math.random() < fireSpreadRate) {
-    scene.add.circle(x - fireOffset, y, fireRadius, 0xFF5733);
-    fire.push({x: x - fireOffset, y: y});
-    set = true;
-  }
-  if (Math.random() < fireSpreadRate) {
-    scene.add.circle(x - fireOffset, y, fireRadius, 0xFF5733);
-    fire.push({x: x - fireOffset, y: y});
-    set = true;
-  }
-  if (Math.random() < fireSpreadRate) {
-    scene.add.circle(x, y - fireOffset, fireRadius, 0xFF5733);
-    fire.push({x: x, y: y - fireOffset});
-    set = true;
-  }
-  if (Math.random() < fireSpreadRate) {
-    scene.add.circle(x, y + fireOffset, fireRadius, 0xFF5733);
-    fire.push({x: x, y: y + fireOffset});
-    set = true;
-  }
+  let {x, y} = fire.shift();
+  let set1 = false;
+  let set2 = false;
+  let set3 = false;
+  let set4 = false;
 
-  if (!set) {
-    fire.push({x: x, y: y});
+  if (x < 0 || x > map.fireGridHeigth || y < 0 || y < map.fireGridWidth) {
+    if (Math.random() < fireSpreadRate) {
+      scene.add.circle(x - fireOffset, y, fireRadius, 0xFF5733);
+      fire.push({x: x - fireOffset, y: y});
+      set1 = true;
+    }
+    if (Math.random() < fireSpreadRate) {
+      scene.add.circle(x - fireOffset, y, fireRadius, 0xFF5733);
+      fire.push({x: x - fireOffset, y: y});
+      set2 = true;
+    }
+    if (Math.random() < fireSpreadRate) {
+      scene.add.circle(x, y - fireOffset, fireRadius, 0xFF5733);
+      fire.push({x: x, y: y - fireOffset});
+      set3= true;
+    }
+    if (Math.random() < fireSpreadRate) {
+      scene.add.circle(x, y + fireOffset, fireRadius, 0xFF5733);
+      fire.push({x: x, y: y + fireOffset});
+      set4 = true;
+    }
+  
+    if (!(set1 && set2 && set3 && set4)) {
+      fire.push({x: x, y: y});
+    }
   }
 };
 
+// If a dude gets stuck this function helps out
 const randomWalk = () => {
   dudes.forEach((dude: Dude) => {
     const curr = dude.getBody();
-    if (curr.speed < 10) {
+    if (curr.speed < speedThreshold) {
       var sign = (Math.random() > 0.5) ? 1 : -1;
       curr.setAccelerationX(sign * 50 * Math.random());
       curr.setAccelerationY(sign * 50 * Math.random());
