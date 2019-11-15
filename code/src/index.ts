@@ -36,6 +36,8 @@ let fire = [];
 const fireRadius = 13;
 const fireOffset = 30;
 const fireSpreadRate = 0.05;
+const accelerationThreshold = 0;
+const accelerationValue = 1000;
 
 const speedThreshold = 7;
 
@@ -351,21 +353,28 @@ const fireExpansion = (scene: Phaser.Scene) => {
 };
 
 // If a dude gets stuck this function helps out
-const randomWalk = () => {
+const unstuckDudes = () => {
   dudes.forEach((dude: Dude) => {
     const curr = dude.getBody();
-    if (curr.speed < speedThreshold) {
-      var sign = (Math.random() > 0.5) ? 1 : -1;
-      curr.setAccelerationX(sign * 50 * Math.random());
-      curr.setAccelerationY(sign * 50 * Math.random());
+    let accelerationVector = curr.acceleration;
+    if (curr.speed < speedThreshold && accelerationVector.length() > accelerationThreshold) {
+      let sign = (Math.random() > 0.5) ? 1 : -1;
+      let changeDirection = new Phaser.Math.Vector2(accelerationVector.y, -accelerationVector.x).normalize();
+      if (Math.abs(accelerationVector.x) < Math.abs(accelerationVector.y)) {
+        changeDirection.negate();
+      }
+      changeDirection.scale(accelerationValue);
+      curr.acceleration.add(changeDirection);
+      // curr.setAccelerationX(sign * 50 * Math.random());
+      // curr.setAccelerationY(sign * 50 * Math.random());
     }
   }
 )};
 
 const update = function(this: Phaser.Scene) {
   calculateForces(this);
-  fireExpansion(this);
-  //randomWalk();
+  //fireExpansion(this);
+  unstuckDudes();
 };
 
 const scene: CreateSceneFromObjectConfig = {
