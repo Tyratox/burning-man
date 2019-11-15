@@ -37,7 +37,7 @@ const fireRadius = 13;
 const fireOffset = 30;
 const fireSpreadRate = 0.05;
 const accelerationThreshold = 0;
-const accelerationValue = 2000;
+const accelerationValue = 1000;
 
 const speedThreshold = 7;
 
@@ -360,21 +360,24 @@ const unstuckDudes = () => {
     const curr = dude.getBody();
     const sign = dude.getSign();
     let accelerationVector = curr.acceleration;
+    // Check if dude is currently too slow and he observes a force, e.g. she/he/it is stuck
     if (curr.speed < speedThreshold && accelerationVector.length() > accelerationThreshold) {
       let changeDirection = new Phaser.Math.Vector2(accelerationVector.y, -accelerationVector.x).normalize();
+      // Check for the direction of the acceleration vector
       if (Math.abs(accelerationVector.x) < Math.abs(accelerationVector.y)) {
-        if ((curr.x < sign.x && curr.y < sign.y) || (curr.x > sign.x && curr.y > sign.y)) { //Math.abs(accelerationVector.x) < Math.abs(accelerationVector.y
+        // Negate the acceleration vector if it is in the 1. or 3. quadrant of the coordinate system
+        if ((curr.x < sign.x && curr.y < sign.y) || (curr.x > sign.x && curr.y > sign.y)) {
         changeDirection.negate();
         }
       } else {
+        // Negate the acceleration vector if it is in the 2. or 4. quadrant of the coordinate system
         if ((curr.x > sign.x && curr.y < sign.y) || (curr.x > sign.x && curr.y < sign.y)) {
           changeDirection.negate();
           }
       }
       changeDirection.scale(accelerationValue);
+      // Help dude out of stuckness
       curr.acceleration.add(changeDirection);
-      // curr.setAccelerationX(sign * 50 * Math.random());
-      // curr.setAccelerationY(sign * 50 * Math.random());
     }
   }
 )};
