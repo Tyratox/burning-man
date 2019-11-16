@@ -99,8 +99,8 @@ class Fire {
     this.config.lifespan = 50000;
     this.config.bounce = 1000;
     this.config.active = true;
-    this.config.accelerationX = 300;
-    this.config.accelerationY = 5000;
+    this.config.accelerationX = 0;
+    this.config.accelerationY = 0;
     this.config.rotate = 0;
     this.config.quantity = 1;
     this.config.speedX = 0;
@@ -119,8 +119,8 @@ class Fire {
         let sign4 = Math.random() > 0.5 ? -1 : 1;
         particle.accelerationX = sign1 * Math.random() * 200;
         particle.accelerationY = sign2 * Math.random() * 200;
-        particle.velocityX = sign3 * Math.random() * 200;
-        particle.velocityY = sign4 * Math.random() * 200;
+        //particle.velocityX = sign3 * Math.random() * 200;
+        //particle.velocityY = sign4 * Math.random() * 200;
         particle.rotation = Math.random() * 36000;
         particle.angle = Math.random() * Math.PI * 2;
       },
