@@ -2,7 +2,7 @@ import { getBody } from "./index";
 import { Scene } from "phaser";
 
 const MaxParticleVelocity = 100;
-const MaxParticleAcceleration = 100;
+const MaxParticleAcceleration = 10;
 
 class Config { 
   x:number 
@@ -44,13 +44,28 @@ class Config {
   delay: number
   lifespan: number
 
-  speed: number
-  speedX: number
-  speedY: number
+  speed: { 
+    min: number
+    max: number
+  }
+  speedX: { 
+    min: number
+    max: number
+  }
+  speedY: { 
+    min: number
+    max: number
+  }
   gravityX: number
   gravityY: number
-  accelerationX: number
-  accelerationY: number
+  accelerationX: { 
+    min: number
+    max: number
+  }
+  accelerationY: { 
+    min: number
+    max: number
+  }
   maxVelocityX: number
   maxVelocityY: number
 
@@ -76,6 +91,23 @@ class Config {
   maxParticles: number
   rotate: number
   timeScale: number
+
+  constructor(
+    x: number,
+    y: number,
+    ) {
+    this.x = x;
+    this.y = y;
+    this.visible = true;
+    this.frequency = 0.005;
+    this.lifespan = 50000;
+    this.bounce = 1000;
+    this.active = true;
+    this.accelerationX = { min: -MaxParticleAcceleration, max: MaxParticleAcceleration };
+    this.accelerationY = { min: -MaxParticleAcceleration, max: MaxParticleAcceleration };
+    this.quantity = 1;
+    this.scale = 0.1;
+    }
 }
 
 class Fire {
@@ -91,21 +123,7 @@ class Fire {
     x: number,
     y: number,
   ) {
-    this.config = new Config();
-    this.config.x = x;
-    this.config.y = y;
-    this.config.visible = true;
-    this.config.frequency = 0.005;
-    this.config.lifespan = 50000;
-    this.config.bounce = 1000;
-    this.config.active = true;
-    this.config.accelerationX = 0;
-    this.config.accelerationY = 0;
-    this.config.rotate = 0;
-    this.config.quantity = 1;
-    this.config.speedX = 0;
-    this.config.speedY = 0;
-    this.config.scale = 0.1;
+    this.config = new Config(x, y);
     this.particle = scene.add.particles(name);
     this.emmiter = this.particle.createEmitter(this.config);
 
@@ -117,11 +135,9 @@ class Fire {
         let sign2 = Math.random() > 0.5 ? -1 : 1;
         let sign3 = Math.random() > 0.5 ? -1 : 1;
         let sign4 = Math.random() > 0.5 ? -1 : 1;
-        particle.accelerationX = sign1 * Math.random() * 200;
-        particle.accelerationY = sign2 * Math.random() * 200;
-        //particle.velocityX = sign3 * Math.random() * 200;
-        //particle.velocityY = sign4 * Math.random() * 200;
-        particle.rotation = Math.random() * 36000;
+        particle.accelerationX = sign1 * Math.random() * MaxParticleAcceleration;
+        particle.accelerationY = sign2 * Math.random() * MaxParticleAcceleration;
+        particle.rotation = Math.random() * 3;
         particle.angle = Math.random() * Math.PI * 2;
       },
       x: 0,
