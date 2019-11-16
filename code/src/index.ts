@@ -52,7 +52,10 @@ const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
   //generate map, yehei
-
+ 
+  // fire.forEach((f: Fire) =>{
+  //   f.emmiter.start();
+  // })
   const walls = this.physics.add.staticGroup();
   const tables = this.physics.add.staticGroup();
   const halfThickness = map.wallThickness / 2;
@@ -144,6 +147,10 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
   this.physics.add.collider(dudeGroup, walls);
   this.physics.add.collider(dudeGroup, tables);
+
+  // Test fire emitter
+  fire.push(new Fire('fire', this, 300, 300));
+  fire[0].emmiter.start();
 
   // let particles = this.add.particles('fire');
 
@@ -351,6 +358,9 @@ const calculateForces = (scene: Phaser.Scene) => {
 };
 
 const fireExpansion = (scene: Phaser.Scene) => {
+  fire.forEach((f: Fire) => {
+    f.emmiter.start();
+  });
 
 
   // let {x, y} = fire.shift();

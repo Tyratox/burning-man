@@ -1,6 +1,10 @@
 import { getBody } from "./index";
+import { Scene } from "phaser";
 
-interface Config { 
+const MaxParticleVelocity = 100;
+const MaxParticleAcceleration = 100;
+
+class Config { 
   x:number 
   y:number
   emitZone: {
@@ -55,9 +59,14 @@ interface Config {
   collideBottom: boolean
   collideTop: boolean
   collideLeft: boolean
-  collideRight : boolean
+  collideRight: boolean
 
   particleClass: Phaser.GameObjects.Particles.Particle
+
+  emitCallback
+  emitCallbackScope
+  deathCallback
+  deathCallbackScope
 
   name: string
   on: boolean
@@ -67,7 +76,7 @@ interface Config {
   maxParticles: number
   rotate: number
   timeScale: number
-} 
+}
 
 class Fire {
   x: number;
@@ -82,10 +91,45 @@ class Fire {
     x: number,
     y: number,
   ) {
+    this.config = new Config();
     this.config.x = x;
     this.config.y = y;
+    this.config.visible = true;
+    this.config.frequency = 0.005;
+    this.config.lifespan = 50000;
+    this.config.bounce = 1000;
+    this.config.active = true;
+    this.config.accelerationX = 300;
+    this.config.accelerationY = 5000;
+    this.config.rotate = 0;
+    this.config.quantity = 1;
+    this.config.speedX = 0;
+    this.config.speedY = 0;
+    this.config.scale = 0.1;
     this.particle = scene.add.particles(name);
     this.emmiter = this.particle.createEmitter(this.config);
+
+    let well : Phaser.GameObjects.Particles.GravityWell;
+    well = {
+      active: true,
+      update: function(particle) {
+        let sign1 = Math.random() > 0.5 ? -1 : 1;
+        let sign2 = Math.random() > 0.5 ? -1 : 1;
+        let sign3 = Math.random() > 0.5 ? -1 : 1;
+        let sign4 = Math.random() > 0.5 ? -1 : 1;
+        particle.accelerationX = sign1 * Math.random() * 200;
+        particle.accelerationY = sign2 * Math.random() * 200;
+        particle.velocityX = sign3 * Math.random() * 200;
+        particle.velocityY = sign4 * Math.random() * 200;
+        particle.rotation = Math.random() * 36000;
+        particle.angle = Math.random() * Math.PI * 2;
+      },
+      x: 0,
+      y: 0,
+      power: 20000,
+      epsilon: 0
+    }
+    this.particle.addGravityWell(well);
   }
 }
 
