@@ -14,6 +14,10 @@ import {
 } from "./controls";
 import Dude from "./Dude";
 import map from "./map";
+<<<<<<< HEAD
+=======
+import Fire from "./Fire";
+>>>>>>> 0dc34d32dd6f8c9a2e088e26a6a6755c05c23d4c
 import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
@@ -29,11 +33,18 @@ export const getBody = (
   //@ts-ignore
   obj.body;
 
-  const traceable = [...map.signs, ...map.doors];
+const traceable = [...map.signs, ...map.doors];
 
-const dudes: Dude[] = [];
+let dudeGroup: Phaser.GameObjects.Group;
+
 const fire: Fire[] = [];
+<<<<<<< HEAD
 //let fireGrid = new Array(map.fireGridHeigth).fill(0).map(() => new Array(map.fireGridWidth).fill(false));
+=======
+let fireGrid = new Array(map.fireGridHeigth)
+  .fill(0)
+  .map(() => new Array(map.fireGridWidth).fill(false));
+>>>>>>> 0dc34d32dd6f8c9a2e088e26a6a6755c05c23d4c
 
 // const fireRadius = 13;
 // const fireOffset = 30;
@@ -46,22 +57,20 @@ const speedThreshold = 7;
 
 const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
   //load images if needed
-  this.load.image('fire', 'assets/logo.png');
-  this.load.image('smokePNG', 'assets/logo.png');
+  this.load.image("fire", "assets/logo.png");
+  this.load.image("smokePNG", "assets/logo.png");
 };
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
   //generate map, yehei
- 
+
   // fire.forEach((f: Fire) =>{
   //   f.emmiter.start();
   // })
-  const walls = this.physics.add.staticGroup();
-  const tables = this.physics.add.staticGroup();
   const halfThickness = map.wallThickness / 2;
 
-  for (let i = 0; i < map.walls.length; i++) {
-    const [from, to] = map.walls[i];
+  const walls = this.physics.add.staticGroup();
+  map.walls.forEach(([from, to]) => {
     const rect = this.add.rectangle(
       from.x + (to.x - from.x) / 2,
       from.y + (to.y - from.y) / 2,
@@ -71,10 +80,10 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     );
 
     walls.add(rect);
-  }
+  });
 
-  for (let i = 0; i < map.tables.length; i++) {
-    const [from, to] = map.tables[i];
+  const tables = this.physics.add.staticGroup();
+  map.tables.forEach(([from, to]) => {
     const rect = this.add.rectangle(
       from.x + (to.x - from.x) / 2,
       from.y + (to.y - from.y) / 2,
@@ -84,7 +93,20 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     );
 
     tables.add(rect);
-  }
+  });
+
+  const despawn_zones = this.physics.add.staticGroup();
+  map.despawn_zone.forEach(([from, to]) => {
+    const rect = this.add.rectangle(
+      from.x + (to.x - from.x) / 2,
+      from.y + (to.y - from.y) / 2,
+      to.x - from.x + halfThickness,
+      to.y - from.y + halfThickness,
+      0xffeaa7
+    );
+
+    despawn_zones.add(rect);
+  });
 
   map.signs.forEach(({ position, direction }) => {
     const triangle = this.add.isotriangle(
@@ -124,7 +146,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       (direction.x > 0 ? 1 : -1) * Math.acos(-direction.y / directionNorm);
   });
 
-  const dudeGroup = this.add.group();
+  dudeGroup = this.add.group();
 
   // To do: Add to physics engine
   const fireGroup = this.add.group();
@@ -136,10 +158,10 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       Math.random(),
       0.3 + Math.random() * 0.7,
       Math.random(),
+      "Peter",
       this
     );
-    dudeGroup.add(dude.object);
-    dudes.push(dude);
+    dudeGroup.add(dude);
   });
 
   // Test fire emitter
@@ -152,9 +174,45 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   this.physics.add.collider(dudeGroup, dudeGroup, (p1, p2) => {
     //collision callback
   });
+
   this.physics.add.collider(dudeGroup, walls);
   this.physics.add.collider(dudeGroup, tables);
+<<<<<<< HEAD
   this.physics.add.collider(walls, fireGroup);
+=======
+  this.physics.add.collider(dudeGroup, despawn_zones, (dude: Dude, zone) => {
+    console.log("Dude " + dude.name + " is a survivor!");
+    dude.destroy();
+  });
+
+  // Test fire emitter
+  fire.push(new Fire("fire", this, 300, 300));
+  fire[0].emmiter.start();
+
+  // let particles = this.add.particles('fire');
+
+  // let smoke = this.make.particles({
+  //   key: 'smokePNG',
+  //   add: false,
+
+  // });
+
+  // particles.createEmitter({
+  //   alpha: { start: 1, end: 0 },
+  //   scale: { start: 0.5, end: 2.5 },
+  //   //tint: { start: 0xff945e, end: 0xff945e },
+  //   speed: 20,
+  //   accelerationY: -300,
+  //   angle: { min: -85, max: -95 },
+  //   rotate: { min: -180, max: 180 },
+  //   lifespan: { min: 1000, max: 1100 },
+  //   blendMode: 'ADD',
+  //   frequency: 110,
+  //   maxParticles: 10,
+  //   x: 400,
+  //   y: 300
+  // });
+>>>>>>> 0dc34d32dd6f8c9a2e088e26a6a6755c05c23d4c
 };
 
 const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
@@ -165,8 +223,17 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
     (best, element) => {
       const { position, orientation } = element;
 
-      if (orientation.x * (position.x - dudeX) + orientation.y * (position.y - dudeY) < 0) {
-        const signToAgent = new Phaser.Geom.Line(dudeX, dudeY, position.x, position.y);
+      if (
+        orientation.x * (position.x - dudeX) +
+          orientation.y * (position.y - dudeY) <
+        0
+      ) {
+        const signToAgent = new Phaser.Geom.Line(
+          dudeX,
+          dudeY,
+          position.x,
+          position.y
+        );
         const currentDist = Math.sqrt(
           (position.x - dudeX) * (position.x - dudeX) +
             (position.y - dudeY) * (position.y - dudeY)
@@ -193,7 +260,7 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
     { distance: Number.MAX_VALUE, sign: { x: -1, y: -1 } }
   ).sign;
 
-  if(res.x > 0){
+  if (res.x > 0) {
     const offset = dude.getRadius();
     trackingRays.add(
       scene.add
@@ -210,6 +277,9 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
 };
 
 const calculateForces = (scene: Phaser.Scene) => {
+  //@ts-ignore
+  const dudes: Dude[] = dudeGroup.children.getArray();
+
   const accelerations = new Array(dudes.length)
     .fill(null)
     .map(_ => new Phaser.Math.Vector2({ x: 0, y: 0 }));
@@ -237,11 +307,21 @@ const calculateForces = (scene: Phaser.Scene) => {
 
         return bestResult;
       },
-      { distance: Number.MAX_VALUE, wall: [{ x: 0, y: 0 }, { x: 0, y: 0 }] }
+      {
+        distance: Number.MAX_VALUE,
+        wall: [
+          { x: 0, y: 0 },
+          { x: 0, y: 0 }
+        ]
+      }
     );
 
     //if the wall is far away, that's okay. ALSO CHECK WHETHER THE DUDE IS IN FRONT OF THE WALL (easy for rectangular walls)
-    if (closestWallDistance < ACCEPTABLE_WALL_DISTANCE && ((closestWall[0].x <= dudeBody.x && closestWall[1].x >= dudeBody.x) || (closestWall[0].y <= dudeBody.y && closestWall[1].y >= dudeBody.y))) {
+    if (
+      closestWallDistance < ACCEPTABLE_WALL_DISTANCE &&
+      ((closestWall[0].x <= dudeBody.x && closestWall[1].x >= dudeBody.x) ||
+        (closestWall[0].y <= dudeBody.y && closestWall[1].y >= dudeBody.y))
+    ) {
       //vector perpendicular to the wall
       const wallRepulsion = new Phaser.Math.Vector2({
         y: closestWall[1].x - closestWall[0].x,
@@ -307,10 +387,14 @@ const calculateForces = (scene: Phaser.Scene) => {
       //force ~ e^{-distance} = 1/(e^{distance}) (exponentially falling with distance)
       //OR => force ~ e^{1/distance} => exponentially increasing with small distances
 
-      const pushingForce = distance > 50 ? 0 : Math.min(
-        DUDE_REPULSION_LINEAR * Math.exp(DUDE_REPULSION_EXPONENTIAL / distance),
-        100
-      );
+      const pushingForce =
+        distance > 50
+          ? 0
+          : Math.min(
+              DUDE_REPULSION_LINEAR *
+                Math.exp(DUDE_REPULSION_EXPONENTIAL / distance),
+              100
+            );
 
       //the bigger the distance the smaller the pulling force
       const pullingForce = 1 / (distance * DUDE_GROUP_ATTRACTION);
@@ -337,33 +421,87 @@ const calculateForces = (scene: Phaser.Scene) => {
   );
 };
 
+<<<<<<< HEAD
+=======
+const fireExpansion = (scene: Phaser.Scene) => {
+  fire.forEach((f: Fire) => {
+    f.emmiter.start();
+  });
+
+  // let {x, y} = fire.shift();
+  // let set1 = false;
+  // let set2 = false;
+  // let set3 = false;
+  // let set4 = false;
+
+  // if (x < 0 || x > map.fireGridHeigth || y < 0 || y < map.fireGridWidth) {
+  //   if (Math.random() < fireSpreadRate) {
+  //     scene.add.circle(x - fireOffset, y, fireRadius, 0xFF5733);
+  //     fire.push({x: x - fireOffset, y: y});
+  //     set1 = true;
+  //   }
+  //   if (Math.random() < fireSpreadRate) {
+  //     scene.add.circle(x - fireOffset, y, fireRadius, 0xFF5733);
+  //     fire.push({x: x - fireOffset, y: y});
+  //     set2 = true;
+  //   }
+  //   if (Math.random() < fireSpreadRate) {
+  //     scene.add.circle(x, y - fireOffset, fireRadius, 0xFF5733);
+  //     fire.push({x: x, y: y - fireOffset});
+  //     set3= true;
+  //   }
+  //   if (Math.random() < fireSpreadRate) {
+  //     scene.add.circle(x, y + fireOffset, fireRadius, 0xFF5733);
+  //     fire.push({x: x, y: y + fireOffset});
+  //     set4 = true;
+  //   }
+
+  //   if (!(set1 && set2 && set3 && set4)) {
+  //     fire.push({x: x, y: y});
+  //   }
+  // }
+};
+
+>>>>>>> 0dc34d32dd6f8c9a2e088e26a6a6755c05c23d4c
 // If a dude gets stuck this function helps out
 const unstuckDudes = () => {
-  dudes.forEach((dude: Dude) => {
+  dudeGroup.children.getArray().forEach((dude: Dude) => {
     const curr = dude.getBody();
     const sign = dude.getSign();
     let accelerationVector = curr.acceleration;
     // Check if dude is currently too slow and he observes a force, e.g. she/he/it is stuck
-    if (curr.speed < speedThreshold && accelerationVector.length() > accelerationThreshold) {
-      let changeDirection = new Phaser.Math.Vector2(accelerationVector.y, -accelerationVector.x).normalize();
+    if (
+      curr.speed < speedThreshold &&
+      accelerationVector.length() > accelerationThreshold
+    ) {
+      let changeDirection = new Phaser.Math.Vector2(
+        accelerationVector.y,
+        -accelerationVector.x
+      ).normalize();
       // Check for the direction of the acceleration vector
       if (Math.abs(accelerationVector.x) < Math.abs(accelerationVector.y)) {
         // Negate the acceleration vector if it is in the 1. or 3. quadrant of the coordinate system
-        if ((curr.x < sign.x && curr.y < sign.y) || (curr.x > sign.x && curr.y > sign.y)) {
-        changeDirection.negate();
+        if (
+          (curr.x < sign.x && curr.y < sign.y) ||
+          (curr.x > sign.x && curr.y > sign.y)
+        ) {
+          changeDirection.negate();
         }
       } else {
         // Negate the acceleration vector if it is in the 2. or 4. quadrant of the coordinate system
-        if ((curr.x > sign.x && curr.y < sign.y) || (curr.x > sign.x && curr.y < sign.y)) {
+        if (
+          (curr.x > sign.x && curr.y < sign.y) ||
+          (curr.x > sign.x && curr.y < sign.y)
+        ) {
           changeDirection.negate();
-          }
+        }
       }
       changeDirection.scale(accelerationValue);
       // Help dude out of stuckness
       curr.acceleration.add(changeDirection);
     }
-  }
-)};
+  });
+};
 
 const update = function(this: Phaser.Scene) {
   calculateForces(this);
