@@ -2,11 +2,11 @@ import { getBody } from "./index";
 import { Scene } from "phaser";
 import { spawn } from "child_process";
 
-const AverageRadius = 50;
-const MinRadius = 10;
+const MAX_RADIUS = 20;
+const MIN_RADIUS = 10;
 
-const Velocity = 40;
-const MinVelocity = 10;
+const VELOCITY = 30;
+const VISIBILITY = 0.3;
 
 class Fire {
   x: number;
@@ -31,20 +31,20 @@ class Fire {
   }
 
   spawn(scene: Phaser.Scene) {
-    const radius = AverageRadius * Math.random() + MinRadius;
+    const radius = MAX_RADIUS * Math.random() + MIN_RADIUS;
       const circle = scene.add.circle(this.x, this.y, radius, 0x626262);
-      circle.alpha = 0.7;
+      circle.alpha = VISIBILITY;
 
       const sign1 = Math.random() > 0.5 ? -1 : 1;
       const sign2 = Math.random() > 0.5 ? -1 : 1;
 
-      const velocityX = sign1 * (Math.random() * Velocity + MinVelocity);
-      const velocityY = sign2 * (Math.random() * Velocity + MinVelocity);
+      const velocityX = sign1 * Math.random() * VELOCITY;
+      const velocityY = sign2 * Math.random() * VELOCITY;
 
       scene.physics.world.enable(circle); //adds body / enables physics
       getBody(circle)
         .setCollideWorldBounds(true)
-        .setBounce(0, 0)
+        .setBounce(0.2, 0.2)
         .setVelocityX(velocityX)
         .setVelocityY(velocityY);
       
