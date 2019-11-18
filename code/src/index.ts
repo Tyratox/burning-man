@@ -14,9 +14,9 @@ import {
 } from "./controls";
 import Dude from "./Dude";
 import map from "./map";
-import Fire from "./Fire"
 import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
+import Fire from "./Fire";
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
@@ -33,11 +33,11 @@ export const getBody = (
 
 const dudes: Dude[] = [];
 const fire: Fire[] = [];
-let fireGrid = new Array(map.fireGridHeigth).fill(0).map(() => new Array(map.fireGridWidth).fill(false));
+//let fireGrid = new Array(map.fireGridHeigth).fill(0).map(() => new Array(map.fireGridWidth).fill(false));
 
-const fireRadius = 13;
-const fireOffset = 30;
-const fireSpreadRate = 0.05;
+// const fireRadius = 13;
+// const fireOffset = 30;
+// const fireSpreadRate = 0.05;
 
 const accelerationThreshold = 0;
 const accelerationValue = 1000;
@@ -142,39 +142,19 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     dudes.push(dude);
   });
 
+  // Test fire emitter
+  map.fireStartPoints.forEach(point => {
+    let f = new Fire(this, point.x, point.y, 20, fireGroup);
+    fire.push(f);
+  });
+  
+  this.physics.add.collider(fireGroup, walls);
   this.physics.add.collider(dudeGroup, dudeGroup, (p1, p2) => {
     //collision callback
   });
   this.physics.add.collider(dudeGroup, walls);
   this.physics.add.collider(dudeGroup, tables);
-
-  // Test fire emitter
-  fire.push(new Fire('fire', this, 300, 300));
-  fire[0].emmiter.start();
-
-  // let particles = this.add.particles('fire');
-
-  // let smoke = this.make.particles({
-  //   key: 'smokePNG',
-  //   add: false,
-
-  // });
-
-  // particles.createEmitter({
-  //   alpha: { start: 1, end: 0 },
-  //   scale: { start: 0.5, end: 2.5 },
-  //   //tint: { start: 0xff945e, end: 0xff945e },
-  //   speed: 20,
-  //   accelerationY: -300,
-  //   angle: { min: -85, max: -95 },
-  //   rotate: { min: -180, max: 180 },
-  //   lifespan: { min: 1000, max: 1100 },
-  //   blendMode: 'ADD',
-  //   frequency: 110,
-  //   maxParticles: 10,
-  //   x: 400,
-  //   y: 300
-  // });
+  this.physics.add.collider(walls, fireGroup);
 };
 
 const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
@@ -357,46 +337,6 @@ const calculateForces = (scene: Phaser.Scene) => {
   );
 };
 
-const fireExpansion = (scene: Phaser.Scene) => {
-  fire.forEach((f: Fire) => {
-    f.emmiter.start();
-  });
-
-
-  // let {x, y} = fire.shift();
-  // let set1 = false;
-  // let set2 = false;
-  // let set3 = false;
-  // let set4 = false;
-
-  // if (x < 0 || x > map.fireGridHeigth || y < 0 || y < map.fireGridWidth) {
-  //   if (Math.random() < fireSpreadRate) {
-  //     scene.add.circle(x - fireOffset, y, fireRadius, 0xFF5733);
-  //     fire.push({x: x - fireOffset, y: y});
-  //     set1 = true;
-  //   }
-  //   if (Math.random() < fireSpreadRate) {
-  //     scene.add.circle(x - fireOffset, y, fireRadius, 0xFF5733);
-  //     fire.push({x: x - fireOffset, y: y});
-  //     set2 = true;
-  //   }
-  //   if (Math.random() < fireSpreadRate) {
-  //     scene.add.circle(x, y - fireOffset, fireRadius, 0xFF5733);
-  //     fire.push({x: x, y: y - fireOffset});
-  //     set3= true;
-  //   }
-  //   if (Math.random() < fireSpreadRate) {
-  //     scene.add.circle(x, y + fireOffset, fireRadius, 0xFF5733);
-  //     fire.push({x: x, y: y + fireOffset});
-  //     set4 = true;
-  //   }
-  
-  //   if (!(set1 && set2 && set3 && set4)) {
-  //     fire.push({x: x, y: y});
-  //   }
-  // }
-};
-
 // If a dude gets stuck this function helps out
 const unstuckDudes = () => {
   dudes.forEach((dude: Dude) => {
@@ -427,6 +367,9 @@ const unstuckDudes = () => {
 
 const update = function(this: Phaser.Scene) {
   calculateForces(this);
+  fire.forEach((f) => {
+    f.spawn(this);
+  });
   //fireExpansion(this);
   unstuckDudes();
 };
