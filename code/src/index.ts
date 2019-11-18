@@ -31,7 +31,8 @@ export const getBody = (
 
 const traceable = [...map.signs, ...map.doors];
 
-const dudes: Dude[] = [];
+let dudeGroup: Phaser.GameObjects.Group;
+
 const fire: Fire[] = [];
 let fireGrid = new Array(map.fireGridHeigth)
   .fill(0)
@@ -137,7 +138,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       (direction.x > 0 ? 1 : -1) * Math.acos(-direction.y / directionNorm);
   });
 
-  const dudeGroup = this.add.group();
+  dudeGroup = this.add.group();
 
   // To do: Add to physics engine
   const fireGroup = this.add.group();
@@ -153,21 +154,17 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       this
     );
     dudeGroup.add(dude);
-    dudes.push(dude);
   });
 
   this.physics.add.collider(dudeGroup, dudeGroup, (p1, p2) => {
     //collision callback
   });
+
   this.physics.add.collider(dudeGroup, walls);
   this.physics.add.collider(dudeGroup, tables);
-  this.physics.add.collider(dudeGroup, despawn_zones, (dude, zone) => {
-    const dudeIndex = dudes.findIndex(d => d === dude);
-    if (dudeIndex !== -1) {
-      console.log("Dude " + dudes[dudeIndex].name + " is a survivor!");
-      dudes.splice(dudeIndex, 1);
-      dude.destroy();
-    }
+  this.physics.add.collider(dudeGroup, despawn_zones, (dude: Dude, zone) => {
+    console.log("Dude " + dude.name + " is a survivor!");
+    dude.destroy();
   });
 
   // Test fire emitter
@@ -261,6 +258,9 @@ const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
 };
 
 const calculateForces = (scene: Phaser.Scene) => {
+  //@ts-ignore
+  const dudes: Dude[] = dudeGroup.children.getArray();
+
   const accelerations = new Array(dudes.length)
     .fill(null)
     .map(_ => new Phaser.Math.Vector2({ x: 0, y: 0 }));
@@ -443,7 +443,7 @@ const fireExpansion = (scene: Phaser.Scene) => {
 
 // If a dude gets stuck this function helps out
 const unstuckDudes = () => {
-  dudes.forEach((dude: Dude) => {
+  dudeGroup.children.getArray().forEach((dude: Dude) => {
     const curr = dude.getBody();
     const sign = dude.getSign();
     let accelerationVector = curr.acceleration;
