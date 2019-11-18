@@ -12,7 +12,7 @@ class Dude {
   stressLevel: number;
   visualRange: number;
   health: number;
-  out: boolean;
+  name: string;
 
   object: Phaser.GameObjects.GameObject;
 
@@ -28,6 +28,7 @@ class Dude {
     fitness: number,
     weight: number,
     age: number,
+    name: string,
     scene: Phaser.Scene
   ) {
     this.sign = {x: 0, y: 0};
@@ -41,7 +42,7 @@ class Dude {
     this.stressLevel = Math.random();
     this.visualRange = MAX_VISUAL_RANGE / age;
     this.health = 1;
-    this.out = false;
+    this.name = name;
 
     const circle = scene.add.circle(x, y, this.radius, 0xf1c40f);
 

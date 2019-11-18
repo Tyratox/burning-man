@@ -52,16 +52,14 @@ const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
   //generate map, yehei
- 
+
   // fire.forEach((f: Fire) =>{
   //   f.emmiter.start();
   // })
-  const walls = this.physics.add.staticGroup();
-  const tables = this.physics.add.staticGroup();
   const halfThickness = map.wallThickness / 2;
 
-  for (let i = 0; i < map.walls.length; i++) {
-    const [from, to] = map.walls[i];
+  const walls = this.physics.add.staticGroup();
+  map.walls.forEach(([from, to]) => {
     const rect = this.add.rectangle(
       from.x + (to.x - from.x) / 2,
       from.y + (to.y - from.y) / 2,
@@ -71,10 +69,11 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     );
 
     walls.add(rect);
-  }
+  });
 
-  for (let i = 0; i < map.tables.length; i++) {
-    const [from, to] = map.tables[i];
+
+  const tables = this.physics.add.staticGroup();
+  map.tables.forEach(([from, to]) => {
     const rect = this.add.rectangle(
       from.x + (to.x - from.x) / 2,
       from.y + (to.y - from.y) / 2,
@@ -84,7 +83,21 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     );
 
     tables.add(rect);
-  }
+  });
+
+
+  const despawn_zones = this.physics.add.staticGroup();
+  map.despawn_zone.forEach(([from, to]) => {
+    const rect = this.add.rectangle(
+      from.x + (to.x - from.x) / 2,
+      from.y + (to.y - from.y) / 2,
+      to.x - from.x + halfThickness,
+      to.y - from.y + halfThickness,
+      0xffeaa7
+    );
+
+    despawn_zones.add(rect);
+  });
 
   map.signs.forEach(({ position, direction }) => {
     const triangle = this.add.isotriangle(
@@ -136,6 +149,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       Math.random(),
       0.3 + Math.random() * 0.7,
       Math.random(),
+      "Peter",
       this
     );
     dudeGroup.add(dude.object);
@@ -147,6 +161,14 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
   this.physics.add.collider(dudeGroup, walls);
   this.physics.add.collider(dudeGroup, tables);
+  this.physics.add.collider(dudeGroup, despawn_zones, (dude, zone) => {
+    const dudeIndex = dudes.findIndex(d => d.object === dude);
+    if(dudeIndex !== -1){
+      console.log("Dude " + dudes[dudeIndex].name + " is a survivor!");
+      dudes.splice(dudeIndex, 1);
+      dude.destroy();
+    }
+  });
 
   // Test fire emitter
   fire.push(new Fire('fire', this, 300, 300));
@@ -390,7 +412,7 @@ const fireExpansion = (scene: Phaser.Scene) => {
   //     fire.push({x: x, y: y + fireOffset});
   //     set4 = true;
   //   }
-  
+
   //   if (!(set1 && set2 && set3 && set4)) {
   //     fire.push({x: x, y: y});
   //   }
