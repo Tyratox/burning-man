@@ -4,98 +4,95 @@ import { Scene } from "phaser";
 const MaxParticleVelocity = 100;
 const MaxParticleAcceleration = 10;
 
-class Config { 
-  x:number 
-  y:number
+class Config {
+  x: number;
+  y: number;
   emitZone: {
-    type: string
-    source: Phaser.Geom.Circle
+    type: string;
+    source: Phaser.Geom.Circle;
 
-    quantity: number
-    stepRate: number
-    yoyo: boolean
-    seamless: boolean
-  }
+    quantity: number;
+    stepRate: number;
+    yoyo: boolean;
+    seamless: boolean;
+  };
 
-  moveToX: number
-  moveToY: number
+  moveToX: number;
+  moveToY: number;
 
   deathZone: {
-    type: string
-    source: Phaser.Geom.Circle
-  }
+    type: string;
+    source: Phaser.Geom.Circle;
+  };
 
-  radial: boolean
-  angle: { 
-    min: number
-    max: number
-  }
+  radial: boolean;
+  angle: {
+    min: number;
+    max: number;
+  };
 
-  scale: number
-  scaleX: number
-  scaleY: number
+  scale: number;
+  scaleX: number;
+  scaleY: number;
 
-  frame: string
-  alpha: number
-  visible: boolean
-  tint: number
-  blendMode: string
+  frame: string;
+  alpha: number;
+  visible: boolean;
+  tint: number;
+  blendMode: string;
 
-  delay: number
-  lifespan: number
+  delay: number;
+  lifespan: number;
 
-  speed: { 
-    min: number
-    max: number
-  }
-  speedX: { 
-    min: number
-    max: number
-  }
-  speedY: { 
-    min: number
-    max: number
-  }
-  gravityX: number
-  gravityY: number
-  accelerationX: { 
-    min: number
-    max: number
-  }
-  accelerationY: { 
-    min: number
-    max: number
-  }
-  maxVelocityX: number
-  maxVelocityY: number
+  speed: {
+    min: number;
+    max: number;
+  };
+  speedX: {
+    min: number;
+    max: number;
+  };
+  speedY: {
+    min: number;
+    max: number;
+  };
+  gravityX: number;
+  gravityY: number;
+  accelerationX: {
+    min: number;
+    max: number;
+  };
+  accelerationY: {
+    min: number;
+    max: number;
+  };
+  maxVelocityX: number;
+  maxVelocityY: number;
 
-  bounce: number
-  bounds: Phaser.Geom.Rectangle
-  collideBottom: boolean
-  collideTop: boolean
-  collideLeft: boolean
-  collideRight: boolean
+  bounce: number;
+  bounds: Phaser.Geom.Rectangle;
+  collideBottom: boolean;
+  collideTop: boolean;
+  collideLeft: boolean;
+  collideRight: boolean;
 
-  particleClass: Phaser.GameObjects.Particles.Particle
+  particleClass: Phaser.GameObjects.Particles.Particle;
 
-  emitCallback
-  emitCallbackScope
-  deathCallback
-  deathCallbackScope
+  emitCallback;
+  emitCallbackScope;
+  deathCallback;
+  deathCallbackScope;
 
-  name: string
-  on: boolean
-  active: boolean
-  frequency: number
-  quantity: number
-  maxParticles: number
-  rotate: number
-  timeScale: number
+  name: string;
+  on: boolean;
+  active: boolean;
+  frequency: number;
+  quantity: number;
+  maxParticles: number;
+  rotate: number;
+  timeScale: number;
 
-  constructor(
-    x: number,
-    y: number,
-    ) {
+  constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
     this.visible = true;
@@ -103,11 +100,17 @@ class Config {
     this.lifespan = 50000;
     this.bounce = 1000;
     this.active = true;
-    this.accelerationX = { min: -MaxParticleAcceleration, max: MaxParticleAcceleration };
-    this.accelerationY = { min: -MaxParticleAcceleration, max: MaxParticleAcceleration };
+    this.accelerationX = {
+      min: -MaxParticleAcceleration,
+      max: MaxParticleAcceleration
+    };
+    this.accelerationY = {
+      min: -MaxParticleAcceleration,
+      max: MaxParticleAcceleration
+    };
     this.quantity = 1;
     this.scale = 0.1;
-    }
+  }
 }
 
 class Fire {
@@ -117,26 +120,22 @@ class Fire {
   particle: Phaser.GameObjects.Particles.ParticleEmitterManager;
   config: Config;
 
-  constructor(
-    name: string,
-    scene: Phaser.Scene,
-    x: number,
-    y: number,
-  ) {
+  constructor(name: string, scene: Phaser.Scene, x: number, y: number) {
     this.config = new Config(x, y);
     this.particle = scene.add.particles(name);
     this.emmiter = this.particle.createEmitter(this.config);
 
-    let well : Phaser.GameObjects.Particles.GravityWell;
-    well = {
+    const well: Phaser.GameObjects.Particles.GravityWell = {
       active: true,
       update: function(particle) {
         let sign1 = Math.random() > 0.5 ? -1 : 1;
         let sign2 = Math.random() > 0.5 ? -1 : 1;
         let sign3 = Math.random() > 0.5 ? -1 : 1;
         let sign4 = Math.random() > 0.5 ? -1 : 1;
-        particle.accelerationX = sign1 * Math.random() * MaxParticleAcceleration;
-        particle.accelerationY = sign2 * Math.random() * MaxParticleAcceleration;
+        particle.accelerationX =
+          sign1 * Math.random() * MaxParticleAcceleration;
+        particle.accelerationY =
+          sign2 * Math.random() * MaxParticleAcceleration;
         particle.rotation = Math.random() * 3;
         particle.angle = Math.random() * Math.PI * 2;
       },
@@ -144,13 +143,12 @@ class Fire {
       y: 0,
       power: 20000,
       epsilon: 0
-    }
+    };
     this.particle.addGravityWell(well);
   }
 }
 
 export default Fire;
-
 
 // **basic properties of particles**
 // **initial position**
@@ -200,7 +198,6 @@ export default Fire;
 
 // delay: 0,
 // lifespan: 1000,       // { min, max }, or { min, max, steps }
-
 
 // **physics**
 // speed:                // { min, max }, or { min, max, steps }
