@@ -44,7 +44,7 @@ class Dude extends Phaser.GameObjects.Arc {
     this.radius = radius;
     this.stressLevel = Math.random();
     this.visualRange = MAX_VISUAL_RANGE / age;
-    this.health = 1;
+    this.health = 500;
     this.name = name;
 
     scene.physics.world.enable(this); //adds body / enables physics

@@ -161,13 +161,19 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
   
   this.physics.add.collider(fireGroup, walls);
+  this.physics.add.overlap(dudeGroup, fireGroup, (dude: Dude, fire) => {
+    dude.health += -1;
+    if (dude.health <= 0) {
+      console.log("Dude " + dude.name + " unfortunately perished in the fire!");
+      dude.destroy();
+    }
+  });
   this.physics.add.collider(dudeGroup, dudeGroup, (p1, p2) => {
     //collision callback
   });
 
   this.physics.add.collider(dudeGroup, walls);
   this.physics.add.collider(dudeGroup, tables);
-  this.physics.add.collider(walls, fireGroup);
   this.physics.add.collider(dudeGroup, despawn_zones, (dude: Dude, zone) => {
     console.log("Dude " + dude.name + " is a survivor!");
     dude.destroy();
