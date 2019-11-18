@@ -155,7 +155,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
 
   // Test fire emitter
-  map.fireStartPoints.forEach(point => {
+  map.fireSpawnPoints.forEach(point => {
     let f = new Fire(this, point.x, point.y, 20, fireGroup);
     fire.push(f);
   });

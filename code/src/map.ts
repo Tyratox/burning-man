@@ -10,7 +10,7 @@ export default {
   fireGridWidth: 190,
   fireGridHeigth: 110,
 
-  fireStartPoints: [
+  fireSpawnPoints: [
     { x: 50, y: 200 },
     { x: 200, y: 400 },
   ],

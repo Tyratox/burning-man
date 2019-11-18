@@ -47,9 +47,20 @@ class Fire {
         .setBounce(0.2, 0.2)
         .setVelocityX(velocityX)
         .setVelocityY(velocityY);
-      
-      this.smokeParticles.push(circle);
+
+      //this.smokeParticles.push(circle);
       this.group.add(circle);
+      scene.tweens.add({
+        targets: circle,
+        alpha: { from: 0.2, to: 0 },
+        ease: 'Linear',
+        duration: 100000,
+        repeat: 0,
+        yoyo: false,
+        onComplete: function () {
+          circle.destroy();
+        },
+      });
   }
 }
 
