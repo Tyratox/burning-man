@@ -5,7 +5,7 @@ const MAX_ACCELERATION = 50;
 const MAX_RADIUS = 9;
 const MAX_VISUAL_RANGE = 50;
 
-class Dude {
+class Dude extends Phaser.GameObjects.Arc {
   maxVelocity: number;
   maxAcceleration: number;
   radius: number;
@@ -14,13 +14,11 @@ class Dude {
   health: number;
   name: string;
 
-  object: Phaser.GameObjects.GameObject;
-
   //should't be changed, just informational
   fitness: number;
   weight: number;
   age: number;
-  sign: {x: number, y: number};
+  sign: { x: number; y: number };
 
   constructor(
     x: number,
@@ -31,23 +29,25 @@ class Dude {
     name: string,
     scene: Phaser.Scene
   ) {
-    this.sign = {x: 0, y: 0};
+    const radius = Math.min(MAX_RADIUS, MAX_RADIUS * (weight / fitness));
+    super(scene, x, y, radius, 0, 360, true, 0xf1c40f, 1);
+
+    scene.children.add(this);
+
+    this.sign = { x: 0, y: 0 };
     this.fitness = fitness; // Math.random(),
-    this.weight = weight;   // 0.3 + Math.random() * 0.7
-    this.age = age;         // Math.random()
+    this.weight = weight; // 0.3 + Math.random() * 0.7
+    this.age = age; // Math.random()
 
     this.maxVelocity = MAX_VELOCITY * ((fitness * weight) / age);
     this.maxAcceleration = MAX_ACCELERATION * ((fitness * weight) / age);
-    this.radius = Math.min(MAX_RADIUS, MAX_RADIUS * (weight / fitness));
+    this.radius = radius;
     this.stressLevel = Math.random();
     this.visualRange = MAX_VISUAL_RANGE / age;
     this.health = 1;
     this.name = name;
 
-    const circle = scene.add.circle(x, y, this.radius, 0xf1c40f);
-
-    scene.physics.world.enable(circle); //adds body / enables physics
-    this.object = circle;
+    scene.physics.world.enable(this); //adds body / enables physics
     this.getBody()
       .setCollideWorldBounds(true)
       .setBounce(0, 0);
@@ -58,7 +58,7 @@ class Dude {
   }
 
   getBody() {
-    return getBody(this.object);
+    return getBody(this);
   }
 
   getSign() {
