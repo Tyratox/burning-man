@@ -6,13 +6,15 @@ const MAX_RADIUS = 20;
 const MIN_RADIUS = 10;
 
 const VELOCITY = 30;
-const VISIBILITY = 0.3;
+const VISIBILITY = 0.1;
+const FIRE_RADIUS = 20;
 
 class Fire {
   x: number;
   y: number;
   group: Phaser.GameObjects.Group;
   smokeParticles: Phaser.GameObjects.GameObject[];
+  fire: Phaser.GameObjects.GameObject;
 
   constructor(
     scene: Phaser.Scene,
@@ -25,9 +27,12 @@ class Fire {
     this.y = y;
     this.smokeParticles = new Array();
     this.group = group;
-    for (let i = 0; i < amount; i++) {
-      this.spawn(scene);
-    }
+    const circle = scene.add.circle(this.x, this.y, FIRE_RADIUS, 0xFC581A);
+    this.fire = circle;
+    scene.time.addEvent({ delay: 5000, callback: (scene) => this.spawn, callbackScope: this, repeat: (100000 / 100) - 1 });
+    // for (let i = 0; i < amount; i++) {
+    //   this.spawn(scene);
+    // }
   }
 
   spawn(scene: Phaser.Scene) {
@@ -54,7 +59,7 @@ class Fire {
         targets: circle,
         alpha: { from: 0.2, to: 0 },
         ease: 'Linear',
-        duration: 1000000,
+        duration: 100000,
         repeat: 0,
         yoyo: false,
         onComplete: function () {
