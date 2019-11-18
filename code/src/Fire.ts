@@ -48,13 +48,13 @@ class Fire {
         .setVelocityX(velocityX)
         .setVelocityY(velocityY);
 
-      //this.smokeParticles.push(circle);
       this.group.add(circle);
+      // Delete faded smoke particles
       scene.tweens.add({
         targets: circle,
         alpha: { from: 0.2, to: 0 },
         ease: 'Linear',
-        duration: 100000,
+        duration: 1000000,
         repeat: 0,
         yoyo: false,
         onComplete: function () {
