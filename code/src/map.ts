@@ -13,6 +13,7 @@ export default {
   fireSpawnPoints: [
     { x: 50, y: 200 },
     { x: 200, y: 400 },
+    { x: 800, y: 450 },
   ],
 
   walls: [
@@ -182,6 +183,11 @@ export default {
       position: { x: 1615, y: 110 },
       orientation: { x: 0, y: -1 },
       direction: { x: 0, y: 1 }
+    },
+    {
+      position: { x: 1435, y: 265 },
+      orientation: { x: 1, y: 0 },
+      direction: { x: -1, y: 0 }
     },
   ],
 

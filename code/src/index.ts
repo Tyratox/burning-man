@@ -138,7 +138,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
   dudeGroup = this.add.group();
 
-  // To do: Add to physics engine
+  const somkeGroup = this.add.group();
   const fireGroup = this.add.group();
 
   map.spawnPoints.forEach(point => {
@@ -154,14 +154,19 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     dudeGroup.add(dude);
   });
 
-  // Test fire emitter
+  // Create Fire class instances
   map.fireSpawnPoints.forEach(point => {
-    let f = new Fire(this, point.x, point.y, 20, fireGroup);
+    let f = new Fire(this, point.x, point.y, 20, somkeGroup);
+    fireGroup.add(f.fire);
     fire.push(f);
   });
   
-  this.physics.add.collider(fireGroup, walls);
-  this.physics.add.overlap(dudeGroup, fireGroup, (dude: Dude, fire) => {
+  this.physics.add.collider(dudeGroup, fireGroup, (dude: Dude, fire) => {
+    dude.health = 0;
+  });
+
+  this.physics.add.collider(somkeGroup, walls);
+  this.physics.add.overlap(dudeGroup, somkeGroup, (dude: Dude, fire) => {
     dude.health += -1;
     if (dude.health <= 0) {
       console.log("Dude " + dude.name + " unfortunately perished in the fire!");
@@ -428,10 +433,6 @@ const unstuckDudes = () => {
 
 const update = function(this: Phaser.Scene) {
   calculateForces(this);
-  fire.forEach((f) => {
-    f.spawn(this);
-  });
-  //fireExpansion(this);
   unstuckDudes();
 };
 
