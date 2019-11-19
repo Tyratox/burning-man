@@ -47,8 +47,8 @@ const speedThreshold = 7;
 
 const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
   //load images if needed
-  this.load.image("fire", "assets/logo.png");
-  this.load.image("smokePNG", "assets/logo.png");
+  this.load.image('skull', 'assets/skull.png');
+  this.load.image('fire', 'assets/fire.png');
 };
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
@@ -157,6 +157,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   // Test fire emitter
   map.fireSpawnPoints.forEach(point => {
     let f = new Fire(this, point.x, point.y, 20, fireGroup);
+    this.add.sprite(point.x, point.y, "fire");
     fire.push(f);
   });
   
@@ -165,6 +166,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     dude.health += -1;
     if (dude.health <= 0) {
       console.log("Dude " + dude.name + " unfortunately perished in the fire!");
+      this.add.sprite(dude.x, dude.y, "skull");
       dude.destroy();
     }
   });
