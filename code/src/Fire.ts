@@ -30,7 +30,7 @@ class Fire {
     this.smokeParticles = new Array();
     this.group = group;
     this.fire = scene.add.circle(this.x, this.y, FIRE_RADIUS, 0xFC581A);
-    scene.time.addEvent({ delay: 100, callback: () => this.spawn(this.scene), callbackScope: this, repeat: 10000000});
+    scene.time.addEvent({ delay: 200, callback: () => this.spawn(this.scene), callbackScope: this, repeat: 100000});
   }
 
   spawn(scene: Phaser.Scene) {

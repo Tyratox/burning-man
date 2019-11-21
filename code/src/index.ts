@@ -17,6 +17,22 @@ import map from "./map";
 import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
+import { fips } from "crypto";
+
+interface Traceable {
+  position: {
+      x: number;
+      y: number;
+  };
+  orientation: {
+      x: number;
+      y: number;
+  };
+  direction: {
+      x: number;
+      y: number;
+  };
+};
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
@@ -29,7 +45,7 @@ export const getBody = (
   //@ts-ignore
   obj.body;
 
-const traceable = [...map.signs, ...map.doors];
+const attractiveTargets: Traceable[] = [...map.signs, ...map.doors];
 
 let dudeGroup: Phaser.GameObjects.Group;
 
@@ -161,6 +177,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     fire.push(f);
   });
   
+  // Not working?!?
   this.physics.add.collider(dudeGroup, fireGroup, (dude: Dude, fire) => {
     dude.health = 0;
   });
@@ -185,65 +202,92 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
 };
 
-const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
-  const trackingRays = scene.add.group();
+
+
+const rayTrace = (dude: Dude, traceables: Traceable[], scene: Phaser.Scene) => {
   const { x: dudeX, y: dudeY } = dude.getBody();
 
-  const res = traceable.reduce(
+  const visible = traceables.filter(
+    (element) => {
+      const { position } = element;
+
+      const signToAgent = new Phaser.Geom.Line(
+        dudeX,
+        dudeY,
+        position.x,
+        position.y
+      );
+      
+      const intersect = map.walls.find(coordinates => {
+        const [from, to] = coordinates;
+        const wall = new Phaser.Geom.Line(from.x, from.y, to.x, to.y);
+        if (Phaser.Geom.Intersects.LineToLine(wall, signToAgent)) {
+          return true;
+        }
+
+        return false;
+      });
+
+      //if the sight isn't intersected and the distance is shorter return the new one
+      return intersect === undefined;
+    }
+  );
+
+  return visible;
+};
+
+const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
+  const { x: dudeX, y: dudeY } = dude.getBody();
+  const visible = rayTrace(dude, attractiveTargets, scene);
+  
+  //find the closest door/sign thats oriented in a way such that it's visible to the dude
+  const closestOriented = visible.reduce(
     (best, element) => {
       const { position, orientation } = element;
 
+      //check orientation
       if (
         orientation.x * (position.x - dudeX) +
           orientation.y * (position.y - dudeY) <
         0
       ) {
-        const signToAgent = new Phaser.Geom.Line(
-          dudeX,
-          dudeY,
-          position.x,
-          position.y
-        );
+
         const currentDist = Math.sqrt(
           (position.x - dudeX) * (position.x - dudeX) +
             (position.y - dudeY) * (position.y - dudeY)
         );
 
-        const intersect = map.walls.find(coordinates => {
-          const [from, to] = coordinates;
-          const wall = new Phaser.Geom.Line(from.x, from.y, to.x, to.y);
-          if (Phaser.Geom.Intersects.LineToLine(wall, signToAgent)) {
-            return true;
-          }
-
-          return false;
-        });
-
         //if the sight isn't intersected and the distance is shorter return the new one
-        return intersect === undefined && best.distance > currentDist
-          ? { distance: currentDist, sign: position }
+        return best.distance > currentDist
+          ? { distance: currentDist, position }
           : best;
       }
 
       return best;
     },
-    { distance: Number.MAX_VALUE, sign: { x: -1, y: -1 } }
-  ).sign;
+    { distance: Number.MAX_VALUE, position: { x: -1, y: -1 } }
+  ).position;
 
-  if (res.x > 0) {
-    const offset = dude.getRadius();
-    trackingRays.add(
+
+
+  const offset = dude.getRadius();
+    const ray = (
       scene.add
-        .line(0, 0, dudeX + offset, dudeY + offset, res.x, res.y, 0xff0000, 0.1)
+        .line(0, 0, dudeX + offset, dudeY + offset, closestOriented.x, closestOriented.y, 0xff0000, 0.1)
         .setOrigin(0, 0)
     );
-  }
 
-  setTimeout(() => {
-    trackingRays.destroy(true);
-  }, 100);
+    scene.tweens.add({
+      targets: ray,
+      alpha: { from: 1, to: 0 },
+      ease: 'Linear',
+      duration: 100,
+      repeat: 0,
+      yoyo: false,
+      onComplete: () => ray.destroy(),
+    });
 
-  return new Phaser.Math.Vector2({ x: res.x, y: res.y });
+  return new Phaser.Math.Vector2({ x: closestOriented.x, y: closestOriented.y });
 };
 
 const calculateForces = (scene: Phaser.Scene) => {
@@ -328,7 +372,7 @@ const calculateForces = (scene: Phaser.Scene) => {
     const desiredVelocity = DEFAULT_DESIRED_VELOCITY;
 
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
-    const sign = rayTrace(dudes[i], scene);
+    const sign = findClosestAttractiveTarget(dudes[i], scene);
     dudes[i].setSign(sign.x, sign.y);
 
     //calculate here the desired velocity from the target value only if we have a target
@@ -451,7 +495,8 @@ const config: GameConfig = {
   physics: {
     default: "arcade",
     arcade: {
-      gravity: { x: 0, y: 0 }
+      gravity: { x: 0, y: 0 },
+      fps: 30
     }
   },
 
