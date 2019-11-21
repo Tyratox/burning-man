@@ -34,7 +34,6 @@ class Fire {
   }
 
   spawn(scene: Phaser.Scene) {
-    console.log('hello from spawn');
     const radius = MAX_RADIUS * Math.random() + MIN_RADIUS;
       const circle = scene.add.circle(this.x, this.y, radius, 0x626262);
       circle.alpha = VISIBILITY;

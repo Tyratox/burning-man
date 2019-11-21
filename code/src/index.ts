@@ -24,14 +24,6 @@ interface Traceable {
       x: number;
       y: number;
   };
-  orientation: {
-      x: number;
-      y: number;
-  };
-  direction: {
-      x: number;
-      y: number;
-  };
 };
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
@@ -45,21 +37,17 @@ export const getBody = (
   //@ts-ignore
   obj.body;
 
-const attractiveTargets: Traceable[] = [...map.signs, ...map.doors];
-
-let dudeGroup: Phaser.GameObjects.Group;
-
-const fire: Fire[] = [];
-//let fireGrid = new Array(map.fireGridHeigth).fill(0).map(() => new Array(map.fireGridWidth).fill(false));
-
-// const fireRadius = 13;
-// const fireOffset = 30;
-// const fireSpreadRate = 0.05;
+const attractiveTargets = [...map.signs, ...map.doors];
+const repulsiveTargets: Traceable[] = [...map.fires];
 
 const accelerationThreshold = 0;
 const accelerationValue = 1000;
+const fireRepulsion = 5000;
 
 const speedThreshold = 7;
+
+let dudeGroup: Phaser.GameObjects.Group;
+
 
 const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
   //load images if needed
@@ -162,7 +150,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       point.x,
       point.y,
       Math.random(),
-      0.3 + Math.random() * 0.7,
+      0.6 + Math.random() * 0.4,
       Math.random(),
       "Peter",
       this
@@ -171,10 +159,10 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
 
   // Create Fire class instances
-  map.fireSpawnPoints.forEach(point => {
-    let f = new Fire(this, point.x, point.y, 20, somkeGroup);
+  map.fires.forEach(point => {
+    let f = new Fire(this, point.position.x, point.position.y, 20, somkeGroup);
     fireGroup.add(f.fire);
-    fire.push(f);
+    //fire.push(f);
   });
   
   // Not working?!?
@@ -202,9 +190,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
 };
 
-
-
-const rayTrace = (dude: Dude, traceables: Traceable[], scene: Phaser.Scene) => {
+const rayTrace = <T extends Traceable>(dude: Dude, traceables: T[], scene: Phaser.Scene) => {
   const { x: dudeX, y: dudeY } = dude.getBody();
 
   const visible = traceables.filter(
@@ -217,7 +203,7 @@ const rayTrace = (dude: Dude, traceables: Traceable[], scene: Phaser.Scene) => {
         position.x,
         position.y
       );
-      
+
       const intersect = map.walls.find(coordinates => {
         const [from, to] = coordinates;
         const wall = new Phaser.Geom.Line(from.x, from.y, to.x, to.y);
@@ -238,6 +224,8 @@ const rayTrace = (dude: Dude, traceables: Traceable[], scene: Phaser.Scene) => {
 
 const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
   const { x: dudeX, y: dudeY } = dude.getBody();
+
+  // feedback when stuck. potential field
   const visible = rayTrace(dude, attractiveTargets, scene);
   
   //find the closest door/sign thats oriented in a way such that it's visible to the dude
@@ -387,6 +375,22 @@ const calculateForces = (scene: Phaser.Scene) => {
       );
     }
 
+    //calculate repulison between dudes and all visible fires
+    let visibleFires = rayTrace( dudes[i], repulsiveTargets, scene);
+    let repulsionSum = new Phaser.Math.Vector2(0, 0);
+    let repulsion = new Phaser.Math.Vector2(0, 0);
+
+    visibleFires.forEach((fire) => {
+      repulsion.x = dudeBody.x - fire.position.x;
+      repulsion.y = dudeBody.y - fire.position.y;
+      let len = repulsion.length();
+      repulsion
+        .normalize()
+        .scale(fireRepulsion * (Math.exp(1 / len) - 1));
+      repulsionSum.add(repulsion);
+    });
+    accelerations[i].add(repulsionSum);
+
     //calculate repulsion and attraction between dudes, start at j=i+1 to prevent doing it twice
     for (let j = i + 1; j < dudes.length; j++) {
       const dude1 = dudes[i],
@@ -470,6 +474,7 @@ const unstuckDudes = () => {
       }
       changeDirection.scale(accelerationValue);
       // Help dude out of stuckness
+      //curr.velocity.add(changeDirection);
       curr.acceleration.add(changeDirection);
     }
   });
