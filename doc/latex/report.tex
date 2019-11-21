@@ -7,11 +7,52 @@
 \usepackage{epstopdf}
 \usepackage{natbib}
 \usepackage{amssymb, amsmath}
+\usepackage{listings}
+\usepackage{inconsolata}
+\usepackage{xcolor}
+
+
+\definecolor{codeRed}{RGB}{231,76,60}
+\definecolor{codeBlue}{RGB}{52,152,219}
+\definecolor{codePurple}{RGB}{155,89,182}
+\definecolor{codeDarkBlue}{RGB}{52,73,94}
+
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, catch, function, null, catch, switch, if, in, while, do, else, case, break, for, return, continue},
+  keywordstyle=\color{codeBlue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this, var, let, const, int, double, char, true, false},
+  ndkeywordstyle=\color{codePurple}\bfseries,
+  identifierstyle=\color{codeBlue},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{codeRed}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstset{
+   language=JavaScript,
+   backgroundcolor=\color{white},
+   extendedchars=true,
+   basicstyle=\footnotesize\ttfamily,
+   showstringspaces=false,
+   showspaces=false,
+   numbers=left,
+   numberstyle=\footnotesize,
+   numbersep=9pt,
+   tabsize=2,
+   breaklines=true,
+   showtabs=false,
+   captionpos=b
+}
+
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 
 \title{Burning Man}
 \author{Nico Hauser, Andri Horat, Elias Schmid, Jonas Spieler}
-\date{date} 
+\date{date}
 
 \begin{document}
 
@@ -45,7 +86,27 @@
 \end{minipage}
 &
 \begin{minipage}{6cm}
-\vspace{2mm} \large Name 1
+\vspace{2mm} \large Nico Hauser
+ \vspace{\baselineskip}
+
+\end{minipage}
+&
+\begin{minipage}{6cm}
+
+\large Andri Horat
+
+\end{minipage}
+\\
+\\
+\\
+\\
+\\
+\begin{minipage}{3cm}
+
+\end{minipage}
+&
+\begin{minipage}{6cm}
+\vspace{2mm} \large Elias Schmid
 
  \vspace{\baselineskip}
 
@@ -53,7 +114,7 @@
 &
 \begin{minipage}{6cm}
 
-\large Name 2
+\large Jonas Spieler
 
 \end{minipage}
 \end{tabular}
@@ -82,15 +143,85 @@
 
 \section{Abstract}
 
-\section{Individual contributions}
+This paper describes a model for the behaviour of people in the event of fire and it's simulation. The model tries to incorporate the general repulsion of people standing too close, the formation of groups in panic situations, the placement of exit signs and many smaller factor such as different weights and ages. In order to make observations on the defined model, it is simulated using a physics engine using javascript that makes it accessible from any place at any time and allows for reproducible and verifiable results. The paper also defines a general format for describing a ground plan of a building that can directly be imported into the model simulation. Combined with the right simulation parameters, this features allows the evaluation of the safety in buildings in the case of fire.
 
 \section{Introduction and Motivations}
 
+This paper was created during the course \textit{Agent-Based Modeling and Social System Simulation} held by Dr. Nino Antulov-Fantulin and Thomas Asikis at ETH Zurich. The goal was to create a project matching the title of the course meaning the modelling of a complex system where humans are the agents. A complex system is in contrast to complicated system not per se hard to implement but rather consists of many simple small parts that on themselves act based on simple rules. The fact that there are a lot of these so-called agents gives rise to behaviours of the whole system that are not always easy to predict or even understand even if the simple rules of a single agent are well-known. As computers keep getting faster and new technology is developed every day, simulations are a good way of understanding these complex systems by playing with the available parameters while looking for emerging patterns and applying them to the real world.
+
+In particular this paper describes and simulates the event of fire in a building that tries to incorporate many parameters an evacuation in real life depends on. When developing the model and simulation it was a primary goal to have every constant that was either empirically chosen or arbitrarily set to be an adjustable parameter. This allows the simulation of a much larger set of situations that may be needed in real life. Even the building is dynamic and can be changed by creating an appropriate file describing it. In the future it may even be possible to automate this process and directly parse a pdf ground plan which would allow even more people to take advantage of this model by testing their building for possible issues in the event of fire.
+
+We also would like to add a side note about the project title \textit{burning man}. When thinking about a project idea, it was clear quickly that an emergency situation would be rather interesting to all of us but we didn't immediately know where the evacuation should take place, in a small house, a large building or an event such as a festival. As burning man is the name of a famous festival in Nevada that takes place in the middle of a desert. After some discussions we settled for the evacuation of a building in the case of fire and when thinking about a new name, we realized the name is still kind of fitting and even funny if you have a little bit of dark humour. As software projects often have similar names we thought we'd just leave it that way though it should be made clear that the aim of this project is of course to reduce the number of 'burning men'.
+
+
 \section{Description of the Model}
+
+The model is separated into different pieces. First of all we had to create a model for the building in which the evacuation takes place. Next a model for the individual agents, here representing humans, had to be created and evaluated.
+
+\subsection{Building model}
+
+Before agents can react to a fire inside a building, a building has to be defined and created. As the simulation in the end will take place on a computer screen, we first of all have to give the building or the \textit{map} a \texttt{width} and a \texttt{height}.
+
+\begin{lstlisting}[language=javascript]
+{
+	width  : 1900,
+	height : 1100,
+	...
+}
+\end{lstlisting}
+
+The next obvious property any building has are walls. Walls define rooms, corridors and give the map its shape. We define the walls to be lines drawn from some coordinate $(x_1, y_1)$ to some other coordinate $(x_2, y_2)$. In javascript these tuples can be defined as objects \texttt{\{x: <xVal>, y: <yVal>\}} and then be put into an array with two elements. A wall from $(0,0)$ to $(100, 0)$ is then given by \texttt{[\{x: 0, y: 0\}, \{x: 100, y: 0\}]}. Multiple walls are the defined like
+
+\begin{lstlisting}[language=javascript]
+{
+    ...,
+    walls  : [
+       [{ x: 0, y: 0 },    { x: 1900, y: 0 }],
+       [{ x: 0, y: 1100 }, { x: 1900, y: 1100 }],
+       [{ x: 0, y: 0 },    { x: 0,    y: 1100 }],
+       [{ x: 1900, y: 0 }, { x: 1900, y: 1100 }],
+       ...
+    ],
+    ...
+}
+\end{lstlisting}
+
+For a very basic version of the simulation, this is already enough information. The agents could randomly start moving around and interact with each other but such a simulation wouldn't even remotely interesting for our purpose, we need at least a way for the agents to escape i.e. define an escape zone or a \texttt{despawnZone}, as the agents are removed from the simulation when they reach it. As most buildings have multiple emergency exits, we do not limit the building model to only one escape zone but allow for an arbitrary amount. The escape zones / \texttt{despawnZone} are modelled as rectangles meaning two points (the top left and bottom right corner) are essentially enough to exactly describe it. Thus the format looks like
+
+\begin{lstlisting}
+{
+
+}
+\end{lstlisting}
+
+\subsection{Agent model}
 
 \section{Implementation}
 
+\subsection{Javascript and the web}
+
+\subsection{Physics (Phaser 3)}
+
+\subsection{Map generation}
+
+\subsection{Agent behaviour}
+
+\subsubsection{Raytracing and pathfinding}
+
 \section{Simulation Results and Discussion}
+
+\subsection{Choosing start parameters}
+
+\subsection{Interpretation of the simulation result}
+
+\subsection{Adapting the parameters for better results}
+
+\subsection{Finding the model's limits}
+
+\subsubsection{Evaluation of the building model}
+\subsubsection{Evaluation of the agent model}
+
+\subsection{Evaluation of the simulation}
 
 \section{Summary and Outlook}
 
