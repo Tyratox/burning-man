@@ -1,23 +1,12 @@
 import * as Phaser from "phaser";
 import { throttle } from "lodash";
 
-import {
-  TRIANGLE_HEIGHT,
-  TRIANGLE_SIZE,
-  DUDE_REPULSION_LINEAR,
-  DUDE_REPULSION_EXPONENTIAL,
-  DUDE_GROUP_ATTRACTION,
-  ACCEPTABLE_WALL_DISTANCE,
-  WALL_REPULSION,
-  DEFAULT_REACTION_TIME,
-  DEFAULT_DESIRED_VELOCITY
-} from "./controls";
+import { CONSTANTS } from "./controls";
 import Dude from "./Dude";
 import map from "./map";
 import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
-import { fips } from "crypto";
 
 interface Traceable {
   position: {
@@ -114,8 +103,8 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     const triangle = this.add.isotriangle(
       position.x,
       position.y,
-      TRIANGLE_SIZE,
-      TRIANGLE_HEIGHT,
+      CONSTANTS.TRIANGLE_SIZE,
+      CONSTANTS.TRIANGLE_HEIGHT,
       false,
       0x237f52,
       0x2ecc71,
@@ -133,8 +122,8 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     const triangle = this.add.isotriangle(
       position.x,
       position.y,
-      TRIANGLE_SIZE,
-      TRIANGLE_HEIGHT,
+      CONSTANTS.TRIANGLE_SIZE,
+      CONSTANTS.TRIANGLE_HEIGHT,
       false,
       0x3498db,
       0x3498db,
@@ -340,7 +329,7 @@ const calculateForces = (scene: Phaser.Scene) => {
 
     //if the wall is far away, that's okay. ALSO CHECK WHETHER THE DUDE IS IN FRONT OF THE WALL (easy for rectangular walls)
     if (
-      closestWallDistance < ACCEPTABLE_WALL_DISTANCE &&
+      closestWallDistance < CONSTANTS.ACCEPTABLE_WALL_DISTANCE &&
       ((closestWall[0].x <= dudeBody.x && closestWall[1].x >= dudeBody.x) ||
         (closestWall[0].y <= dudeBody.y && closestWall[1].y >= dudeBody.y))
     ) {
@@ -367,7 +356,9 @@ const calculateForces = (scene: Phaser.Scene) => {
       );*/
 
       accelerations[i].add(
-        wallRepulsion.scale(WALL_REPULSION / closestWallDistance)
+        wallRepulsion.scale(
+          CONSTANTS.WALL_REPULSION_FORCE / closestWallDistance
+        )
       ); //how strong is the repulsion
     }
 
@@ -376,8 +367,8 @@ const calculateForces = (scene: Phaser.Scene) => {
     }, 100);*/
 
     //calculate directioncorrecting force
-    const reactionTime = DEFAULT_REACTION_TIME; //depends on dude
-    const desiredVelocity = DEFAULT_DESIRED_VELOCITY;
+    const reactionTime = CONSTANTS.DEFAULT_REACTION_TIME; //depends on dude
+    const desiredVelocity = CONSTANTS.DEFAULT_DESIRED_VELOCITY;
 
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
     const sign = findClosestAttractiveTarget(dudes[i], scene);
@@ -427,13 +418,13 @@ const calculateForces = (scene: Phaser.Scene) => {
         distance > 50
           ? 0
           : Math.min(
-              DUDE_REPULSION_LINEAR *
-                Math.exp(DUDE_REPULSION_EXPONENTIAL / distance),
+              CONSTANTS.DUDE_REPULSION_LINEAR *
+                Math.exp(CONSTANTS.DUDE_REPULSION_EXPONENTIAL / distance),
               100
             );
 
       //the bigger the distance the smaller the pulling force
-      const pullingForce = 1 / (distance * DUDE_GROUP_ATTRACTION);
+      const pullingForce = 1 / (distance * CONSTANTS.DUDE_GROUP_ATTRACTION);
 
       const force = pushingForce - pullingForce;
 

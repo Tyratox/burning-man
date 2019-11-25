@@ -1,23 +1,24 @@
-export let TRIANGLE_HEIGHT = 20;
-export let TRIANGLE_SIZE = 10;
+export const CONSTANTS = {
+  TRIANGLE_HEIGHT: 20,
+  TRIANGLE_SIZE: 10,
 
-export let DUDE_REPULSION_LINEAR = 1 / 1000;
-export let DUDE_REPULSION_EXPONENTIAL = 205;
-export let DUDE_GROUP_ATTRACTION = 5000;
-export let ACCEPTABLE_WALL_DISTANCE = 30;
-export let WALL_REPULSION = 500;
-export let DEFAULT_REACTION_TIME = 1;
-export let DEFAULT_DESIRED_VELOCITY = 100;
+  DUDE_REPULSION_LINEAR: 1 / 1000,
+  DUDE_REPULSION_EXPONENTIAL: 205,
+  DUDE_GROUP_ATTRACTION: 5000,
+  ACCEPTABLE_WALL_DISTANCE: 30,
+  WALL_REPULSION_FORCE: 500,
+  DEFAULT_REACTION_TIME: 1,
+  DEFAULT_DESIRED_VELOCITY: 100,
 
-export let MAX_RADIUS = 20;
-export let MIN_RADIUS = 10;
+  MAX_SMOKE_RADIUS: 20,
+  MIN_SMOKE_RADIUS: 10,
 
-export let VELOCITY = 30;
-export let VISIBILITY = 0.1;
-export let FIRE_RADIUS = 20;
+  SMOKE_VELOCITY: 30,
+  FIRE_RADIUS: 20,
 
-export let SMOKE_EMISSION_RATE = 800;
-export let MAX_SMOKE_PARTICLES_PER_FIRE = 20;
+  SMOKE_EMISSION_RATE: 800,
+  MAX_SMOKE_PARTICLES_PER_FIRE: 20
+};
 
 const onSliderChange = (e: InputEvent) => {
   //@ts-ignore, i (think) know what i'm doing
@@ -27,35 +28,7 @@ const onSliderChange = (e: InputEvent) => {
   );
 
   valueField.value = slider.value;
-  const value = parseInt(slider.value);
-
-  switch (slider.id) {
-    case "dude-repulsion-linear":
-      DUDE_REPULSION_LINEAR = value;
-      console.log(DUDE_REPULSION_LINEAR);
-
-      break;
-    case "dude-repulsion-exponential":
-      DUDE_REPULSION_EXPONENTIAL = value;
-      break;
-    case "dude-group-attraction":
-      DUDE_GROUP_ATTRACTION = value;
-      break;
-    case "acceptable-wall-distance":
-      ACCEPTABLE_WALL_DISTANCE = value;
-      break;
-    case "wall-repulsion-force":
-      WALL_REPULSION = value;
-      break;
-    case "default-reaction-time":
-      DEFAULT_REACTION_TIME = value;
-      break;
-    case "default-desired-velocity":
-      DEFAULT_DESIRED_VELOCITY = value;
-      break;
-    default:
-      break;
-  }
+  CONSTANTS[slider.id] = parseInt(slider.value);
 };
 
 export const onDOMReadyControlSetup = e => {

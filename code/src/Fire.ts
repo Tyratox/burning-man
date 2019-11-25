@@ -1,14 +1,6 @@
 import { getBody } from "./index";
 
-import {
-  MAX_RADIUS,
-  MIN_RADIUS,
-  VELOCITY,
-  VISIBILITY,
-  FIRE_RADIUS,
-  SMOKE_EMISSION_RATE,
-  MAX_SMOKE_PARTICLES_PER_FIRE
-} from "./controls";
+import { CONSTANTS } from "./controls";
 
 class Fire extends Phaser.GameObjects.Arc {
   x: number;
@@ -24,7 +16,7 @@ class Fire extends Phaser.GameObjects.Arc {
     y: number,
     group: Phaser.GameObjects.Group
   ) {
-    super(scene, x, y, FIRE_RADIUS, 0, 360, true, 0xfc581a, 1);
+    super(scene, x, y, CONSTANTS.FIRE_RADIUS, 0, 360, true, 0xfc581a, 1);
     scene.children.add(this);
 
     //🔥 emoji
@@ -38,7 +30,7 @@ class Fire extends Phaser.GameObjects.Arc {
     this.group = group;
 
     scene.time.addEvent({
-      delay: SMOKE_EMISSION_RATE,
+      delay: CONSTANTS.SMOKE_EMISSION_RATE,
       callback: () => this.spawn(this.scene),
       callbackScope: this,
       repeat: -1
@@ -46,15 +38,18 @@ class Fire extends Phaser.GameObjects.Arc {
   }
 
   spawn(scene: Phaser.Scene) {
-    const radius = MAX_RADIUS * Math.random() + MIN_RADIUS;
+    const radius =
+      CONSTANTS.MIN_SMOKE_RADIUS +
+      (CONSTANTS.MAX_SMOKE_RADIUS - CONSTANTS.MIN_SMOKE_RADIUS) * Math.random();
     const circle = scene.add.circle(this.x, this.y, radius, 0x626262);
-    circle.alpha = VISIBILITY;
 
     const sign1 = Math.random() > 0.5 ? -1 : 1;
     const sign2 = Math.random() > 0.5 ? -1 : 1;
 
-    const velocityX = sign1 * Math.random() * VELOCITY;
-    const velocityY = sign2 * Math.random() * VELOCITY;
+    const velocityX = sign1 * Math.random() * CONSTANTS.SMOKE_VELOCITY;
+    const velocityY = sign2 * Math.random() * CONSTANTS.SMOKE_VELOCITY;
+
+    console.log("min", CONSTANTS.MIN_SMOKE_RADIUS);
 
     scene.physics.world.enable(circle); //adds body / enables physics
     getBody(circle)
@@ -71,7 +66,8 @@ class Fire extends Phaser.GameObjects.Arc {
       scale: { from: 1, to: 2 },
       ease: "cubic.out",
       duration:
-        (1000 * MAX_SMOKE_PARTICLES_PER_FIRE) / (SMOKE_EMISSION_RATE / 1000),
+        (1000 * CONSTANTS.MAX_SMOKE_PARTICLES_PER_FIRE) /
+        (CONSTANTS.SMOKE_EMISSION_RATE / 1000),
       repeat: 0,
       yoyo: false,
       onComplete: () => circle.destroy()
