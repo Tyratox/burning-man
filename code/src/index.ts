@@ -164,6 +164,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   // Create Fire class instances
   map.fires.forEach(point => {
     let f = new Fire(this, point.position.x, point.position.y, 20, somkeGroup);
+    this.add.sprite(point.position.x, point.position.y, "fire");
     fireGroup.add(f.fire);
     //fire.push(f);
   });
@@ -172,7 +173,9 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   
   // Not working?!?
   this.physics.add.collider(dudeGroup, fireGroup, (dude: Dude, fire) => {
-    dude.health = 0;
+    console.log("Dude " + dude.name + " unfortunately perished in the fire!");
+    this.add.sprite(dude.x, dude.y, "skull");
+    dude.destroy();
   });
 
   this.physics.add.collider(somkeGroup, walls);

@@ -29,7 +29,7 @@ class Fire {
     this.y = y;
     this.smokeParticles = new Array();
     this.group = group;
-    this.fire = scene.add.circle(this.x, this.y, FIRE_RADIUS, 0xFC581A);
+    this.fire = scene.add.circle(this.x, this.y, FIRE_RADIUS, 0xFC581A).setVisible(false);
     scene.time.addEvent({ delay: 200, callback: () => this.spawn(this.scene), callbackScope: this, repeat: 100000});
   }
 
