@@ -37,17 +37,20 @@ export const getBody = (
   //@ts-ignore
   obj.body;
 
+// ----- Declaring Constants -----
+
 const attractiveTargets = [...map.signs, ...map.doors];
 const repulsiveTargets: Traceable[] = [...map.fires];
 
 const accelerationThreshold = 0;
-const accelerationValue = 1000;
+const accelerationValue = 500;
 const fireRepulsion = 5000;
 
 const speedThreshold = 7;
 
 let dudeGroup: Phaser.GameObjects.Group;
 
+// ----- Phaser initialization functions -----
 
 const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
   //load images if needed
@@ -57,13 +60,18 @@ const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
   //generate map, yehei
-
-  // fire.forEach((f: Fire) =>{
-  //   f.emmiter.start();
-  // })
   const halfThickness = map.wallThickness / 2;
 
+  // ----- Create Physiscs Group -----
+
   const walls = this.physics.add.staticGroup();
+  
+  dudeGroup = this.add.group();
+  const somkeGroup = this.add.group();
+  const fireGroup = this.add.group();
+
+  // ----- Initialize all Groups -----
+
   map.walls.forEach(([from, to]) => {
     const rect = this.add.rectangle(
       from.x + (to.x - from.x) / 2,
@@ -140,11 +148,6 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       (direction.x > 0 ? 1 : -1) * Math.acos(-direction.y / directionNorm);
   });
 
-  dudeGroup = this.add.group();
-
-  const somkeGroup = this.add.group();
-  const fireGroup = this.add.group();
-
   map.spawnPoints.forEach(point => {
     const dude = new Dude(
       point.x,
@@ -164,6 +167,8 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     fireGroup.add(f.fire);
     //fire.push(f);
   });
+
+  // ----- Adding Groups to the Physics Collider Engine -----
   
   // Not working?!?
   this.physics.add.collider(dudeGroup, fireGroup, (dude: Dude, fire) => {
@@ -189,6 +194,8 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     dude.destroy();
   });
 };
+
+// ----- Orientation and Force Algorithms -----
 
 const rayTrace = <T extends Traceable>(dude: Dude, traceables: T[], scene: Phaser.Scene) => {
   const { x: dudeX, y: dudeY } = dude.getBody();
@@ -255,8 +262,6 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
     },
     { distance: Number.MAX_VALUE, position: { x: -1, y: -1 } }
   ).position;
-
-
 
   const offset = dude.getRadius();
     const ray = (
@@ -480,6 +485,8 @@ const unstuckDudes = () => {
   });
 };
 
+// ----- Phaser initialization functions -----
+
 const update = function(this: Phaser.Scene) {
   calculateForces(this);
   unstuckDudes();
@@ -504,9 +511,10 @@ const config: GameConfig = {
       fps: 30
     }
   },
-
   backgroundColor: 0xffffff
 };
+
+
 
 const game = new Phaser.Game(config);
 
