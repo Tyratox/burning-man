@@ -26,6 +26,9 @@ class Fire extends Phaser.GameObjects.Arc {
   ) {
     super(scene, x, y, FIRE_RADIUS, 0, 360, true, 0xfc581a, 1);
     scene.children.add(this);
+
+    //🔥 emoji
+    scene.add.sprite(x, y, "fire");
     this.setVisible(false);
 
     this.scene = scene;
@@ -71,9 +74,7 @@ class Fire extends Phaser.GameObjects.Arc {
         (1000 * MAX_SMOKE_PARTICLES_PER_FIRE) / (SMOKE_EMISSION_RATE / 1000),
       repeat: 0,
       yoyo: false,
-      onComplete: function() {
-        circle.destroy();
-      }
+      onComplete: () => circle.destroy()
     });
   }
 }

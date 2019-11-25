@@ -148,26 +148,26 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       (direction.x > 0 ? 1 : -1) * Math.acos(-direction.y / directionNorm);
   });
 
-  map.spawnPoints.forEach(point => {
-    const dude = new Dude(
-      point.x,
-      point.y,
-      Math.random(),
-      0.6 + Math.random() * 0.4,
-      Math.random(),
-      "Peter",
-      this
-    );
-    dudeGroup.add(dude);
-  });
+  map.spawnPoints.forEach(point =>
+    dudeGroup.add(
+      new Dude(
+        point.x,
+        point.y,
+        Math.random(),
+        0.6 + Math.random() * 0.4,
+        Math.random(),
+        "Peter",
+        this
+      )
+    )
+  );
 
   // Create Fire class instances
-  map.fires.forEach(point => {
-    this.add.sprite(point.position.x, point.position.y, "fire");
+  map.fires.forEach(point =>
     fireGroup.add(
       new Fire(this, point.position.x, point.position.y, somkeGroup)
-    );
-  });
+    )
+  );
 
   // ----- Adding Groups to the Physics Collider Engine -----
 
