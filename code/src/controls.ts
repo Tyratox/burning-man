@@ -6,10 +6,9 @@ export const CONSTANTS = {
 
   DUDE_REPULSION_LINEAR: 1 / 1000,
   DUDE_REPULSION_EXPONENTIAL: 205,
-  DUDE_GROUP_ATTRACTION: 5000,
+  DUDE_GROUP_ATTRACTION: 10000,
   ACCEPTABLE_WALL_DISTANCE: 30,
   WALL_REPULSION_FORCE: 500,
-  DEFAULT_REACTION_TIME: 1,
   DEFAULT_DESIRED_VELOCITY: 100,
 
   MAX_SMOKE_RADIUS: 20,
@@ -19,7 +18,28 @@ export const CONSTANTS = {
   FIRE_RADIUS: 20,
 
   SMOKE_EMISSION_RATE: 800,
-  MAX_SMOKE_PARTICLES_PER_FIRE: 20
+  MAX_SMOKE_PARTICLES_PER_FIRE: 20,
+
+  MEAN_DUDE_MAX_VELOCITY: 125,
+  DUDE_MAX_VELOCITY_STD_DEV: 50,
+
+  MEAN_DUDE_MAX_ACCELERATION: 50,
+  DUDE_MAX_ACCELERATION_STD_DEV: 10,
+
+  MEAN_DUDE_RADIUS: 12,
+  DUDE_RADIUS_STD_DEV: 2,
+
+  MEAN_DUDE_VISUAL_RANGE: 500,
+  DUDE_VISUAL_RANGE_STD_DEV: 10,
+
+  MEAN_DUDE_AGE: 0.5,
+  DUDE_AGE_STD_DEV: 0.1,
+
+  MEAN_DUDE_WEIGHT: 0.5,
+  DUDE_WEIGHT_STD_DEV: 0.1,
+
+  MEAN_DUDE_FITNESS: 0.5,
+  DUDE_FITNESS_STD_DEV: 0.1
 };
 
 const onSliderChange = (e: InputEvent) => {
@@ -34,7 +54,9 @@ const onSliderChange = (e: InputEvent) => {
 };
 
 export const onDOMReadyControlSetup = e => {
-  const rangeSliderContainers = document.querySelectorAll(".sliders > div");
+  const rangeSliderContainers = document.querySelectorAll(
+    ".sliders .columns > div"
+  );
   for (const sliderContainer of rangeSliderContainers) {
     const slider: HTMLInputElement = sliderContainer.querySelector(
       "input[type=range]"
@@ -55,6 +77,7 @@ export const onDOMReadyControlSetup = e => {
   const staticSliders = document.getElementById("static-sliders");
   const dynamicSliders = document.getElementById("dynamic-sliders");
   const startButton = document.getElementById("start");
+  const pauseButton = document.getElementById("pause");
   const overlay: HTMLDivElement = document.querySelector(".wrapper .overlay");
 
   initButton.addEventListener("click", () => {
@@ -64,6 +87,14 @@ export const onDOMReadyControlSetup = e => {
     startButton.style.display = "block";
 
     initGame();
+  });
+
+  pauseButton.addEventListener("click", () => {
+    if (game.scene.isPaused("default")) {
+      game.scene.resume("default");
+    } else {
+      game.scene.pause("default");
+    }
   });
 
   startButton.addEventListener("click", () => {

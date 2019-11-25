@@ -7,12 +7,14 @@ import map from "./map";
 import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
+import { sign } from "crypto";
 
 interface Traceable {
   position: {
     x: number;
     y: number;
   };
+  type: string;
 }
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
@@ -28,8 +30,13 @@ export const getBody = (
 
 // ----- Declaring Constants -----
 
-const attractiveTargets = [...map.signs, ...map.doors];
-const repulsiveTargets: Traceable[] = [...map.fires];
+const attractiveTargets = [
+  ...map.signs.map(e => ({ ...e, type: "sign" })),
+  ...map.doors.map(e => ({ ...e, type: "door" }))
+];
+const repulsiveTargets: Traceable[] = [
+  ...map.fires.map(e => ({ ...e, type: "fire" }))
+];
 
 const ACCELERATION_THRESHOLD = 0;
 const ACCELERATION_VALUE = 500;
@@ -155,18 +162,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
 
   map.spawnPoints.forEach(point =>
-    dudeGroup.add(
-      new Dude(
-        point.x,
-        point.y,
-        Math.random(),
-        0.6 + Math.random() * 0.4,
-        Math.random(),
-        "Peter",
-        this
-      )
-    ),
-    totalNumberOfDudes++
+    dudeGroup.add(new Dude(point.x, point.y, "Peter", this))
   );
 
   // Create Fire class instances
@@ -228,6 +224,16 @@ const rayTrace = <T extends Traceable>(
   const visible = traceables.filter(element => {
     const { position } = element;
 
+    const currentDist = Math.sqrt(
+      (position.x - dudeX) * (position.x - dudeX) +
+        (position.y - dudeY) * (position.y - dudeY)
+    );
+
+    //always remember the door
+    if (element.type !== "door" && currentDist > dude.visualRange) {
+      return false;
+    }
+
     const signToAgent = new Phaser.Geom.Line(
       dudeX,
       dudeY,
@@ -286,28 +292,31 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
   ).position;
 
   const offset = dude.getRadius();
-  const ray = scene.add
-    .line(
-      0,
-      0,
-      dudeX + offset,
-      dudeY + offset,
-      closestOriented.x,
-      closestOriented.y,
-      0xff0000,
-      0.1
-    )
-    .setOrigin(0, 0);
 
-  scene.tweens.add({
-    targets: ray,
-    alpha: { from: 1, to: 0 },
-    ease: "Linear",
-    duration: 100,
-    repeat: 0,
-    yoyo: false,
-    onComplete: () => ray.destroy()
-  });
+  if (closestOriented.x > 0) {
+    const ray = scene.add
+      .line(
+        0,
+        0,
+        dudeX + offset,
+        dudeY + offset,
+        closestOriented.x,
+        closestOriented.y,
+        0xff0000,
+        0.1
+      )
+      .setOrigin(0, 0);
+
+    scene.tweens.add({
+      targets: ray,
+      alpha: { from: 1, to: 0 },
+      ease: "Linear",
+      duration: 100,
+      repeat: 0,
+      yoyo: false,
+      onComplete: () => ray.destroy()
+    });
+  }
 
   return new Phaser.Math.Vector2({
     x: closestOriented.x,
@@ -395,8 +404,7 @@ const calculateForces = (scene: Phaser.Scene) => {
     }, 100);*/
 
     //calculate directioncorrecting force
-    const reactionTime = CONSTANTS.DEFAULT_REACTION_TIME; //depends on dude
-    const desiredVelocity = CONSTANTS.DEFAULT_DESIRED_VELOCITY;
+    const desiredVelocity = dudes[i].maxVelocity;
 
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
     const sign = findClosestAttractiveTarget(dudes[i], scene);
@@ -410,7 +418,7 @@ const calculateForces = (scene: Phaser.Scene) => {
           .normalize()
           .scale(desiredVelocity)
           .subtract(dudes[i].getBody().velocity) // subtract current velocity
-          .scale(dudes[i].weight / reactionTime)
+          .scale(dudes[i].fitness / dudes[i].weight) //reaction time
       );
     }
 

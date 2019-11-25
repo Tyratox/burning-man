@@ -14,15 +14,184 @@
       <h2>Static settings</h2>
       <div class="columns">
         <div>
-          <label>Fire radius</label>
+          <label>Mean dude max velocity</label>
           <input
-            id="FIRE_RADIUS"
+            id="MEAN_DUDE_MAX_VELOCITY"
             type="range"
             autocomplete="off"
-            min="5"
-            max="100"
-            value="20"
+            min="100"
+            max="500"
+            value="125"
             step="5"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Dude max velocity SD</label>
+          <input
+            id="DUDE_MAX_VELOCITY_STD_DEV"
+            type="range"
+            autocomplete="off"
+            min="0"
+            max="200"
+            value="50"
+            step="5"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Mean dude max acceleration</label>
+          <input
+            id="MEAN_DUDE_MAX_ACCELERATION"
+            type="range"
+            autocomplete="off"
+            min="30"
+            max="100"
+            value="50"
+            step="5"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Dude max acceleration SD</label>
+          <input
+            id="DUDE_MAX_ACCELERATION_STD_DEV"
+            type="range"
+            autocomplete="off"
+            min="0"
+            max="50"
+            value="10"
+            step="1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Mean dude radius</label>
+          <input
+            id="MEAN_DUDE_RADIUS"
+            type="range"
+            autocomplete="off"
+            min="1"
+            max="30"
+            value="12"
+            step="1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Dude radius SD</label>
+          <input
+            id="DUDE_RADIUS_STD_DEV"
+            type="range"
+            autocomplete="off"
+            min="0"
+            max="20"
+            value="2"
+            step="1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Mean dude visual range</label>
+          <input
+            id="MEAN_DUDE_VISUAL_RANGE"
+            type="range"
+            autocomplete="off"
+            min="300"
+            max="1000"
+            value="500"
+            step="1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Dude visual range SD</label>
+          <input
+            id="DUDE_VISUAL_RANGE_STD_DEV"
+            type="range"
+            autocomplete="off"
+            min="0"
+            max="50"
+            value="10"
+            step="1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Mean dude age</label>
+          <input
+            id="MEAN_DUDE_AGE"
+            type="range"
+            autocomplete="off"
+            min="0.1"
+            max="1.0"
+            value="0.5"
+            step="0.1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Dude age SD</label>
+          <input
+            id="DUDE_AGE_STD_DEV"
+            type="range"
+            autocomplete="off"
+            min="0"
+            max="1"
+            value="0.2"
+            step="0.1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Mean dude weight</label>
+          <input
+            id="MEAN_DUDE_WEIGHT"
+            type="range"
+            autocomplete="off"
+            min="0.1"
+            max="1.0"
+            value="0.5"
+            step="0.1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Dude weight SD</label>
+          <input
+            id="DUDE_WEIGHT_STD_DEV"
+            type="range"
+            autocomplete="off"
+            min="0"
+            max="1.0"
+            value="0.1"
+            step="0.1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Mean dude fitness</label>
+          <input
+            id="MEAN_DUDE_FITNESS"
+            type="range"
+            autocomplete="off"
+            min="0.1"
+            max="1.0"
+            value="0.5"
+            step="0.1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Dude fitness SD</label>
+          <input
+            id="DUDE_FITNESS_STD_DEV"
+            type="range"
+            autocomplete="off"
+            min="0"
+            max="1.0"
+            value="0.1"
+            step="0.1"
           />
           <input type="text" autocomplete="off" readonly />
         </div>
@@ -30,6 +199,8 @@
       <button>Initialize simulation</button>
     </div>
     <div id="dynamic-sliders" class="sliders">
+      <button id="pause">Pause</button>
+      <button onclick="window.location.reload()">Reset</button>
       <h2>Dynamic settings</h2>
       <div class="columns">
         <div>
@@ -94,19 +265,6 @@
             max="1000"
             value="500"
             step="10"
-          />
-          <input type="text" autocomplete="off" readonly />
-        </div>
-        <div>
-          <label>Default reaction time (pathfinding)</label>
-          <input
-            id="DEFAULT_REACTION_TIME"
-            type="range"
-            autocomplete="off"
-            min="1"
-            max="20"
-            value="1"
-            step="0.1"
           />
           <input type="text" autocomplete="off" readonly />
         </div>
