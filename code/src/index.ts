@@ -35,6 +35,8 @@ const accelerationThreshold = 0;
 const accelerationValue = 500;
 const fireRepulsion = 5000;
 
+const DUDE_WALKING_FRICTION = 0.98;
+
 const speedThreshold = 7;
 
 let dudeGroup: Phaser.GameObjects.Group;
@@ -361,7 +363,7 @@ const calculateForces = (scene: Phaser.Scene) => {
         wallRepulsion.scale(
           CONSTANTS.WALL_REPULSION_FORCE / closestWallDistance
         )
-      ); //how strong is the repulsion
+      );
     }
 
     /*setTimeout(() => {
@@ -401,6 +403,8 @@ const calculateForces = (scene: Phaser.Scene) => {
       repulsionSum.add(repulsion);
     });
     accelerations[i].add(repulsionSum);
+
+    dudeBody.velocity.scale(DUDE_WALKING_FRICTION);
 
     //calculate repulsion and attraction between dudes, start at j=i+1 to prevent doing it twice
     for (let j = i + 1; j < dudes.length; j++) {
