@@ -77,6 +77,7 @@ export const onDOMReadyControlSetup = e => {
   const staticSliders = document.getElementById("static-sliders");
   const dynamicSliders = document.getElementById("dynamic-sliders");
   const startButton = document.getElementById("start");
+  const pauseButton = document.getElementById("pause");
   const overlay: HTMLDivElement = document.querySelector(".wrapper .overlay");
 
   initButton.addEventListener("click", () => {
@@ -86,6 +87,14 @@ export const onDOMReadyControlSetup = e => {
     startButton.style.display = "block";
 
     initGame();
+  });
+
+  pauseButton.addEventListener("click", () => {
+    if (game.scene.isPaused("default")) {
+      game.scene.resume("default");
+    } else {
+      game.scene.pause("default");
+    }
   });
 
   startButton.addEventListener("click", () => {
