@@ -12,13 +12,10 @@ export default {
 
   fires: [
     {
-      position: { x: 50, y: 200 },
+      position: { x: 20, y: 450 },
     },
     {
-      position: { x: 200, y: 400 },
-    },
-    {
-      position: { x: 800, y: 450 }
+      position: { x: 20, y: 500 },
     },
   ],
 
