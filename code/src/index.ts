@@ -48,6 +48,10 @@ const fireRepulsion = 5000;
 
 const speedThreshold = 7;
 
+var totalNumberOfDudes = 0;
+var numberOfDeadDudes = 0;
+var ThisVariableCountsTheNumberOfDudesWhoMadeItToTheDespawningZoneAndThereforeSurvived = 0;
+
 let dudeGroup: Phaser.GameObjects.Group;
 
 // ----- Phaser initialization functions -----
@@ -158,6 +162,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       "Peter",
       this
     );
+    totalNumberOfDudes++;
     dudeGroup.add(dude);
   });
 
@@ -175,6 +180,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   this.physics.add.collider(dudeGroup, fireGroup, (dude: Dude, fire) => {
     console.log("Dude " + dude.name + " unfortunately perished in the fire!");
     this.add.sprite(dude.x, dude.y, "skull");
+    numberOfDeadDudes++;
     dude.destroy();
   });
 
@@ -184,6 +190,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     if (dude.health <= 0) {
       console.log("Dude " + dude.name + " unfortunately perished in the fire!");
       this.add.sprite(dude.x, dude.y, "skull");
+      numberOfDeadDudes++;
       dude.destroy();
     }
   });
@@ -195,6 +202,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   this.physics.add.collider(dudeGroup, tables);
   this.physics.add.collider(dudeGroup, despawn_zones, (dude: Dude, zone) => {
     console.log("Dude " + dude.name + " is a survivor!");
+    ThisVariableCountsTheNumberOfDudesWhoMadeItToTheDespawningZoneAndThereforeSurvived++;
     dude.destroy();
   });
 };
