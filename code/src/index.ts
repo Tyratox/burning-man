@@ -39,13 +39,18 @@ const DUDE_WALKING_FRICTION = 0.98;
 
 const SPEED_THRESHOLD = 7;
 
-var totalNumberOfDudes = 0;
-var numberOfDeadDudes = 0;
-var ThisVariableCountsTheNumberOfDudesWhoMadeItToTheDespawningZoneAndThereforeSurvived = 0;
+let totalNumberOfDudes = 0;
+let numberOfDeadDudes = 0;
+let ThisVariableCountsTheNumberOfDudesWhoMadeItToTheDespawningZoneAndThereforeSurvived = 0;
 
-var currentStartTime = 0;
-var totalElapsedTime = 0;
-var currentElapsedTime = 0;
+let currentStartTime: number = 0;
+let previousElapsedTime = 0;
+let currentElapsedTime = 0;
+let timeLabel;
+
+export const setCurrentStartTime = (time: number) => {
+  currentStartTime = time;
+};
 
 let dudeGroup: Phaser.GameObjects.Group;
 
@@ -70,8 +75,6 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   const fireGroup = this.add.group();
 
 
-  // ----- Initialize Timer -----	
-  currentStartTime = game.getTime();
 
   // ----- Initialize all Groups -----
 
@@ -203,6 +206,9 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     ThisVariableCountsTheNumberOfDudesWhoMadeItToTheDespawningZoneAndThereforeSurvived++;
     dude.destroy();
   });
+
+  // ----- Initialize Timer -----	
+  timeLabel = this.add.text(map.width/2, 100, "00:00", {font: "100px Arial", fill: "#000"}).setOrigin(0.5);
 
   this.scene.pause();
 };
@@ -510,12 +516,34 @@ const unstuckDudes = () => {
   });
 };
 
+const createTimer = function(scene: Phaser.Scene) {
+  // timeLabel.align = 'center';
+}
+
+
+const updateTimer = function() {
+
+  currentElapsedTime = (game.getTime() - currentStartTime)/1000;
+  let totalElapsedTime = previousElapsedTime + currentElapsedTime;
+
+  
+  let minutes = Math.floor(totalElapsedTime / 60);
+  let seconds = Math.floor(totalElapsedTime) - (60 * minutes);
+  //Display minutes, add a 0 to the start if less than 10
+  let result = (minutes < 10) ? "0" + minutes : minutes; 
+
+  //Display seconds, add a 0 to the start if less than 10
+  result += (seconds < 10) ? ":0" + seconds : ":" + seconds;
+
+  timeLabel.text = result;
+}
+
 // ----- Phaser initialization functions -----
 
 const update = function(this: Phaser.Scene) {
   calculateForces(this);
   unstuckDudes();
-  currentElapsedTime = totalElapsedTime + (game.getTime() - currentStartTime);
+  updateTimer();
 };
 
 const scene: CreateSceneFromObjectConfig = {

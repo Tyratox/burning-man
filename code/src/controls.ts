@@ -1,4 +1,4 @@
-import { game, initGame } from ".";
+import { game, initGame, setCurrentStartTime } from ".";
 
 export const CONSTANTS = {
   TRIANGLE_HEIGHT: 20,
@@ -70,6 +70,7 @@ export const onDOMReadyControlSetup = e => {
     overlay.style.display = "none";
     startButton.style.display = "none";
 
+    setCurrentStartTime(game.getTime());
     game.scene.resume("default");
   });
 };
