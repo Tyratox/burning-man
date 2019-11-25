@@ -188,6 +188,8 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     console.log("Dude " + dude.name + " is a survivor!");
     dude.destroy();
   });
+
+  this.scene.pause();
 };
 
 // ----- Orientation and Force Algorithms -----
@@ -522,6 +524,10 @@ const config: GameConfig = {
   backgroundColor: 0xffffff
 };
 
-const game = new Phaser.Game(config);
+export let game: Phaser.Game = null;
+
+export const initGame = () => {
+  game = new Phaser.Game(config);
+};
 
 document.addEventListener("DOMContentLoaded", onDOMReadyControlSetup);
