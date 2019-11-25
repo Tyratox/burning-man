@@ -44,9 +44,9 @@ let numberOfDeadDudes = 0;
 let ThisVariableCountsTheNumberOfDudesWhoMadeItToTheDespawningZoneAndThereforeSurvived = 0;
 
 let currentStartTime: number = 0;
-let previousElapsedTime = 0;
-let currentElapsedTime = 0;
-let timeLabel;
+let previousElapsedTime: number = 0;
+let currentElapsedTime: number = 0;
+let timeLabel: Phaser.GameObjects.Text;
 
 export const setCurrentStartTime = (time: number) => {
   currentStartTime = time;
@@ -208,7 +208,10 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
 
   // ----- Initialize Timer -----	
-  timeLabel = this.add.text(map.width/2, 100, "00:00", {font: "100px Arial", fill: "#000"}).setOrigin(0.5);
+  timeLabel = this.add.text(map.width/2, 100, "00:00", {font: "100px Arial", fill: "#000"});
+  timeLabel.setOrigin(0.5);
+  timeLabel.setAlign('center');
+  timeLabel.setShadow(0, 0, '#000', 0, true, true);
 
   this.scene.pause();
 };
@@ -535,7 +538,7 @@ const updateTimer = function() {
   //Display seconds, add a 0 to the start if less than 10
   result += (seconds < 10) ? ":0" + seconds : ":" + seconds;
 
-  timeLabel.text = result;
+  timeLabel.text = result.toString();
 }
 
 // ----- Phaser initialization functions -----
