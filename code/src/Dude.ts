@@ -36,7 +36,7 @@ class Dude extends Phaser.GameObjects.Arc {
 
     this.sign = { x: 0, y: 0 };
     this.fitness = fitness; // Math.random(),
-    this.weight = weight; // 0.3 + Math.random() * 0.7
+    this.weight = weight; // 0.6 + Math.random() * 0.4
     this.age = age; // Math.random()
 
     this.maxVelocity = MAX_VELOCITY * ((fitness * weight) / age);

@@ -10,10 +10,16 @@ export default {
   fireGridWidth: 190,
   fireGridHeigth: 110,
 
-  fireSpawnPoints: [
-    { x: 50, y: 200 },
-    { x: 200, y: 400 },
-    { x: 800, y: 450 },
+  fires: [
+    {
+      position: { x: 50, y: 200 },
+    },
+    {
+      position: { x: 200, y: 400 },
+    },
+    {
+      position: { x: 800, y: 450 }
+    },
   ],
 
   walls: [
@@ -194,6 +200,11 @@ export default {
   signs: [
     {
       position: { x: 550, y: 538 },
+      orientation: { x: -1, y: 0 },
+      direction: { x: 1, y: 0 }
+    },
+    {
+      position: { x: 1125, y: 538 },
       orientation: { x: -1, y: 0 },
       direction: { x: 1, y: 0 }
     },

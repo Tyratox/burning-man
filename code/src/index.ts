@@ -17,6 +17,14 @@ import map from "./map";
 import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
+import { fips } from "crypto";
+
+interface Traceable {
+  position: {
+      x: number;
+      y: number;
+  };
+};
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
@@ -29,21 +37,20 @@ export const getBody = (
   //@ts-ignore
   obj.body;
 
-const traceable = [...map.signs, ...map.doors];
+// ----- Declaring Constants -----
+
+const attractiveTargets = [...map.signs, ...map.doors];
+const repulsiveTargets: Traceable[] = [...map.fires];
+
+const accelerationThreshold = 0;
+const accelerationValue = 500;
+const fireRepulsion = 5000;
+
+const speedThreshold = 7;
 
 let dudeGroup: Phaser.GameObjects.Group;
 
-const fire: Fire[] = [];
-//let fireGrid = new Array(map.fireGridHeigth).fill(0).map(() => new Array(map.fireGridWidth).fill(false));
-
-// const fireRadius = 13;
-// const fireOffset = 30;
-// const fireSpreadRate = 0.05;
-
-const accelerationThreshold = 0;
-const accelerationValue = 1000;
-
-const speedThreshold = 7;
+// ----- Phaser initialization functions -----
 
 const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
   //load images if needed
@@ -53,13 +60,18 @@ const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
   //generate map, yehei
-
-  // fire.forEach((f: Fire) =>{
-  //   f.emmiter.start();
-  // })
   const halfThickness = map.wallThickness / 2;
 
+  // ----- Create Physiscs Group -----
+
   const walls = this.physics.add.staticGroup();
+  
+  dudeGroup = this.add.group();
+  const somkeGroup = this.add.group();
+  const fireGroup = this.add.group();
+
+  // ----- Initialize all Groups -----
+
   map.walls.forEach(([from, to]) => {
     const rect = this.add.rectangle(
       from.x + (to.x - from.x) / 2,
@@ -136,17 +148,12 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       (direction.x > 0 ? 1 : -1) * Math.acos(-direction.y / directionNorm);
   });
 
-  dudeGroup = this.add.group();
-
-  const somkeGroup = this.add.group();
-  const fireGroup = this.add.group();
-
   map.spawnPoints.forEach(point => {
     const dude = new Dude(
       point.x,
       point.y,
       Math.random(),
-      0.3 + Math.random() * 0.7,
+      0.6 + Math.random() * 0.4,
       Math.random(),
       "Peter",
       this
@@ -155,13 +162,15 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
 
   // Create Fire class instances
-  map.fireSpawnPoints.forEach(point => {
-    let f = new Fire(this, point.x, point.y, 20, somkeGroup);
-    this.add.sprite(point.x, point.y, "fire");
+  map.fires.forEach(point => {
+    let f = new Fire(this, point.position.x, point.position.y, 20, somkeGroup);
     fireGroup.add(f.fire);
-    fire.push(f);
+    //fire.push(f);
   });
+
+  // ----- Adding Groups to the Physics Collider Engine -----
   
+  // Not working?!?
   this.physics.add.collider(dudeGroup, fireGroup, (dude: Dude, fire) => {
     dude.health = 0;
   });
@@ -187,65 +196,92 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
 };
 
-const rayTrace = (dude: Dude, scene: Phaser.Scene) => {
-  const trackingRays = scene.add.group();
+// ----- Orientation and Force Algorithms -----
+
+const rayTrace = <T extends Traceable>(dude: Dude, traceables: T[], scene: Phaser.Scene) => {
   const { x: dudeX, y: dudeY } = dude.getBody();
 
-  const res = traceable.reduce(
+  const visible = traceables.filter(
+    (element) => {
+      const { position } = element;
+
+      const signToAgent = new Phaser.Geom.Line(
+        dudeX,
+        dudeY,
+        position.x,
+        position.y
+      );
+
+      const intersect = map.walls.find(coordinates => {
+        const [from, to] = coordinates;
+        const wall = new Phaser.Geom.Line(from.x, from.y, to.x, to.y);
+        if (Phaser.Geom.Intersects.LineToLine(wall, signToAgent)) {
+          return true;
+        }
+
+        return false;
+      });
+
+      //if the sight isn't intersected and the distance is shorter return the new one
+      return intersect === undefined;
+    }
+  );
+
+  return visible;
+};
+
+const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
+  const { x: dudeX, y: dudeY } = dude.getBody();
+
+  // feedback when stuck. potential field
+  const visible = rayTrace(dude, attractiveTargets, scene);
+  
+  //find the closest door/sign thats oriented in a way such that it's visible to the dude
+  const closestOriented = visible.reduce(
     (best, element) => {
       const { position, orientation } = element;
 
+      //check orientation
       if (
         orientation.x * (position.x - dudeX) +
           orientation.y * (position.y - dudeY) <
         0
       ) {
-        const signToAgent = new Phaser.Geom.Line(
-          dudeX,
-          dudeY,
-          position.x,
-          position.y
-        );
+
         const currentDist = Math.sqrt(
           (position.x - dudeX) * (position.x - dudeX) +
             (position.y - dudeY) * (position.y - dudeY)
         );
 
-        const intersect = map.walls.find(coordinates => {
-          const [from, to] = coordinates;
-          const wall = new Phaser.Geom.Line(from.x, from.y, to.x, to.y);
-          if (Phaser.Geom.Intersects.LineToLine(wall, signToAgent)) {
-            return true;
-          }
-
-          return false;
-        });
-
         //if the sight isn't intersected and the distance is shorter return the new one
-        return intersect === undefined && best.distance > currentDist
-          ? { distance: currentDist, sign: position }
+        return best.distance > currentDist
+          ? { distance: currentDist, position }
           : best;
       }
 
       return best;
     },
-    { distance: Number.MAX_VALUE, sign: { x: -1, y: -1 } }
-  ).sign;
+    { distance: Number.MAX_VALUE, position: { x: -1, y: -1 } }
+  ).position;
 
-  if (res.x > 0) {
-    const offset = dude.getRadius();
-    trackingRays.add(
+  const offset = dude.getRadius();
+    const ray = (
       scene.add
-        .line(0, 0, dudeX + offset, dudeY + offset, res.x, res.y, 0xff0000, 0.1)
+        .line(0, 0, dudeX + offset, dudeY + offset, closestOriented.x, closestOriented.y, 0xff0000, 0.1)
         .setOrigin(0, 0)
     );
-  }
 
-  setTimeout(() => {
-    trackingRays.destroy(true);
-  }, 100);
+    scene.tweens.add({
+      targets: ray,
+      alpha: { from: 1, to: 0 },
+      ease: 'Linear',
+      duration: 100,
+      repeat: 0,
+      yoyo: false,
+      onComplete: () => ray.destroy(),
+    });
 
-  return new Phaser.Math.Vector2({ x: res.x, y: res.y });
+  return new Phaser.Math.Vector2({ x: closestOriented.x, y: closestOriented.y });
 };
 
 const calculateForces = (scene: Phaser.Scene) => {
@@ -330,7 +366,7 @@ const calculateForces = (scene: Phaser.Scene) => {
     const desiredVelocity = DEFAULT_DESIRED_VELOCITY;
 
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
-    const sign = rayTrace(dudes[i], scene);
+    const sign = findClosestAttractiveTarget(dudes[i], scene);
     dudes[i].setSign(sign.x, sign.y);
 
     //calculate here the desired velocity from the target value only if we have a target
@@ -344,6 +380,22 @@ const calculateForces = (scene: Phaser.Scene) => {
           .scale(dudes[i].weight / reactionTime)
       );
     }
+
+    //calculate repulison between dudes and all visible fires
+    let visibleFires = rayTrace( dudes[i], repulsiveTargets, scene);
+    let repulsionSum = new Phaser.Math.Vector2(0, 0);
+    let repulsion = new Phaser.Math.Vector2(0, 0);
+
+    visibleFires.forEach((fire) => {
+      repulsion.x = dudeBody.x - fire.position.x;
+      repulsion.y = dudeBody.y - fire.position.y;
+      let len = repulsion.length();
+      repulsion
+        .normalize()
+        .scale(fireRepulsion * (Math.exp(1 / len) - 1));
+      repulsionSum.add(repulsion);
+    });
+    accelerations[i].add(repulsionSum);
 
     //calculate repulsion and attraction between dudes, start at j=i+1 to prevent doing it twice
     for (let j = i + 1; j < dudes.length; j++) {
@@ -428,10 +480,13 @@ const unstuckDudes = () => {
       }
       changeDirection.scale(accelerationValue);
       // Help dude out of stuckness
+      //curr.velocity.add(changeDirection);
       curr.acceleration.add(changeDirection);
     }
   });
 };
+
+// ----- Phaser initialization functions -----
 
 const update = function(this: Phaser.Scene) {
   calculateForces(this);
@@ -453,12 +508,14 @@ const config: GameConfig = {
   physics: {
     default: "arcade",
     arcade: {
-      gravity: { x: 0, y: 0 }
+      gravity: { x: 0, y: 0 },
+      fps: 30
     }
   },
-
   backgroundColor: 0xffffff
 };
+
+
 
 const game = new Phaser.Game(config);
 
