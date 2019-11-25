@@ -31,13 +31,13 @@ export const getBody = (
 const attractiveTargets = [...map.signs, ...map.doors];
 const repulsiveTargets: Traceable[] = [...map.fires];
 
-const accelerationThreshold = 0;
-const accelerationValue = 500;
-const fireRepulsion = 5000;
+const ACCELERATION_THRESHOLD = 0;
+const ACCELERATION_VALUE = 500;
+const FIRE_REPULSION = 5000;
 
 const DUDE_WALKING_FRICTION = 0.98;
 
-const speedThreshold = 7;
+const SPEED_THRESHOLD = 7;
 
 let dudeGroup: Phaser.GameObjects.Group;
 
@@ -397,7 +397,7 @@ const calculateForces = (scene: Phaser.Scene) => {
       repulsion.x = dudeBody.x - fire.position.x;
       repulsion.y = dudeBody.y - fire.position.y;
       let len = repulsion.length();
-      repulsion.normalize().scale(fireRepulsion * (Math.exp(1 / len) - 1));
+      repulsion.normalize().scale(FIRE_REPULSION * (Math.exp(1 / len) - 1));
       repulsionSum.add(repulsion);
     });
     accelerations[i].add(repulsionSum);
@@ -460,8 +460,8 @@ const unstuckDudes = () => {
     let accelerationVector = curr.acceleration;
     // Check if dude is currently too slow and he observes a force, e.g. she/he/it is stuck
     if (
-      curr.speed < speedThreshold &&
-      accelerationVector.length() > accelerationThreshold
+      curr.speed < SPEED_THRESHOLD &&
+      accelerationVector.length() > ACCELERATION_THRESHOLD
     ) {
       const changeDirection = new Phaser.Math.Vector2(
         accelerationVector.y,
@@ -485,7 +485,7 @@ const unstuckDudes = () => {
           changeDirection.negate();
         }
       }
-      changeDirection.scale(accelerationValue);
+      changeDirection.scale(ACCELERATION_VALUE);
       // Help dude out of stuckness
       //curr.velocity.add(changeDirection);
       curr.acceleration.add(changeDirection);
