@@ -49,6 +49,8 @@ Dirk Helbing, Illés Farkas, and Tamás Vicsek:
 Simulating dynamical features of escape panic
 Nature 407, 487-490 (2000)
 
+Wang, Peng. (2016). Understanding Social-Force Model in Psychological Principles of Collective Behavior. 
+
 ## Research Methods
 
 (Cellular Automata, Agent-Based Model, Continuous Modeling...) (If you are not sure here: 1. Consult your colleagues, 2. ask the teachers, 3. remember that you can change it afterwards)
