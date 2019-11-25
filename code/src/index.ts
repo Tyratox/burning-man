@@ -509,6 +509,7 @@ const unstuckDudes = () => {
 const update = function(this: Phaser.Scene) {
   calculateForces(this);
   unstuckDudes();
+  currentElapsedTime = totalElapsedTime + (game.getTime() - currentStartTime);
 };
 
 const scene: CreateSceneFromObjectConfig = {
