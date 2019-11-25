@@ -1,3 +1,5 @@
+import { game, initGame } from ".";
+
 export const CONSTANTS = {
   TRIANGLE_HEIGHT: 20,
   TRIANGLE_SIZE: 10,
@@ -32,7 +34,7 @@ const onSliderChange = (e: InputEvent) => {
 };
 
 export const onDOMReadyControlSetup = e => {
-  const rangeSliderContainers = document.querySelectorAll("#sliders > div");
+  const rangeSliderContainers = document.querySelectorAll(".sliders > div");
   for (const sliderContainer of rangeSliderContainers) {
     const slider: HTMLInputElement = sliderContainer.querySelector(
       "input[type=range]"
@@ -45,4 +47,29 @@ export const onDOMReadyControlSetup = e => {
     valueField.value = slider.value;
     slider.addEventListener("input", onSliderChange);
   }
+
+  const initButton: HTMLButtonElement = document.querySelector(
+    "#static-sliders button"
+  );
+  const gameCanvas: HTMLCanvasElement = document.querySelector("#game");
+  const staticSliders = document.getElementById("static-sliders");
+  const dynamicSliders = document.getElementById("dynamic-sliders");
+  const startButton = document.getElementById("start");
+  const overlay: HTMLDivElement = document.querySelector(".wrapper .overlay");
+
+  initButton.addEventListener("click", () => {
+    staticSliders.style.display = "none";
+    gameCanvas.style.display = "block";
+    dynamicSliders.style.display = "block";
+    startButton.style.display = "block";
+
+    initGame();
+  });
+
+  startButton.addEventListener("click", () => {
+    overlay.style.display = "none";
+    startButton.style.display = "none";
+
+    game.scene.resume("default");
+  });
 };

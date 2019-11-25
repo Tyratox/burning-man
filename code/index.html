@@ -5,177 +5,189 @@
     <meta charset="utf-8" />
   </head>
   <body>
-    <div id="game"></div>
-
-    <div id="sliders">
-      <div>
-        <label>Linear factor for group repulsion</label>
-        <input
-          id="DUDE_REPULSION_LINEAR"
-          type="range"
-          autocomplete="off"
-          min="0.001"
-          max="10"
-          value="0.001"
-          step="0.0001"
-        />
-        <input type="text" autocomplete="off" readonly />
+    <div class="wrapper">
+      <div id="game"></div>
+      <div class="overlay"></div>
+      <button id="start">Start simulation</button>
+    </div>
+    <div id="static-sliders" class="sliders">
+      <h2>Static settings</h2>
+      <div class="columns">
+        <div>
+          <label>Fire radius</label>
+          <input
+            id="FIRE_RADIUS"
+            type="range"
+            autocomplete="off"
+            min="5"
+            max="100"
+            value="20"
+            step="5"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
       </div>
-      <div>
-        <label>Exponential factor for group repulsion</label>
-        <input
-          id="DUDE_REPULSION_EXPONENTIAL"
-          type="range"
-          autocomplete="off"
-          min="1"
-          max="300"
-          value="205"
-          step="1"
-        />
-        <input type="text" autocomplete="off" readonly />
-      </div>
-      <div>
-        <label>Linear factor for group attraction</label>
-        <input
-          id="DUDE_GROUP_ATTRACTION"
-          type="range"
-          autocomplete="off"
-          min="1"
-          max="7000"
-          value="5000"
-          step="500"
-        />
-        <input type="text" autocomplete="off" readonly />
-      </div>
-      <div>
-        <label>Acceptable wall distance</label>
-        <input
-          id="ACCEPTABLE_WALL_DISTANCE"
-          type="range"
-          autocomplete="off"
-          min="1"
-          max="2000"
-          value="30"
-          step="1"
-        />
-        <input type="text" autocomplete="off" readonly />
-      </div>
-      <div>
-        <label>Wall repulsion force</label>
-        <input
-          id="WALL_REPULSION_FORCE"
-          type="range"
-          autocomplete="off"
-          min="10"
-          max="1000"
-          value="500"
-          step="10"
-        />
-        <input type="text" autocomplete="off" readonly />
-      </div>
-      <div>
-        <label>Default reaction time (pathfinding)</label>
-        <input
-          id="DEFAULT_REACTION_TIME"
-          type="range"
-          autocomplete="off"
-          min="1"
-          max="20"
-          value="1"
-          step="0.1"
-        />
-        <input type="text" autocomplete="off" readonly />
-      </div>
-      <div>
-        <label>Default desired velocity (pathfinding)</label>
-        <input
-          id="DEFAULT_DESIRED_VELOCITY"
-          type="range"
-          autocomplete="off"
-          min="10"
-          max="500"
-          value="100"
-          step="10"
-        />
-        <input type="text" autocomplete="off" readonly />
-      </div>
-      <div>
-        <label>Maximum smoke radius</label>
-        <input
-          id="MAX_SMOKE_RADIUS"
-          type="range"
-          autocomplete="off"
-          min="5"
-          max="50"
-          value="20"
-          step="1"
-        />
-        <input type="text" autocomplete="off" readonly />
-      </div>
-      <div>
-        <label>Minimum smoke radius</label>
-        <input
-          id="MIN_SMOKE_RADIUS"
-          type="range"
-          autocomplete="off"
-          min="1"
-          max="50"
-          value="10"
-          step="1"
-        />
-        <input type="text" autocomplete="off" readonly />
-      </div>
-      <div>
-        <label>Smoke velocity</label>
-        <input
-          id="SMOKE_VELOCITY"
-          type="range"
-          autocomplete="off"
-          min="5"
-          max="50"
-          value="30"
-          step="1"
-        />
-        <input type="text" autocomplete="off" readonly />
-      </div>
-      <div>
-        <label>Fire radius</label>
-        <input
-          id="FIRE_RADIUS"
-          type="range"
-          autocomplete="off"
-          min="5"
-          max="100"
-          value="20"
-          step="5"
-        />
-        <input type="text" autocomplete="off" readonly />
-      </div>
-      <div>
-        <label>Smoke emission rate</label>
-        <input
-          id="SMOKE_EMISSION_RATE"
-          type="range"
-          autocomplete="off"
-          min="200"
-          max="10000"
-          value="800"
-          step="10"
-        />
-        <input type="text" autocomplete="off" readonly />
-      </div>
-      <div>
-        <label>Max smoke particles per fire</label>
-        <input
-          id="MAX_SMOKE_PARTICLES_PER_FIRE"
-          type="range"
-          autocomplete="off"
-          min="5"
-          max="100"
-          value="20"
-          step="1"
-        />
-        <input type="text" autocomplete="off" readonly />
+      <button>Initialize simulation</button>
+    </div>
+    <div id="dynamic-sliders" class="sliders">
+      <h2>Dynamic settings</h2>
+      <div class="columns">
+        <div>
+          <label>Linear factor for group repulsion</label>
+          <input
+            id="DUDE_REPULSION_LINEAR"
+            type="range"
+            autocomplete="off"
+            min="0.001"
+            max="10"
+            value="0.001"
+            step="0.0001"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Exponential factor for group repulsion</label>
+          <input
+            id="DUDE_REPULSION_EXPONENTIAL"
+            type="range"
+            autocomplete="off"
+            min="1"
+            max="300"
+            value="205"
+            step="1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Linear factor for group attraction</label>
+          <input
+            id="DUDE_GROUP_ATTRACTION"
+            type="range"
+            autocomplete="off"
+            min="1"
+            max="7000"
+            value="5000"
+            step="500"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Acceptable wall distance</label>
+          <input
+            id="ACCEPTABLE_WALL_DISTANCE"
+            type="range"
+            autocomplete="off"
+            min="1"
+            max="2000"
+            value="30"
+            step="1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Wall repulsion force</label>
+          <input
+            id="WALL_REPULSION_FORCE"
+            type="range"
+            autocomplete="off"
+            min="10"
+            max="1000"
+            value="500"
+            step="10"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Default reaction time (pathfinding)</label>
+          <input
+            id="DEFAULT_REACTION_TIME"
+            type="range"
+            autocomplete="off"
+            min="1"
+            max="20"
+            value="1"
+            step="0.1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Default desired velocity (pathfinding)</label>
+          <input
+            id="DEFAULT_DESIRED_VELOCITY"
+            type="range"
+            autocomplete="off"
+            min="10"
+            max="500"
+            value="100"
+            step="10"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Maximum smoke radius</label>
+          <input
+            id="MAX_SMOKE_RADIUS"
+            type="range"
+            autocomplete="off"
+            min="5"
+            max="50"
+            value="20"
+            step="1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Minimum smoke radius</label>
+          <input
+            id="MIN_SMOKE_RADIUS"
+            type="range"
+            autocomplete="off"
+            min="1"
+            max="50"
+            value="10"
+            step="1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Smoke velocity</label>
+          <input
+            id="SMOKE_VELOCITY"
+            type="range"
+            autocomplete="off"
+            min="5"
+            max="50"
+            value="30"
+            step="1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Smoke emission rate</label>
+          <input
+            id="SMOKE_EMISSION_RATE"
+            type="range"
+            autocomplete="off"
+            min="200"
+            max="10000"
+            value="800"
+            step="10"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
+        <div>
+          <label>Max smoke particles per fire</label>
+          <input
+            id="MAX_SMOKE_PARTICLES_PER_FIRE"
+            type="range"
+            autocomplete="off"
+            min="5"
+            max="100"
+            value="20"
+            step="1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
       </div>
     </div>
   </body>
