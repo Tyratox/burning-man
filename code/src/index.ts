@@ -54,8 +54,8 @@ let dudeGroup: Phaser.GameObjects.Group;
 
 const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
   //load images if needed
-  this.load.image("fire", "assets/logo.png");
-  this.load.image("smokePNG", "assets/logo.png");
+  this.load.image("skull", "assets/skull.png");
+  this.load.image("fire", "assets/fire.png");
 };
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
@@ -170,6 +170,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       20,
       somkeGroup
     );
+    this.add.sprite(point.position.x, point.position.y, "fire");
     fireGroup.add(f.fire);
   });
 
@@ -177,7 +178,9 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
   // Not working?!?
   this.physics.add.collider(dudeGroup, fireGroup, (dude: Dude, fire) => {
-    dude.health = 0;
+    console.log("Dude " + dude.name + " unfortunately perished in the fire!");
+    this.add.sprite(dude.x, dude.y, "skull");
+    dude.destroy();
   });
 
   this.physics.add.collider(somkeGroup, walls);
@@ -185,6 +188,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     dude.health += -1;
     if (dude.health <= 0) {
       console.log("Dude " + dude.name + " unfortunately perished in the fire!");
+      this.add.sprite(dude.x, dude.y, "skull");
       dude.destroy();
     }
   });

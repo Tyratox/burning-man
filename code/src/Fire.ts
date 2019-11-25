@@ -30,7 +30,9 @@ class Fire {
     this.y = y;
     this.smokeParticles = new Array();
     this.group = group;
-    this.fire = scene.add.circle(this.x, this.y, FIRE_RADIUS, 0xfc581a);
+    this.fire = scene.add
+      .circle(this.x, this.y, FIRE_RADIUS, 0xfc581a)
+      .setVisible(false);
     scene.time.addEvent({
       delay: SMOKE_EMISSION_RATE,
       callback: () => this.spawn(this.scene),
