@@ -31,11 +31,13 @@ export const getBody = (
 const attractiveTargets = [...map.signs, ...map.doors];
 const repulsiveTargets: Traceable[] = [...map.fires];
 
-const accelerationThreshold = 0;
-const accelerationValue = 500;
-const fireRepulsion = 5000;
+const ACCELERATION_THRESHOLD = 0;
+const ACCELERATION_VALUE = 500;
+const FIRE_REPULSION = 5000;
 
-const speedThreshold = 7;
+const DUDE_WALKING_FRICTION = 0.98;
+
+const SPEED_THRESHOLD = 7;
 
 var totalNumberOfDudes = 0;
 var numberOfDeadDudes = 0;
@@ -201,6 +203,8 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     ThisVariableCountsTheNumberOfDudesWhoMadeItToTheDespawningZoneAndThereforeSurvived++;
     dude.destroy();
   });
+
+  this.scene.pause();
 };
 
 // ----- Orientation and Force Algorithms -----
@@ -374,7 +378,7 @@ const calculateForces = (scene: Phaser.Scene) => {
         wallRepulsion.scale(
           CONSTANTS.WALL_REPULSION_FORCE / closestWallDistance
         )
-      ); //how strong is the repulsion
+      );
     }
 
     /*setTimeout(() => {
@@ -410,10 +414,12 @@ const calculateForces = (scene: Phaser.Scene) => {
       repulsion.x = dudeBody.x - fire.position.x;
       repulsion.y = dudeBody.y - fire.position.y;
       let len = repulsion.length();
-      repulsion.normalize().scale(fireRepulsion * (Math.exp(1 / len) - 1));
+      repulsion.normalize().scale(FIRE_REPULSION * (Math.exp(1 / len) - 1));
       repulsionSum.add(repulsion);
     });
     accelerations[i].add(repulsionSum);
+
+    dudeBody.velocity.scale(DUDE_WALKING_FRICTION);
 
     //calculate repulsion and attraction between dudes, start at j=i+1 to prevent doing it twice
     for (let j = i + 1; j < dudes.length; j++) {
@@ -471,8 +477,8 @@ const unstuckDudes = () => {
     let accelerationVector = curr.acceleration;
     // Check if dude is currently too slow and he observes a force, e.g. she/he/it is stuck
     if (
-      curr.speed < speedThreshold &&
-      accelerationVector.length() > accelerationThreshold
+      curr.speed < SPEED_THRESHOLD &&
+      accelerationVector.length() > ACCELERATION_THRESHOLD
     ) {
       const changeDirection = new Phaser.Math.Vector2(
         accelerationVector.y,
@@ -496,7 +502,7 @@ const unstuckDudes = () => {
           changeDirection.negate();
         }
       }
-      changeDirection.scale(accelerationValue);
+      changeDirection.scale(ACCELERATION_VALUE);
       // Help dude out of stuckness
       //curr.velocity.add(changeDirection);
       curr.acceleration.add(changeDirection);
@@ -534,6 +540,10 @@ const config: GameConfig = {
   backgroundColor: 0xffffff
 };
 
-const game = new Phaser.Game(config);
+export let game: Phaser.Game = null;
+
+export const initGame = () => {
+  game = new Phaser.Game(config);
+};
 
 document.addEventListener("DOMContentLoaded", onDOMReadyControlSetup);
