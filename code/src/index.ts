@@ -21,10 +21,10 @@ import { fips } from "crypto";
 
 interface Traceable {
   position: {
-      x: number;
-      y: number;
+    x: number;
+    y: number;
   };
-};
+}
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
@@ -65,7 +65,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   // ----- Create Physiscs Group -----
 
   const walls = this.physics.add.staticGroup();
-  
+
   dudeGroup = this.add.group();
   const somkeGroup = this.add.group();
   const fireGroup = this.add.group();
@@ -163,13 +163,18 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
   // Create Fire class instances
   map.fires.forEach(point => {
-    let f = new Fire(this, point.position.x, point.position.y, 20, somkeGroup);
+    const f = new Fire(
+      this,
+      point.position.x,
+      point.position.y,
+      20,
+      somkeGroup
+    );
     fireGroup.add(f.fire);
-    //fire.push(f);
   });
 
   // ----- Adding Groups to the Physics Collider Engine -----
-  
+
   // Not working?!?
   this.physics.add.collider(dudeGroup, fireGroup, (dude: Dude, fire) => {
     dude.health = 0;
@@ -197,34 +202,36 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
 // ----- Orientation and Force Algorithms -----
 
-const rayTrace = <T extends Traceable>(dude: Dude, traceables: T[], scene: Phaser.Scene) => {
+const rayTrace = <T extends Traceable>(
+  dude: Dude,
+  traceables: T[],
+  scene: Phaser.Scene
+) => {
   const { x: dudeX, y: dudeY } = dude.getBody();
 
-  const visible = traceables.filter(
-    (element) => {
-      const { position } = element;
+  const visible = traceables.filter(element => {
+    const { position } = element;
 
-      const signToAgent = new Phaser.Geom.Line(
-        dudeX,
-        dudeY,
-        position.x,
-        position.y
-      );
+    const signToAgent = new Phaser.Geom.Line(
+      dudeX,
+      dudeY,
+      position.x,
+      position.y
+    );
 
-      const intersect = map.walls.find(coordinates => {
-        const [from, to] = coordinates;
-        const wall = new Phaser.Geom.Line(from.x, from.y, to.x, to.y);
-        if (Phaser.Geom.Intersects.LineToLine(wall, signToAgent)) {
-          return true;
-        }
+    const intersect = map.walls.find(coordinates => {
+      const [from, to] = coordinates;
+      const wall = new Phaser.Geom.Line(from.x, from.y, to.x, to.y);
+      if (Phaser.Geom.Intersects.LineToLine(wall, signToAgent)) {
+        return true;
+      }
 
-        return false;
-      });
+      return false;
+    });
 
-      //if the sight isn't intersected and the distance is shorter return the new one
-      return intersect === undefined;
-    }
-  );
+    //if the sight isn't intersected and the distance is shorter return the new one
+    return intersect === undefined;
+  });
 
   return visible;
 };
@@ -234,7 +241,7 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
 
   // feedback when stuck. potential field
   const visible = rayTrace(dude, attractiveTargets, scene);
-  
+
   //find the closest door/sign thats oriented in a way such that it's visible to the dude
   const closestOriented = visible.reduce(
     (best, element) => {
@@ -246,7 +253,6 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
           orientation.y * (position.y - dudeY) <
         0
       ) {
-
         const currentDist = Math.sqrt(
           (position.x - dudeX) * (position.x - dudeX) +
             (position.y - dudeY) * (position.y - dudeY)
@@ -264,23 +270,33 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
   ).position;
 
   const offset = dude.getRadius();
-    const ray = (
-      scene.add
-        .line(0, 0, dudeX + offset, dudeY + offset, closestOriented.x, closestOriented.y, 0xff0000, 0.1)
-        .setOrigin(0, 0)
-    );
+  const ray = scene.add
+    .line(
+      0,
+      0,
+      dudeX + offset,
+      dudeY + offset,
+      closestOriented.x,
+      closestOriented.y,
+      0xff0000,
+      0.1
+    )
+    .setOrigin(0, 0);
 
-    scene.tweens.add({
-      targets: ray,
-      alpha: { from: 1, to: 0 },
-      ease: 'Linear',
-      duration: 100,
-      repeat: 0,
-      yoyo: false,
-      onComplete: () => ray.destroy(),
-    });
+  scene.tweens.add({
+    targets: ray,
+    alpha: { from: 1, to: 0 },
+    ease: "Linear",
+    duration: 100,
+    repeat: 0,
+    yoyo: false,
+    onComplete: () => ray.destroy()
+  });
 
-  return new Phaser.Math.Vector2({ x: closestOriented.x, y: closestOriented.y });
+  return new Phaser.Math.Vector2({
+    x: closestOriented.x,
+    y: closestOriented.y
+  });
 };
 
 const calculateForces = (scene: Phaser.Scene) => {
@@ -381,17 +397,15 @@ const calculateForces = (scene: Phaser.Scene) => {
     }
 
     //calculate repulison between dudes and all visible fires
-    let visibleFires = rayTrace( dudes[i], repulsiveTargets, scene);
+    let visibleFires = rayTrace(dudes[i], repulsiveTargets, scene);
     let repulsionSum = new Phaser.Math.Vector2(0, 0);
     let repulsion = new Phaser.Math.Vector2(0, 0);
 
-    visibleFires.forEach((fire) => {
+    visibleFires.forEach(fire => {
       repulsion.x = dudeBody.x - fire.position.x;
       repulsion.y = dudeBody.y - fire.position.y;
       let len = repulsion.length();
-      repulsion
-        .normalize()
-        .scale(fireRepulsion * (Math.exp(1 / len) - 1));
+      repulsion.normalize().scale(fireRepulsion * (Math.exp(1 / len) - 1));
       repulsionSum.add(repulsion);
     });
     accelerations[i].add(repulsionSum);
@@ -455,7 +469,7 @@ const unstuckDudes = () => {
       curr.speed < speedThreshold &&
       accelerationVector.length() > accelerationThreshold
     ) {
-      let changeDirection = new Phaser.Math.Vector2(
+      const changeDirection = new Phaser.Math.Vector2(
         accelerationVector.y,
         -accelerationVector.x
       ).normalize();
@@ -513,8 +527,6 @@ const config: GameConfig = {
   },
   backgroundColor: 0xffffff
 };
-
-
 
 const game = new Phaser.Game(config);
 

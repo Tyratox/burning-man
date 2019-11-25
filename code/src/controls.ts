@@ -9,6 +9,16 @@ export let WALL_REPULSION = 500;
 export let DEFAULT_REACTION_TIME = 1;
 export let DEFAULT_DESIRED_VELOCITY = 100;
 
+export let MAX_RADIUS = 20;
+export let MIN_RADIUS = 10;
+
+export let VELOCITY = 30;
+export let VISIBILITY = 0.1;
+export let FIRE_RADIUS = 20;
+
+export let SMOKE_EMISSION_RATE = 800;
+export let MAX_SMOKE_PARTICLES_PER_FIRE = 20;
+
 const onSliderChange = (e: InputEvent) => {
   //@ts-ignore, i (think) know what i'm doing
   const slider: HTMLInputElement = e.currentTarget;

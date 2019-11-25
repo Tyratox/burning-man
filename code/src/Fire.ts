@@ -1,13 +1,14 @@
 import { getBody } from "./index";
-import { Scene } from "phaser";
-import { spawn } from "child_process";
 
-const MAX_RADIUS = 20;
-const MIN_RADIUS = 10;
-
-const VELOCITY = 30;
-const VISIBILITY = 0.1;
-const FIRE_RADIUS = 20;
+import {
+  MAX_RADIUS,
+  MIN_RADIUS,
+  VELOCITY,
+  VISIBILITY,
+  FIRE_RADIUS,
+  SMOKE_EMISSION_RATE,
+  MAX_SMOKE_PARTICLES_PER_FIRE
+} from "./controls";
 
 class Fire {
   x: number;
@@ -29,41 +30,48 @@ class Fire {
     this.y = y;
     this.smokeParticles = new Array();
     this.group = group;
-    this.fire = scene.add.circle(this.x, this.y, FIRE_RADIUS, 0xFC581A);
-    scene.time.addEvent({ delay: 200, callback: () => this.spawn(this.scene), callbackScope: this, repeat: 100000});
+    this.fire = scene.add.circle(this.x, this.y, FIRE_RADIUS, 0xfc581a);
+    scene.time.addEvent({
+      delay: SMOKE_EMISSION_RATE,
+      callback: () => this.spawn(this.scene),
+      callbackScope: this,
+      repeat: -1
+    });
   }
 
   spawn(scene: Phaser.Scene) {
     const radius = MAX_RADIUS * Math.random() + MIN_RADIUS;
-      const circle = scene.add.circle(this.x, this.y, radius, 0x626262);
-      circle.alpha = VISIBILITY;
+    const circle = scene.add.circle(this.x, this.y, radius, 0x626262);
+    circle.alpha = VISIBILITY;
 
-      const sign1 = Math.random() > 0.5 ? -1 : 1;
-      const sign2 = Math.random() > 0.5 ? -1 : 1;
+    const sign1 = Math.random() > 0.5 ? -1 : 1;
+    const sign2 = Math.random() > 0.5 ? -1 : 1;
 
-      const velocityX = sign1 * Math.random() * VELOCITY;
-      const velocityY = sign2 * Math.random() * VELOCITY;
+    const velocityX = sign1 * Math.random() * VELOCITY;
+    const velocityY = sign2 * Math.random() * VELOCITY;
 
-      scene.physics.world.enable(circle); //adds body / enables physics
-      getBody(circle)
-        .setCollideWorldBounds(true)
-        .setBounce(0.2, 0.2)
-        .setVelocityX(velocityX)
-        .setVelocityY(velocityY);
+    scene.physics.world.enable(circle); //adds body / enables physics
+    getBody(circle)
+      .setCollideWorldBounds(true)
+      .setBounce(0.2, 0.2)
+      .setVelocityX(velocityX)
+      .setVelocityY(velocityY);
 
-      this.group.add(circle);
-      // Delete faded smoke particles
-      scene.tweens.add({
-        targets: circle,
-        alpha: { from: 0.2, to: 0 },
-        ease: 'Linear',
-        duration: 100000,
-        repeat: 0,
-        yoyo: false,
-        onComplete: function () {
-          circle.destroy();
-        },
-      });
+    this.group.add(circle);
+    // Delete faded smoke particles
+    scene.tweens.add({
+      targets: circle,
+      alpha: { from: 0.6, to: 0 },
+      scale: { from: 1, to: 2 },
+      ease: "cubic.out",
+      duration:
+        (1000 * MAX_SMOKE_PARTICLES_PER_FIRE) / (SMOKE_EMISSION_RATE / 1000),
+      repeat: 0,
+      yoyo: false,
+      onComplete: function() {
+        circle.destroy();
+      }
+    });
   }
 }
 
