@@ -163,15 +163,10 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
   // Create Fire class instances
   map.fires.forEach(point => {
-    const f = new Fire(
-      this,
-      point.position.x,
-      point.position.y,
-      20,
-      somkeGroup
-    );
     this.add.sprite(point.position.x, point.position.y, "fire");
-    fireGroup.add(f.fire);
+    fireGroup.add(
+      new Fire(this, point.position.x, point.position.y, somkeGroup)
+    );
   });
 
   // ----- Adding Groups to the Physics Collider Engine -----

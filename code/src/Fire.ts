@@ -10,7 +10,7 @@ import {
   MAX_SMOKE_PARTICLES_PER_FIRE
 } from "./controls";
 
-class Fire {
+class Fire extends Phaser.GameObjects.Arc {
   x: number;
   y: number;
   group: Phaser.GameObjects.Group;
@@ -22,17 +22,18 @@ class Fire {
     scene: Phaser.Scene,
     x: number,
     y: number,
-    amount: number,
     group: Phaser.GameObjects.Group
   ) {
+    super(scene, x, y, FIRE_RADIUS, 0, 360, true, 0xfc581a, 1);
+    scene.children.add(this);
+    this.setVisible(false);
+
     this.scene = scene;
     this.x = x;
     this.y = y;
     this.smokeParticles = new Array();
     this.group = group;
-    this.fire = scene.add
-      .circle(this.x, this.y, FIRE_RADIUS, 0xfc581a)
-      .setVisible(false);
+
     scene.time.addEvent({
       delay: SMOKE_EMISSION_RATE,
       callback: () => this.spawn(this.scene),
