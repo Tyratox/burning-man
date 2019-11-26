@@ -1,4 +1,5 @@
 import { getBody } from "./index";
+import Sign from "./index";
 import randomNormal from "random-normal";
 
 import { CONSTANTS } from "./controls";
@@ -18,7 +19,8 @@ class Dude extends Phaser.GameObjects.Arc {
   age: number;
 
   //the currently tracked sign
-  sign: { x: number; y: number };
+  sign: Sign;
+  validSign: boolean;
 
   constructor(x: number, y: number, name: string, scene: Phaser.Scene) {
     const weight = Math.min(
@@ -58,7 +60,13 @@ class Dude extends Phaser.GameObjects.Arc {
 
     scene.children.add(this);
 
-    this.sign = { x: 0, y: 0 };
+    this.sign = { 
+      position: { x: 0, y: 0 },
+      orientation: { x: -1, y: 0 },
+      direction: { x: 1, y: 0 },
+      type: "sign"
+    };
+    this.validSign = false;
     this.fitness = fitness;
     this.weight = weight;
     this.age = Math.min(
@@ -120,9 +128,16 @@ class Dude extends Phaser.GameObjects.Arc {
     return this.sign;
   }
 
-  setSign(x: number, y: number) {
-    this.sign.x = x;
-    this.sign.y = y;
+  getSignValidity() {
+    return this.validSign;
+  }
+
+  setSignValidity(x: boolean) {
+    this.validSign = x;
+  }
+
+  setSign(sign: Sign) {
+    this.sign = sign;
   }
 }
 

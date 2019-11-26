@@ -7,7 +7,7 @@ import map from "./map";
 import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
-import { sign } from "crypto";
+import { sign, Signer } from "crypto";
 
 interface Traceable {
   position: {
@@ -16,6 +16,43 @@ interface Traceable {
   };
   type: string;
 }
+
+class Sign implements Traceable{
+  type: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  orientation: {
+    x: number;
+    y: number;
+  };
+  direction: {
+    x: number, 
+    y: number 
+  };
+
+  constructor(
+    position: {
+      x: number;
+      y: number;
+    },
+    orientation: {
+      x: number;
+      y: number;
+    },
+    direction: {
+      x: number;
+      y: number;
+    }
+  ) {
+    this.direction = direction;
+    this.orientation = orientation;
+    this.position = position;
+  }
+}
+
+export default Sign;
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
@@ -37,6 +74,8 @@ const attractiveTargets = [
 const repulsiveTargets: Traceable[] = [
   ...map.fires.map(e => ({ ...e, type: "fire" }))
 ];
+
+const INITIAL_SIGN = new Sign({x: Number.MAX_VALUE, y: Number.MAX_VALUE}, { x: 0, y: 0 }, { x: 0, y: 0 });
 
 const ACCELERATION_THRESHOLD = 0;
 const ACCELERATION_VALUE = 500;
@@ -237,48 +276,58 @@ const rayTrace = <T extends Traceable>(
 
 const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
   const { x: dudeX, y: dudeY } = dude.getBody();
+  let closestOriented: Sign;
 
-  // feedback when stuck. potential field
-  const visible = rayTrace(dude, attractiveTargets, scene);
+  if (!visible(dude, dude.getSign())) {
+    dude.setSignValidity(false);
+  }
 
-  //find the closest door/sign thats oriented in a way such that it's visible to the dude
-  const closestOriented = visible.reduce(
-    (best, element) => {
-      const { position, orientation } = element;
-
-      //check orientation
-      if (
-        orientation.x * (position.x - dudeX) +
-          orientation.y * (position.y - dudeY) <
-        0
-      ) {
-        const currentDist = Math.sqrt(
-          (position.x - dudeX) * (position.x - dudeX) +
-            (position.y - dudeY) * (position.y - dudeY)
+  if (dude.getSignValidity()) {
+    closestOriented = dude.getSign();
+  } else {
+    const visible = rayTrace(dude, attractiveTargets, scene);
+    //find the closest door/sign thats oriented in a way such that it's visible to the dude
+    closestOriented = visible.reduce(
+      (best: Sign, element: Sign) => {
+        let position = element.position;
+        const bestDistance = Math.sqrt(
+          (best.position.x - dudeX) * (best.position.x - dudeX) +
+            (best.position.y - dudeY) * (best.position.y - dudeY)
         );
+        
+        //check orientation
+        if (
+          element.orientation.x * (position.x - dudeX) +
+          element.orientation.y * (position.y - dudeY) <
+          0
+        ) {
+          const currentDist = Math.sqrt(
+            (position.x - dudeX) * (position.x - dudeX) +
+              (position.y - dudeY) * (position.y - dudeY)
+          );
 
-        //if the sight isn't intersected and the distance is shorter return the new one
-        return best.distance > currentDist
-          ? { distance: currentDist, position }
-          : best;
-      }
-
-      return best;
-    },
-    { distance: Number.MAX_VALUE, position: { x: -1, y: -1 } }
-  ).position;
-
+          //if the sight isn't intersected and the distance is shorter return the new one
+          return (bestDistance > currentDist) && (element.position.x != dude.getSign().position.x)
+            ? element
+            : best;
+        }
+        return best;
+      }, INITIAL_SIGN);
+  }
+  
+  dude.setSign(closestOriented);
+  dude.setSignValidity(true);
   const offset = dude.getRadius();
 
-  if (closestOriented.x > 0) {
+  if (closestOriented.position.x > 0) {
     const ray = scene.add
       .line(
         0,
         0,
         dudeX + offset,
         dudeY + offset,
-        closestOriented.x,
-        closestOriented.y,
+        closestOriented.position.x,
+        closestOriented.position.y,
         0xff0000,
         0.1
       )
@@ -295,10 +344,7 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
     });
   }
 
-  return new Phaser.Math.Vector2({
-    x: closestOriented.x,
-    y: closestOriented.y
-  });
+  return closestOriented;
 };
 
 const calculateForces = (scene: Phaser.Scene) => {
@@ -385,12 +431,13 @@ const calculateForces = (scene: Phaser.Scene) => {
 
     // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
     const sign = findClosestAttractiveTarget(dudes[i], scene);
-    dudes[i].setSign(sign.x, sign.y);
+    dudes[i].setSign(sign);
+    const vec = new Phaser.Math.Vector2(sign.position.x, sign.position.y);
 
     //calculate here the desired velocity from the target value only if we have a target
-    if (sign.x > 0) {
+    if (sign.position.x > 0) {
       accelerations[i].add(
-        sign
+        vec
           .subtract(dudes[i].getBody().position)
           .normalize()
           .scale(desiredVelocity)
@@ -463,6 +510,12 @@ const calculateForces = (scene: Phaser.Scene) => {
   );
 };
 
+// Check if a dude sees the sign s
+const visible = (dude: Dude, s: Sign) => {
+  const d = dude.getBody();
+  return s.orientation.x * (s.position.x - d.x) + s.orientation.y * (s.position.y - d.y) < 0;
+};
+
 // If a dude gets stuck this function helps out
 const unstuckDudes = () => {
   dudeGroup.children.getArray().forEach((dude: Dude) => {
@@ -474,32 +527,34 @@ const unstuckDudes = () => {
       curr.speed < SPEED_THRESHOLD &&
       accelerationVector.length() > ACCELERATION_THRESHOLD
     ) {
-      const changeDirection = new Phaser.Math.Vector2(
-        accelerationVector.y,
-        -accelerationVector.x
-      ).normalize();
-      // Check for the direction of the acceleration vector
-      if (Math.abs(accelerationVector.x) < Math.abs(accelerationVector.y)) {
-        // Negate the acceleration vector if it is in the 1. or 3. quadrant of the coordinate system
-        if (
-          (curr.x < sign.x && curr.y < sign.y) ||
-          (curr.x > sign.x && curr.y > sign.y)
-        ) {
-          changeDirection.negate();
-        }
-      } else {
-        // Negate the acceleration vector if it is in the 2. or 4. quadrant of the coordinate system
-        if (
-          (curr.x > sign.x && curr.y < sign.y) ||
-          (curr.x > sign.x && curr.y < sign.y)
-        ) {
-          changeDirection.negate();
-        }
-      }
-      changeDirection.scale(ACCELERATION_VALUE);
-      // Help dude out of stuckness
-      //curr.velocity.add(changeDirection);
-      curr.acceleration.add(changeDirection);
+      dude.setSignValidity(false);
+      // const changeDirection = new Phaser.Math.Vector2(
+      //   accelerationVector.y,
+      //   -accelerationVector.x
+      // ).normalize();
+      // // Check for the direction of the acceleration vector
+      // if (Math.abs(accelerationVector.x) < Math.abs(accelerationVector.y)) {
+      //   // Negate the acceleration vector if it is in the 1. or 3. quadrant of the coordinate system
+      //   if (
+      //     (curr.x < sign.x && curr.y < sign.y) ||
+      //     (curr.x > sign.x && curr.y > sign.y)
+      //   ) {
+      //     changeDirection.negate();
+      //   }
+      // } else {
+      //   // Negate the acceleration vector if it is in the 2. or 4. quadrant of the coordinate system
+      //   if (
+      //     (curr.x > sign.x && curr.y < sign.y) ||
+      //     (curr.x > sign.x && curr.y < sign.y)
+      //   ) {
+      //     changeDirection.negate();
+      //   }
+      // }
+      // changeDirection.scale(ACCELERATION_VALUE);
+      // // Help dude out of stuckness
+      // curr.acceleration.add(changeDirection);
+    } else {
+      //dude.setSignValidity(false);
     }
   });
 };
