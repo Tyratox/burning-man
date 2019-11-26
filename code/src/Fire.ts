@@ -49,8 +49,6 @@ class Fire extends Phaser.GameObjects.Arc {
     const velocityX = sign1 * Math.random() * CONSTANTS.SMOKE_VELOCITY;
     const velocityY = sign2 * Math.random() * CONSTANTS.SMOKE_VELOCITY;
 
-    console.log("min", CONSTANTS.MIN_SMOKE_RADIUS);
-
     scene.physics.world.enable(circle); //adds body / enables physics
     getBody(circle)
       .setCollideWorldBounds(true)
