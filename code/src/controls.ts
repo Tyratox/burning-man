@@ -1,4 +1,4 @@
-import { game, initGame, setCurrentStartTime } from ".";
+import { game, initGame, setCurrentStartTime, setPreviousElapsedTime } from ".";
 
 export const CONSTANTS = {
   TRIANGLE_HEIGHT: 20,
@@ -91,9 +91,13 @@ export const onDOMReadyControlSetup = e => {
 
   pauseButton.addEventListener("click", () => {
     if (game.scene.isPaused("default")) {
+      setCurrentStartTime(game.getTime());
       game.scene.resume("default");
+      pauseButton.innerText = "Pause";
     } else {
+      setPreviousElapsedTime(game.getTime());
       game.scene.pause("default");
+      pauseButton.innerText = "Resume";
     }
   });
 

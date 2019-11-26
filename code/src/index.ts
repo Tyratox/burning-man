@@ -48,7 +48,7 @@ const SPEED_THRESHOLD = 7;
 
 let totalNumberOfDudes = 0;
 let numberOfDeadDudes = 0;
-let ThisVariableCountsTheNumberOfDudesWhoMadeItToTheDespawningZoneAndThereforeSurvived = 0;
+let numberOfSurvivorDudes = 0;
 
 let currentStartTime: number = 0;
 let previousElapsedTime: number = 0;
@@ -57,6 +57,9 @@ let timeLabel: Phaser.GameObjects.Text;
 
 export const setCurrentStartTime = (time: number) => {
   currentStartTime = time;
+};
+export const setPreviousElapsedTime = (time: number) => {
+  previousElapsedTime += (time - currentStartTime) / 1000;
 };
 
 let dudeGroup: Phaser.GameObjects.Group;
@@ -160,6 +163,8 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     triangle.rotation =
       (direction.x > 0 ? 1 : -1) * Math.acos(-direction.y / directionNorm);
   });
+  
+  totalNumberOfDudes = map.spawnPoints.length;
 
   map.spawnPoints.forEach(point =>
     dudeGroup.add(new Dude(point.x, point.y, "Peter", this))
@@ -199,7 +204,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   this.physics.add.collider(dudeGroup, tables);
   this.physics.add.collider(dudeGroup, despawn_zones, (dude: Dude, zone) => {
     console.log("Dude " + dude.name + " is a survivor!");
-    ThisVariableCountsTheNumberOfDudesWhoMadeItToTheDespawningZoneAndThereforeSurvived++;
+    numberOfSurvivorDudes++;
     dude.destroy();
   });
 
@@ -527,10 +532,6 @@ const unstuckDudes = () => {
   });
 };
 
-const createTimer = function(scene: Phaser.Scene) {
-  // timeLabel.align = 'center';
-}
-
 
 const updateTimer = function() {
 
@@ -552,6 +553,10 @@ const updateTimer = function() {
 // ----- Phaser initialization functions -----
 
 const update = function(this: Phaser.Scene) {
+
+  if (totalNumberOfDudes == numberOfDeadDudes + numberOfSurvivorDudes) {
+    this.scene.pause();
+  }
   calculateForces(this);
   unstuckDudes();
   updateTimer();
