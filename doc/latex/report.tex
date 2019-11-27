@@ -162,19 +162,27 @@ The model is separated into different pieces. First of all we had to create a mo
 
 Before agents can react to a fire inside a building, a building has to be defined and created. As the simulation in the end will take place on a computer screen, we first of all have to give the building or the \textit{map} a \texttt{width} and a \texttt{height}.
 
-\begin{lstlisting}[language=javascript]
-{
-	width  : 1900,
-	height : 1100,
-	...
-}
-\end{lstlisting}
-
 The next obvious property any building has are walls. Walls define rooms, corridors and give the map its shape. We define the walls to be lines drawn from some coordinate $(x_1, y_1)$ to some other coordinate $(x_2, y_2)$. In javascript these tuples can be defined as objects \texttt{\{x: <xVal>, y: <yVal>\}} and then be put into an array with two elements. A wall from $(0,0)$ to $(100, 0)$ is then given by \texttt{[\{x: 0, y: 0\}, \{x: 100, y: 0\}]}. Multiple walls are the defined like
 
 \begin{lstlisting}[language=javascript]
 {
-    ...,
+    width  : 1900,
+    height : 1100,
+    wallThickness: 10,
+    fires: [{position: { x: 20, y: 450 }}, {position: { x: 20, y: 500 }}],
+    doors: [
+        {
+            position    : { x: 85, y: 425 },
+            orientation : { x: 0, y: -1 },
+            direction   : { x: 0, y: 1 }
+        },
+        {
+            position    : { x: 445, y: 425 },
+            orientation : { x: 0, y: -1 },
+            direction   : { x: 0, y: 1 }
+        },
+        ...
+    ]
     walls  : [
        [{ x: 0, y: 0 },    { x: 1900, y: 0 }],
        [{ x: 0, y: 1100 }, { x: 1900, y: 1100 }],
@@ -182,7 +190,24 @@ The next obvious property any building has are walls. Walls define rooms, corrid
        [{ x: 1900, y: 0 }, { x: 1900, y: 1100 }],
        ...
     ],
-    ...
+    signs: [
+        {
+            position: { x: 550, y: 538 },
+            orientation: { x: -1, y: 0 },
+            direction: { x: 1, y: 0 }
+        },
+        {
+            position: { x: 1125, y: 538 },
+            orientation: { x: -1, y: 0 },
+            direction: { x: 1, y: 0 }
+        },
+        ...
+    ],
+    tables: [
+        [{ x: 70, y: 70 },  { x: 110, y: 170 }],
+        [{ x: 70, y: 225 }, { x: 110, y: 325 }],
+        ...
+    ]
 }
 \end{lstlisting}
 
