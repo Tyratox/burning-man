@@ -5,11 +5,12 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "webpack --config webpack-prod.config.js ",
-    "start": "webpack-dev-server --open"
+    "start": "webpack-dev-server --open",
+    "prettier": "prettier --trailing-comma none --arrow-parens avoid --write ./src/**/*"
   },
   "config": {
     "ghooks": {
-      "pre-commit": "cd code && prettier && npm run build && cp style.css ../docs/style.css && cp -R ./assets/ ../docs/assets/ && touch ../.commit",
+      "pre-commit": "cd code && npm run prettier && npm run build && cp style.css ../docs/style.css && cp -R ./assets/ ../docs/assets/ && touch ../.commit",
       "post-commit": "if [ -a .commit ]; then rm .commit && git add ./docs/* && git commit --amend -C HEAD --no-verify; fi"
     }
   },
