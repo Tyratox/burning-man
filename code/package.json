@@ -9,7 +9,7 @@
   },
   "config": {
     "ghooks": {
-      "pre-commit": "cd code && npm run build && cp style.css ../docs/style.css && cp -R ./assets/ ../docs/assets/ && touch ../.commit",
+      "pre-commit": "cd code && prettier && npm run build && cp style.css ../docs/style.css && cp -R ./assets/ ../docs/assets/ && touch ../.commit",
       "post-commit": "if [ -a .commit ]; then rm .commit && git add ./docs/* && git commit --amend -C HEAD --no-verify; fi"
     }
   },
@@ -37,6 +37,7 @@
     "file-loader": "^3.0.1",
     "ghooks": "^2.0.4",
     "html-webpack-plugin": "^3.2.0",
+    "prettier": "^1.19.1",
     "raw-loader": "^1.0.0",
     "terser-webpack-plugin": "^1.2.1",
     "typescript": "^3.6.4",

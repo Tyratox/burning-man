@@ -492,7 +492,7 @@ export default {
     ]
   ],
 
-  despawn_zone: [
+  despawnZones: [
     [
       { x: 1275, y: 115 },
       { x: 1585, y: 420 }

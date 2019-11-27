@@ -84,8 +84,6 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   const somkeGroup = this.add.group();
   const fireGroup = this.add.group();
 
-
-
   // ----- Initialize all Groups -----
 
   map.walls.forEach(([from, to]) => {
@@ -113,8 +111,8 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     tables.add(rect);
   });
 
-  const despawn_zones = this.physics.add.staticGroup();
-  map.despawn_zone.forEach(([from, to]) => {
+  const despawnZones = this.physics.add.staticGroup();
+  map.despawnZones.forEach(([from, to]) => {
     const rect = this.add.rectangle(
       from.x + (to.x - from.x) / 2,
       from.y + (to.y - from.y) / 2,
@@ -123,7 +121,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       0xffeaa7
     );
 
-    despawn_zones.add(rect);
+    despawnZones.add(rect);
   });
 
   map.signs.forEach(({ position, direction }) => {
@@ -163,7 +161,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     triangle.rotation =
       (direction.x > 0 ? 1 : -1) * Math.acos(-direction.y / directionNorm);
   });
-  
+
   totalNumberOfDudes = map.spawnPoints.length;
 
   map.spawnPoints.forEach(point =>
@@ -187,32 +185,41 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });
 
   this.physics.add.collider(somkeGroup, walls);
-  this.physics.add.overlap(dudeGroup, somkeGroup, (dude: Dude, smoke:Phaser.GameObjects.Arc ) => {
-    dude.health -= smoke.alpha;
-    if (dude.health <= 0) {
-      console.log("Dude " + dude.name + " unfortunately perished in the fire!");
-      this.add.sprite(dude.x, dude.y, "skull");
-      numberOfDeadDudes++;
-      dude.destroy();
+  this.physics.add.overlap(
+    dudeGroup,
+    somkeGroup,
+    (dude: Dude, smoke: Phaser.GameObjects.Arc) => {
+      dude.health -= smoke.alpha;
+      if (dude.health <= 0) {
+        console.log(
+          "Dude " + dude.name + " unfortunately perished in the fire!"
+        );
+        this.add.sprite(dude.x, dude.y, "skull");
+        numberOfDeadDudes++;
+        dude.destroy();
+      }
     }
-  });
+  );
   this.physics.add.collider(dudeGroup, dudeGroup, (p1, p2) => {
     //collision callback
   });
 
   this.physics.add.collider(dudeGroup, walls);
   this.physics.add.collider(dudeGroup, tables);
-  this.physics.add.collider(dudeGroup, despawn_zones, (dude: Dude, zone) => {
+  this.physics.add.collider(dudeGroup, despawnZones, (dude: Dude, zone) => {
     console.log("Dude " + dude.name + " is a survivor!");
     numberOfSurvivorDudes++;
     dude.destroy();
   });
 
-  // ----- Initialize Timer -----	
-  timeLabel = this.add.text(map.width/2, 100, "00:00", {font: "100px Arial", fill: "#000"});
+  // ----- Initialize Timer -----
+  timeLabel = this.add.text(map.width / 2, 100, "00:00", {
+    font: "100px Arial",
+    fill: "#000"
+  });
   timeLabel.setOrigin(0.5);
-  timeLabel.setAlign('center');
-  timeLabel.setShadow(0, 0, '#000', 0, true, true);
+  timeLabel.setAlign("center");
+  timeLabel.setShadow(0, 0, "#000", 0, true, true);
 
   this.scene.pause();
 };
@@ -532,28 +539,24 @@ const unstuckDudes = () => {
   });
 };
 
-
 const updateTimer = function() {
-
-  currentElapsedTime = (game.getTime() - currentStartTime)/1000;
+  currentElapsedTime = (game.getTime() - currentStartTime) / 1000;
   let totalElapsedTime = previousElapsedTime + currentElapsedTime;
 
-  
   let minutes = Math.floor(totalElapsedTime / 60);
-  let seconds = Math.floor(totalElapsedTime) - (60 * minutes);
+  let seconds = Math.floor(totalElapsedTime) - 60 * minutes;
   //Display minutes, add a 0 to the start if less than 10
-  let result = (minutes < 10) ? "0" + minutes : minutes; 
+  let result = minutes < 10 ? "0" + minutes : minutes;
 
   //Display seconds, add a 0 to the start if less than 10
-  result += (seconds < 10) ? ":0" + seconds : ":" + seconds;
+  result += seconds < 10 ? ":0" + seconds : ":" + seconds;
 
   timeLabel.text = result.toString();
-}
+};
 
 // ----- Phaser initialization functions -----
 
 const update = function(this: Phaser.Scene) {
-
   if (totalNumberOfDudes == numberOfDeadDudes + numberOfSurvivorDudes) {
     this.scene.pause();
   }
