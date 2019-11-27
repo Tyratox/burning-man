@@ -3,7 +3,7 @@
 type Vector = { x: number; y: number };
 
 const sqr = (x: number) => x * x;
-const dist2 = (v: Vector, w: Vector) => sqr(v.x - w.x) + sqr(v.y - w.y);
+export const dist2 = (v: Vector, w: Vector) => sqr(v.x - w.x) + sqr(v.y - w.y);
 
 const distanceToLineSegmentSquared = (p: Vector, v: Vector, w: Vector) => {
   let l2 = dist2(v, w);

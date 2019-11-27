@@ -4,9 +4,10 @@ import PhaserNavMeshPlugin from "phaser-navmesh";
 import { CONSTANTS } from "./controls";
 import Dude from "./Dude";
 import map from "./map";
-import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
+import { isLeftOfLine, distanceToLineSegment, dist2 } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
+import AttractiveTarget from "./AttractiveTarget";
 
 interface Traceable {
   position: {
@@ -29,8 +30,9 @@ export const getBody = (
 
 // ----- Declaring Constants -----
 
-interface AttractiveTarget extends Traceable {
+interface TraceableAttractiveTarget extends Traceable {
   type: string;
+  index: number;
   position: {
     x: number;
     y: number;
@@ -41,7 +43,7 @@ interface AttractiveTarget extends Traceable {
   };
 }
 
-interface RepulsiveTarget extends Traceable {
+interface TraceableRepulsiveTarget extends Traceable {
   type: string;
   position: {
     x: number;
@@ -49,8 +51,8 @@ interface RepulsiveTarget extends Traceable {
   };
 }
 
-const attractiveTargets: AttractiveTarget[] = [];
-const repulsiveTargets: RepulsiveTarget[] = [];
+const attractiveTargets: TraceableAttractiveTarget[] = [];
+const repulsiveTargets: TraceableRepulsiveTarget[] = [];
 
 type Wall = Phaser.Geom.Polygon | Phaser.Geom.Rectangle | Phaser.Geom.Ellipse;
 const wallShape: Wall[] = [];
@@ -79,7 +81,9 @@ export const setPreviousElapsedTime = (time: number) => {
   previousElapsedTime += (time - currentStartTime) / 1000;
 };
 
+//globals
 let dudeGroup: Phaser.GameObjects.Group;
+let navmesh: any;
 
 // ----- Phaser initialization functions -----
 
@@ -94,10 +98,17 @@ const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
   //generate map, yehei
   //https://stackabuse.com/phaser-3-and-tiled-building-a-platformer/
-  const tiledMap = this.make.tilemap({ key: "map" });
-  const tileset = tiledMap.addTilesetImage("Dungeon_Tileset", "dungeon-tiles");
-  const floorLayer = tiledMap.createStaticLayer("floor", tileset, 0, 0);
-  const walls = tiledMap.createStaticLayer("walls", tileset, 0, 0);
+  const tilemap = this.make.tilemap({ key: "map" });
+  const tileset = tilemap.addTilesetImage("Dungeon_Tileset", "dungeon-tiles");
+  const floorLayer = tilemap.createStaticLayer("floor", tileset, 0, 0);
+  //@ts-ignore
+  navmesh = this.navMeshPlugin.buildMeshFromTiled(
+    "mesh",
+    tilemap.getObjectLayer("navmesh"),
+    16
+  );
+
+  const walls = tilemap.createStaticLayer("walls", tileset, 0, 0);
   walls.setCollisionBetween(1, 10000);
 
   walls.forEachTile((tile: Phaser.Tilemaps.Tile) => {
@@ -154,13 +165,11 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     }
   });
 
-  console.log("wallShape", wallShape.length);
-
   // ----- Create Physiscs Group -----
 
   dudeGroup = this.add.group();
 
-  tiledMap
+  tilemap
     .getObjectLayer("dudes")
     ["objects"].forEach(dude =>
       dudeGroup.add(new Dude(dude.x, dude.y, "Peter", this))
@@ -183,7 +192,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   });*/
 
   const despawnZones = this.physics.add.staticGroup();
-  tiledMap.getObjectLayer("despawn-zones")["objects"].forEach(zone => {
+  tilemap.getObjectLayer("despawn-zones")["objects"].forEach(zone => {
     const rect = this.add.rectangle(
       zone.x + zone.width / 2,
       zone.y + zone.height / 2,
@@ -197,7 +206,9 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
   const attractiveTargetGroup = this.physics.add.staticGroup();
 
-  tiledMap.getObjectLayer("signs")["objects"].forEach(sign => {
+  const signCount = tilemap.getObjectLayer("signs")["objects"].length;
+
+  tilemap.getObjectLayer("signs")["objects"].forEach((sign, index) => {
     const orientationX: number = sign.properties.find(
       p => p.name === "orientationX"
     ).value;
@@ -224,13 +235,17 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
     attractiveTargets.push({
       type: "sign",
+      index,
       position: { x: sign.x, y: sign.y },
       orientation: { x: orientationX, y: orientationY }
     });
-    attractiveTargetGroup.add(triangle);
+
+    attractiveTargetGroup.add(
+      new AttractiveTarget(index, sign.x, sign.y, this)
+    );
   });
 
-  tiledMap.getObjectLayer("doors")["objects"].forEach(door => {
+  tilemap.getObjectLayer("doors")["objects"].forEach((door, index) => {
     const orientationX: number = door.properties.find(
       p => p.name === "orientationX"
     ).value;
@@ -257,9 +272,14 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
     attractiveTargets.push({
       type: "door",
+      index: signCount + index,
       position: { x: door.x, y: door.y },
       orientation: { x: orientationX, y: orientationY }
     });
+
+    attractiveTargetGroup.add(
+      new AttractiveTarget(signCount + index, door.x, door.y, this)
+    );
   });
 
   totalNumberOfDudes = map.spawnPoints.length;
@@ -305,6 +325,14 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     dude.destroy();
   });
 
+  this.physics.add.overlap(
+    dudeGroup,
+    attractiveTargetGroup,
+    (dude: Dude, target: AttractiveTarget) => {
+      dude.visitedTargets.push(target.index);
+      dude.path = null;
+    }
+  );
   // ----- Initialize Timer -----
   timeLabel = this.add.text(map.width / 2, 100, "00:00", {
     font: "100px Arial",
@@ -341,29 +369,7 @@ const rayTrace = <T extends Traceable>(
 
     const ray = new Phaser.Geom.Line(dudeX, dudeY, position.x, position.y);
 
-    const intersect = wallShape.find(wall => {
-      if (wall instanceof Phaser.Geom.Rectangle) {
-        return Phaser.Geom.Intersects.LineToRectangle(ray, wall);
-      } else if (wall instanceof Phaser.Geom.Ellipse) {
-        //approximate as rectangle
-        return Phaser.Geom.Intersects.LineToRectangle(ray, wall);
-      } else if (wall instanceof Phaser.Geom.Polygon) {
-        let collided = false;
-        for (let i = 1; i < wall.points.length; i++) {
-          const w = new Phaser.Geom.Line(
-            wall.points[i - 1].x,
-            wall.points[i - 1].y,
-            wall.points[i].x,
-            wall.points[i].y
-          );
-          collided = collided && Phaser.Geom.Intersects.LineToLine(ray, w);
-        }
-
-        return collided;
-      }
-
-      return false;
-    });
+    const intersect = undefined;
 
     //if the sight isn't intersected and the distance is shorter return the new one
     return intersect === undefined;
@@ -394,8 +400,9 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
             (position.y - dudeY) * (position.y - dudeY)
         );
 
-        //if the sight isn't intersected and the distance is shorter return the new one
-        return best.distance > currentDist
+        //if the sight isn't intersected, the distance is shorter and it wasn't visited before return the new one
+        return !dude.visitedTargets.includes(element.index) &&
+          best.distance > currentDist
           ? { distance: currentDist, position }
           : best;
       }
@@ -405,7 +412,7 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
     { distance: Number.MAX_VALUE, position: { x: -1, y: -1 } }
   ).position;
 
-  const offset = dude.getRadius();
+  const offset = dude.radius;
 
   if (closestOriented.x > 0) {
     const ray = scene.add
@@ -519,15 +526,79 @@ const calculateForces = (scene: Phaser.Scene) => {
 
     //calculate directioncorrecting force
     const desiredVelocity = dudes[i].maxVelocity;
+    const dudePosition = { x: dudes[i].x, y: dudes[i].y };
 
-    // CorrectingForce = Mass*(Vdesired-Vcurr)/reactionTime
-    const sign = findClosestAttractiveTarget(dudes[i], scene);
-    dudes[i].setSign(sign.x, sign.y);
+    //check if the dude isn't already tracking a path or just reached
+    if (dudes[i].path === null) {
+      //check if he see's a sign
+      const sign = findClosestAttractiveTarget(dudes[i], scene);
 
-    //calculate here the desired velocity from the target value only if we have a target
-    if (sign.x > 0) {
+      //calculate here the desired velocity from the target value only if we have a target
+      if (sign.x > 0) {
+        const path = navmesh.findPath({ x: dudes[i].x, y: dudes[i].y }, sign);
+        dudes[i].path = path;
+      } else {
+        //do random stuff / generate a random path
+      }
+    }
+
+    if (dudes[i].path !== null) {
+      //follow the path that is just an array of points, find the two closest and take the one with the higher index
+      let closestPoint: { x: number; y: number } = dudes[i].path[0];
+      let closestPointDistance = dist2(closestPoint, dudePosition);
+      let closestPointIndex = 0;
+
+      let secondClosestPoint = { x: 0, y: 0 };
+      let secondClosestPointDistance = Number.MAX_VALUE;
+      let secondClosestPointIndex = -1;
+
+      for (let j = 1; j < dudes[i].path.length; j++) {
+        const p: { x: number; y: number } = dudes[i].path[j];
+        const d = dist2(p, dudePosition);
+        if (d < closestPointDistance) {
+          secondClosestPoint = closestPoint;
+          secondClosestPointDistance = closestPointDistance;
+          secondClosestPointIndex = closestPointIndex;
+
+          closestPoint = p;
+          closestPointDistance = d;
+          closestPointIndex = j;
+        } else if (d < secondClosestPointDistance) {
+          secondClosestPoint = p;
+          secondClosestPointDistance = d;
+          secondClosestPointIndex = j;
+        }
+      }
+      const nextPoint =
+        closestPointIndex > secondClosestPointIndex
+          ? closestPoint
+          : secondClosestPoint;
+
+      const ray = scene.add
+        .line(
+          0,
+          0,
+          dudePosition.x,
+          dudePosition.y,
+          nextPoint.x,
+          nextPoint.y,
+          0xff0000,
+          0.1
+        )
+        .setOrigin(0, 0);
+
+      scene.tweens.add({
+        targets: ray,
+        alpha: { from: 1, to: 0 },
+        ease: "Linear",
+        duration: 100,
+        repeat: 0,
+        yoyo: false,
+        onComplete: () => ray.destroy()
+      });
+
       accelerations[i].add(
-        sign
+        new Phaser.Math.Vector2(nextPoint.x, nextPoint.y)
           .subtract(dudes[i].getBody().position)
           .normalize()
           .scale(desiredVelocity)
@@ -597,7 +668,7 @@ const calculateForces = (scene: Phaser.Scene) => {
   );
 };
 
-// If a dude gets stuck this function helps out
+/*// If a dude gets stuck this function helps out
 const unstuckDudes = () => {
   dudeGroup.children.getArray().forEach((dude: Dude) => {
     const curr = dude.getBody();
@@ -636,7 +707,7 @@ const unstuckDudes = () => {
       curr.acceleration.add(changeDirection);
     }
   });
-};
+};*/
 
 const updateTimer = function() {
   currentElapsedTime = (game.getTime() - currentStartTime) / 1000;

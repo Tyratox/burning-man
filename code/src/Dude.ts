@@ -24,8 +24,9 @@ class Dude extends Phaser.GameObjects.Arc {
   age: number;
   normalizedAge: number;
 
-  //the currently tracked sign
-  sign: { x: number; y: number };
+  //the currently tracked path
+  visitedTargets: number[];
+  path: { x: number; y: number }[];
 
   constructor(x: number, y: number, name: string, scene: Phaser.Scene) {
     const weight = strictNormal(
@@ -59,7 +60,8 @@ class Dude extends Phaser.GameObjects.Arc {
 
     scene.children.add(this);
 
-    this.sign = { x: 0, y: 0 };
+    this.path = null;
+    this.visitedTargets = [];
     this.fitness = fitness;
     this.weight = weight;
     this.age = age;
@@ -95,21 +97,8 @@ class Dude extends Phaser.GameObjects.Arc {
       .setBounce(0, 0);
   }
 
-  getRadius() {
-    return this.radius;
-  }
-
   getBody() {
     return getBody(this);
-  }
-
-  getSign() {
-    return this.sign;
-  }
-
-  setSign(x: number, y: number) {
-    this.sign.x = x;
-    this.sign.y = y;
   }
 }
 
