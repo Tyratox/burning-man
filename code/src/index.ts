@@ -1,5 +1,5 @@
 import * as Phaser from "phaser";
-import { throttle } from "lodash";
+import PhaserNavMeshPlugin from "phaser-navmesh";
 
 import { CONSTANTS } from "./controls";
 import Dude from "./Dude";
@@ -7,7 +7,6 @@ import map from "./map";
 import { isLeftOfLine, distanceToLineSegment } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
-import { sign } from "crypto";
 
 interface Traceable {
   position: {
@@ -430,7 +429,7 @@ const calculateForces = (scene: Phaser.Scene) => {
           .normalize()
           .scale(desiredVelocity)
           .subtract(dudes[i].getBody().velocity) // subtract current velocity
-          .scale(dudes[i].fitness / dudes[i].weight) //reaction time
+          .scale(dudes[i].normalizedFitness / dudes[i].normalizedWeight) //reaction time
       );
     }
 
@@ -485,10 +484,10 @@ const calculateForces = (scene: Phaser.Scene) => {
         .normalize();
 
       accelerations[i].add(
-        directionForDude1.clone().scale(force / dude1.weight)
+        directionForDude1.clone().scale(force / dude1.normalizedWeight)
       );
       accelerations[j].add(
-        directionForDude1.negate().scale(force / dude2.weight)
+        directionForDude1.negate().scale(force / dude2.normalizedWeight)
       );
     }
   }
@@ -577,6 +576,16 @@ const config: GameConfig = {
   width: map.width,
   height: map.height,
   scene,
+  plugins: {
+    scene: [
+      {
+        key: "NavMeshPlugin",
+        plugin: PhaserNavMeshPlugin,
+        mapping: "navMeshPlugin",
+        start: true
+      }
+    ]
+  },
   physics: {
     default: "arcade",
     arcade: {

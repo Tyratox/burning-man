@@ -3,102 +3,89 @@ import randomNormal from "random-normal";
 
 import { CONSTANTS } from "./controls";
 
+const strictNormal = (mean: number, dev: number) =>
+  Math.min(Math.max(randomNormal({ mean, dev }), mean - dev), mean + dev);
+const normalFactor = (value: number, mean: number) => value / value;
+
 class Dude extends Phaser.GameObjects.Arc {
   maxVelocity: number;
   maxAcceleration: number;
-  radius: number;
-  stressLevel: number;
   visualRange: number;
   health: number;
   name: string;
 
   //should't be changed, just informational
   fitness: number;
+  normalizedFitness: number;
+
   weight: number;
+  normalizedWeight: number;
+
   age: number;
+  normalizedAge: number;
 
   //the currently tracked sign
   sign: { x: number; y: number };
 
   constructor(x: number, y: number, name: string, scene: Phaser.Scene) {
-    const weight = Math.min(
-      Math.max(
-        randomNormal({
-          mean: CONSTANTS.MEAN_DUDE_WEIGHT,
-          dev: CONSTANTS.DUDE_WEIGHT_STD_DEV
-        }),
-        0.1
-      ),
-      1
+    const weight = strictNormal(
+      CONSTANTS.MEAN_DUDE_WEIGHT,
+      CONSTANTS.DUDE_WEIGHT_STD_DEV
     );
-    const fitness = Math.min(
-      Math.max(
-        randomNormal({
-          mean: CONSTANTS.MEAN_DUDE_FITNESS,
-          dev: CONSTANTS.DUDE_FITNESS_STD_DEV
-        }),
-        0.1
-      ),
-      1
+    const normalizedWeight = normalFactor(weight, CONSTANTS.MEAN_DUDE_WEIGHT);
+
+    const fitness = strictNormal(
+      CONSTANTS.MEAN_DUDE_FITNESS,
+      CONSTANTS.DUDE_FITNESS_STD_DEV
+    );
+    const normalizedFitness = normalFactor(
+      fitness,
+      CONSTANTS.MEAN_DUDE_FITNESS
     );
 
-    const r = Math.max(
-      randomNormal({
-        mean: CONSTANTS.MEAN_DUDE_RADIUS,
-        dev: CONSTANTS.DUDE_RADIUS_STD_DEV
-      }),
-      8
-    );
+    const normalizedAgility = normalizedFitness / normalizedWeight;
 
-    const radius = Math.min(
-      Math.max((r * Math.pow(weight, 2)) / fitness, 9),
-      18
+    const age = strictNormal(
+      CONSTANTS.MEAN_DUDE_AGE,
+      CONSTANTS.DUDE_AGE_STD_DEV
     );
-    super(scene, x, y, radius, 0, 360, true, 0xf1c40f, 1);
+    const normalizedAge = normalFactor(age, CONSTANTS.MEAN_DUDE_AGE);
+
+    const r =
+      strictNormal(CONSTANTS.MEAN_DUDE_RADIUS, CONSTANTS.DUDE_RADIUS_STD_DEV) *
+      (1 / normalizedAgility);
+
+    super(scene, x, y, r, 0, 360, true, 0xf1c40f, 1);
 
     scene.children.add(this);
 
     this.sign = { x: 0, y: 0 };
     this.fitness = fitness;
     this.weight = weight;
-    this.age = Math.min(
-      Math.max(
-        randomNormal({
-          mean: CONSTANTS.MEAN_DUDE_AGE,
-          dev: CONSTANTS.DUDE_AGE_STD_DEV
-        }),
-        0.1
-      ),
-      1
-    );
+    this.age = age;
 
-    this.maxVelocity = Math.max(
-      randomNormal({
-        mean: CONSTANTS.MEAN_DUDE_MAX_VELOCITY,
-        dev: CONSTANTS.DUDE_MAX_VELOCITY_STD_DEV
-      }) *
-        ((fitness * weight) / this.age),
-      100
-    );
+    this.normalizedWeight = normalizedWeight;
+    this.normalizedFitness = normalizedFitness;
+    this.normalizedAge = normalizedAge;
+
+    this.maxVelocity =
+      strictNormal(
+        CONSTANTS.MEAN_DUDE_MAX_VELOCITY,
+        CONSTANTS.DUDE_MAX_ACCELERATION_STD_DEV
+      ) * normalizedAgility;
+
     this.maxAcceleration =
-      Math.max(
-        randomNormal({
-          mean: CONSTANTS.MEAN_DUDE_MAX_ACCELERATION,
-          dev: CONSTANTS.DUDE_MAX_ACCELERATION_STD_DEV
-        }),
-        30
-      ) *
-      ((fitness * weight) / this.age);
-    this.radius = radius;
-    this.stressLevel = Math.random();
+      strictNormal(
+        CONSTANTS.MEAN_DUDE_MAX_VELOCITY,
+        CONSTANTS.DUDE_MAX_ACCELERATION_STD_DEV
+      ) * normalizedAgility;
+
     this.visualRange =
-      Math.max(
-        randomNormal({
-          mean: CONSTANTS.MEAN_DUDE_VISUAL_RANGE,
-          dev: CONSTANTS.DUDE_VISUAL_RANGE_STD_DEV
-        }),
-        300
-      ) / this.age;
+      strictNormal(
+        CONSTANTS.MEAN_DUDE_VISUAL_RANGE,
+        CONSTANTS.DUDE_VISUAL_RANGE_STD_DEV
+      ) / this.normalizedAge;
+
     this.health = 4000;
     this.name = name;
 
