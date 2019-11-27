@@ -29,13 +29,31 @@ export const getBody = (
 
 // ----- Declaring Constants -----
 
-const attractiveTargets = [
-  ...map.signs.map(e => ({ ...e, type: "sign" })),
-  ...map.doors.map(e => ({ ...e, type: "door" }))
-];
-const repulsiveTargets: Traceable[] = [
-  ...map.fires.map(e => ({ ...e, type: "fire" }))
-];
+interface AttractiveTarget extends Traceable {
+  type: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  orientation: {
+    x: number;
+    y: number;
+  };
+}
+
+interface RepulsiveTarget extends Traceable {
+  type: string;
+  position: {
+    x: number;
+    y: number;
+  };
+}
+
+const attractiveTargets: AttractiveTarget[] = [];
+const repulsiveTargets: RepulsiveTarget[] = [];
+
+type Wall = Phaser.Geom.Polygon | Phaser.Geom.Rectangle | Phaser.Geom.Ellipse;
+const wallShape: Wall[] = [];
 
 const ACCELERATION_THRESHOLD = 0;
 const ACCELERATION_VALUE = 500;
@@ -67,38 +85,92 @@ let dudeGroup: Phaser.GameObjects.Group;
 
 const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
   //load images if needed
-  this.load.image("skull", "assets/skull.png");
-  this.load.image("fire", "assets/fire.png");
+  this.load.image("dungeon-tiles", "/assets/map/dungeon-tileset.png");
+  this.load.image("skull", "/assets/skull.png");
+  this.load.image("fire", "/assets/fire.png");
+  this.load.tilemapTiledJSON("map", "/assets/map/default.json");
 };
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
   //generate map, yehei
-  const halfThickness = map.wallThickness / 2;
+  //https://stackabuse.com/phaser-3-and-tiled-building-a-platformer/
+  const tiledMap = this.make.tilemap({ key: "map" });
+  const tileset = tiledMap.addTilesetImage("Dungeon_Tileset", "dungeon-tiles");
+  const floorLayer = tiledMap.createStaticLayer("floor", tileset, 0, 0);
+  const walls = tiledMap.createStaticLayer("walls", tileset, 0, 0);
+  walls.setCollisionBetween(1, 10000);
+
+  walls.forEachTile((tile: Phaser.Tilemaps.Tile) => {
+    const collisionGroup: any = tileset.getTileCollisionGroup(tile.index);
+    const tileWorldPos = walls.tileToWorldXY(tile.x, tile.y);
+
+    if (!collisionGroup || collisionGroup.objects.length === 0) {
+      wallShape.push(
+        new Phaser.Geom.Rectangle(tile.x, tile.y, tile.width, tile.height)
+      );
+      return;
+    }
+
+    // The group will have an array of objects - these are the individual collision shapes
+    const objects = collisionGroup.objects;
+
+    for (let i = 0; i < objects.length; i++) {
+      const object = objects[i];
+      const objectX = tileWorldPos.x + object.x;
+      const objectY = tileWorldPos.y + object.y;
+
+      // When objects are parsed by Phaser, they will be guaranteed to have one of the
+      // following properties if they are a rectangle/ellipse/polygon/polyline.
+      if (object.rectangle) {
+        wallShape.push(
+          new Phaser.Geom.Rectangle(
+            objectX,
+            objectY,
+            object.width,
+            object.height
+          )
+        );
+      } else if (object.ellipse) {
+        // Ellipses in Tiled have a top-left origin, while ellipses in Phaser have a center
+        // origin
+        wallShape.push(
+          new Phaser.Geom.Ellipse(
+            objectX + object.width / 2,
+            objectY + object.height / 2,
+            object.width,
+            object.height
+          )
+        );
+      } else if (object.polygon || object.polyline) {
+        const originalPoints = object.polygon
+          ? object.polygon
+          : object.polyline;
+        const points = originalPoints.map(
+          point => new Phaser.Geom.Point(objectX + point.x, objectY + point.y)
+        );
+
+        wallShape.push(new Phaser.Geom.Polygon(points));
+      }
+    }
+  });
+
+  console.log("wallShape", wallShape.length);
 
   // ----- Create Physiscs Group -----
 
-  const walls = this.physics.add.staticGroup();
-
   dudeGroup = this.add.group();
+
+  tiledMap
+    .getObjectLayer("dudes")
+    ["objects"].forEach(dude =>
+      dudeGroup.add(new Dude(dude.x, dude.y, "Peter", this))
+    );
+
   const somkeGroup = this.add.group();
   const fireGroup = this.add.group();
 
-  // ----- Initialize all Groups -----
-
-  map.walls.forEach(([from, to]) => {
-    const rect = this.add.rectangle(
-      from.x + (to.x - from.x) / 2,
-      from.y + (to.y - from.y) / 2,
-      to.x - from.x + halfThickness,
-      to.y - from.y + halfThickness,
-      0x000000
-    );
-
-    walls.add(rect);
-  });
-
   const tables = this.physics.add.staticGroup();
-  map.tables.forEach(([from, to]) => {
+  /*map.tables.forEach(([from, to]) => {
     const rect = this.add.rectangle(
       from.x + (to.x - from.x) / 2,
       from.y + (to.y - from.y) / 2,
@@ -108,25 +180,34 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     );
 
     tables.add(rect);
-  });
+  });*/
 
   const despawnZones = this.physics.add.staticGroup();
-  map.despawnZones.forEach(([from, to]) => {
+  tiledMap.getObjectLayer("despawn-zones")["objects"].forEach(zone => {
     const rect = this.add.rectangle(
-      from.x + (to.x - from.x) / 2,
-      from.y + (to.y - from.y) / 2,
-      to.x - from.x + halfThickness,
-      to.y - from.y + halfThickness,
+      zone.x + zone.width / 2,
+      zone.y + zone.height / 2,
+      zone.width,
+      zone.height,
       0xffeaa7
     );
 
     despawnZones.add(rect);
   });
 
-  map.signs.forEach(({ position, direction }) => {
+  const attractiveTargetGroup = this.physics.add.staticGroup();
+
+  tiledMap.getObjectLayer("signs")["objects"].forEach(sign => {
+    const orientationX: number = sign.properties.find(
+      p => p.name === "orientationX"
+    ).value;
+    const orientationY: number = sign.properties.find(
+      p => p.name === "orientationY"
+    ).value;
+
     const triangle = this.add.isotriangle(
-      position.x,
-      position.y,
+      sign.x,
+      sign.y,
       CONSTANTS.TRIANGLE_SIZE,
       CONSTANTS.TRIANGLE_HEIGHT,
       false,
@@ -134,18 +215,32 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       0x2ecc71,
       0x27ae60
     );
-    const directionNorm = Math.sqrt(
-      direction.x * direction.x + direction.y * direction.y
+    const orientationNorm = Math.sqrt(
+      orientationX * orientationX + orientationY * orientationY
     );
 
     triangle.rotation =
-      (direction.x > 0 ? 1 : -1) * Math.acos(-direction.y / directionNorm);
+      (orientationX < 0 ? 1 : -1) * Math.acos(orientationY / orientationNorm);
+
+    attractiveTargets.push({
+      type: "sign",
+      position: { x: sign.x, y: sign.y },
+      orientation: { x: orientationX, y: orientationY }
+    });
+    attractiveTargetGroup.add(triangle);
   });
 
-  map.doors.forEach(({ position, direction }) => {
+  tiledMap.getObjectLayer("doors")["objects"].forEach(door => {
+    const orientationX: number = door.properties.find(
+      p => p.name === "orientationX"
+    ).value;
+    const orientationY: number = door.properties.find(
+      p => p.name === "orientationY"
+    ).value;
+
     const triangle = this.add.isotriangle(
-      position.x,
-      position.y,
+      door.x,
+      door.y,
       CONSTANTS.TRIANGLE_SIZE,
       CONSTANTS.TRIANGLE_HEIGHT,
       false,
@@ -154,18 +249,20 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       0x2980b9
     );
     const directionNorm = Math.sqrt(
-      direction.x * direction.x + direction.y * direction.y
+      orientationX * orientationX + orientationY * orientationY
     );
 
     triangle.rotation =
-      (direction.x > 0 ? 1 : -1) * Math.acos(-direction.y / directionNorm);
+      (orientationX < 0 ? 1 : -1) * Math.acos(orientationY / directionNorm);
+
+    attractiveTargets.push({
+      type: "door",
+      position: { x: door.x, y: door.y },
+      orientation: { x: orientationX, y: orientationY }
+    });
   });
 
   totalNumberOfDudes = map.spawnPoints.length;
-
-  map.spawnPoints.forEach(point =>
-    dudeGroup.add(new Dude(point.x, point.y, "Peter", this))
-  );
 
   // Create Fire class instances
   map.fires.forEach(point =>
@@ -199,10 +296,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       }
     }
   );
-  this.physics.add.collider(dudeGroup, dudeGroup, (p1, p2) => {
-    //collision callback
-  });
-
+  this.physics.add.collider(dudeGroup, dudeGroup);
   this.physics.add.collider(dudeGroup, walls);
   this.physics.add.collider(dudeGroup, tables);
   this.physics.add.collider(dudeGroup, despawnZones, (dude: Dude, zone) => {
@@ -220,7 +314,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   timeLabel.setAlign("center");
   timeLabel.setShadow(0, 0, "#000", 0, true, true);
 
-  this.scene.pause();
+  //this.scene.pause();
 };
 
 // ----- Orientation and Force Algorithms -----
@@ -245,18 +339,27 @@ const rayTrace = <T extends Traceable>(
       return false;
     }
 
-    const signToAgent = new Phaser.Geom.Line(
-      dudeX,
-      dudeY,
-      position.x,
-      position.y
-    );
+    const ray = new Phaser.Geom.Line(dudeX, dudeY, position.x, position.y);
 
-    const intersect = map.walls.find(coordinates => {
-      const [from, to] = coordinates;
-      const wall = new Phaser.Geom.Line(from.x, from.y, to.x, to.y);
-      if (Phaser.Geom.Intersects.LineToLine(wall, signToAgent)) {
-        return true;
+    const intersect = wallShape.find(wall => {
+      if (wall instanceof Phaser.Geom.Rectangle) {
+        return Phaser.Geom.Intersects.LineToRectangle(ray, wall);
+      } else if (wall instanceof Phaser.Geom.Ellipse) {
+        //approximate as rectangle
+        return Phaser.Geom.Intersects.LineToRectangle(ray, wall);
+      } else if (wall instanceof Phaser.Geom.Polygon) {
+        let collided = false;
+        for (let i = 1; i < wall.points.length; i++) {
+          const w = new Phaser.Geom.Line(
+            wall.points[i - 1].x,
+            wall.points[i - 1].y,
+            wall.points[i].x,
+            wall.points[i].y
+          );
+          collided = collided && Phaser.Geom.Intersects.LineToLine(ray, w);
+        }
+
+        return collided;
       }
 
       return false;
@@ -466,14 +569,11 @@ const calculateForces = (scene: Phaser.Scene) => {
       const pushingForce =
         distance > 50
           ? 0
-          : Math.min(
-              CONSTANTS.DUDE_REPULSION_LINEAR *
-                Math.exp(CONSTANTS.DUDE_REPULSION_EXPONENTIAL / distance),
-              100
-            );
+          : CONSTANTS.DUDE_REPULSION_LINEAR *
+            Math.exp(CONSTANTS.DUDE_REPULSION_EXPONENTIAL / distance);
 
       //the bigger the distance the smaller the pulling force
-      const pullingForce = 1 / (distance * CONSTANTS.DUDE_GROUP_ATTRACTION);
+      const pullingForce = CONSTANTS.DUDE_GROUP_ATTRACTION / distance;
 
       const force = pushingForce - pullingForce;
 
@@ -560,7 +660,7 @@ const update = function(this: Phaser.Scene) {
     this.scene.pause();
   }
   calculateForces(this);
-  unstuckDudes();
+  //unstuckDudes();
   updateTimer();
 };
 
@@ -601,5 +701,7 @@ export let game: Phaser.Game = null;
 export const initGame = () => {
   game = new Phaser.Game(config);
 };
+
+initGame();
 
 document.addEventListener("DOMContentLoaded", onDOMReadyControlSetup);
