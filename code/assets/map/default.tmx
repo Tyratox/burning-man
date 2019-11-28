@@ -81,7 +81,7 @@
 52,53,53,53,53,53,53,53,53,53,54,52,53,53,53,53,53,53,53,53,53,53,54,52,53,53,53,53,54,52,53,53,53,53,54,52,53,53,53,53,54,52,53,53,53,53,53,53,53,54,52,53,53,53,53,53,53,53,53,54
 </data>
  </layer>
- <objectgroup id="9" name="navmesh">
+ <objectgroup id="9" name="navmesh" visible="0">
   <object id="70" x="1816" y="480" width="72" height="128"/>
   <object id="71" x="112" y="376" width="32" height="104"/>
   <object id="72" x="48" y="80" width="680" height="272"/>
@@ -424,7 +424,7 @@
    <point/>
   </object>
  </objectgroup>
- <objectgroup id="4" name="signs">
+ <objectgroup id="4" name="signs" visible="0">
   <object id="28" name="Sign" type="sign" x="395.662" y="561.254">
    <properties>
     <property name="orientationX" type="int" value="-1"/>
