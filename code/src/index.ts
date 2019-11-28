@@ -13,6 +13,7 @@ import {
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
 import AttractiveTarget from "./AttractiveTarget";
+import Names from "../assets/names.json"
 
 interface Traceable {
   position: {
@@ -76,8 +77,15 @@ let numberOfSurvivorDudes = 0;
 let currentStartTime: number = 0;
 let previousElapsedTime: number = 0;
 let currentElapsedTime: number = 0;
+
+//globals
+let dudeGroup: Phaser.GameObjects.Group;
+let navmesh: any;
 let timeLabel: Phaser.GameObjects.Text;
 let despawnZones: Phaser.Physics.Arcade.StaticGroup;
+let walls: Phaser.Physics.Arcade.StaticGroup;
+let doorGroup: Phaser.GameObjects.Group;
+let attractiveTargetGroup: Phaser.Physics.Arcade.StaticGroup;
 
 export const setCurrentStartTime = (time: number) => {
   currentStartTime = time;
@@ -87,11 +95,18 @@ export const setPreviousElapsedTime = (time: number) => {
 };
 export const toggleDebugObjectsVisibility = () => {
   despawnZones.toggleVisible();
+  walls.toggleVisible();
+  doorGroup.toggleVisible();
+  attractiveTargetGroup.toggleVisible();
+};
+export const toggleNavmeshDebugVisibility = () => {
+  if (navmesh.isDebugEnabled()) {
+    navmesh.disableDebug();
+  } else {
+    navmesh.enableDebug();
+  }
 };
 
-//globals
-let dudeGroup: Phaser.GameObjects.Group;
-let navmesh: any;
 
 // ----- Phaser initialization functions -----
 
@@ -117,18 +132,19 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     tilemap.getObjectLayer("navmesh"),
     16
   );
-  // navmesh.enableDebug();
-  // navmesh.debugDrawMesh({
-  //   drawCentroid: true,
-  //   drawBounds: true,
-  //   drawNeighbors: true,
-  //   drawPortals: false
-  // });
+  navmesh.enableDebug();
+  navmesh.debugDrawMesh({
+    drawCentroid: true,
+    drawBounds: true,
+    drawNeighbors: true,
+    drawPortals: false
+  });
+  navmesh.disableDebug();
 
   //walls.setCollisionBetween(1, walls.tilesTotal);
 
   //additional layer for raytracing
-  const walls = this.physics.add.staticGroup();
+  walls = this.physics.add.staticGroup();
   tilemap.getObjectLayer("physical-walls")["objects"].forEach(rect => {
     wallShape.push(
       new Phaser.Geom.Rectangle(rect.x, rect.y, rect.width, rect.height)
@@ -151,7 +167,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   tilemap
     .getObjectLayer("dudes")
     ["objects"].forEach(dude =>
-      dudeGroup.add(new Dude(dude.x, dude.y, "Peter", this))
+      dudeGroup.add(new Dude(dude.x, dude.y, Names[Math.floor(Math.random() * Names.length)], this))
     );
 
   const somkeGroup = this.add.group();
@@ -183,7 +199,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     despawnZones.add(rect);
   });
 
-  const attractiveTargetGroup = this.physics.add.staticGroup();
+  attractiveTargetGroup = this.physics.add.staticGroup();
 
   const signCount = tilemap.getObjectLayer("signs")["objects"].length;
 
@@ -224,6 +240,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     );
   });
 
+  doorGroup = this.add.group();
   tilemap.getObjectLayer("doors")["objects"].forEach((door, index) => {
     const orientationX: number = door.properties.find(
       p => p.name === "orientationX"
@@ -242,6 +259,9 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
       0x3498db,
       0x2980b9
     );
+
+    doorGroup.add(triangle);
+
     const directionNorm = Math.sqrt(
       orientationX * orientationX + orientationY * orientationY
     );
@@ -313,13 +333,12 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     }
   );
   // ----- Initialize Timer -----
-  timeLabel = this.add.text(map.width / 2, 100, "00:00", {
+  timeLabel = this.add.text(150, 105, "00:00", {
     font: "100px Arial",
     fill: "#000"
   });
   timeLabel.setOrigin(0.5);
   timeLabel.setAlign("center");
-  timeLabel.setShadow(0, 0, "#000", 0, true, true);
 
   this.scene.pause();
 };
@@ -395,7 +414,7 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
 
   const offset = dude.radius;
 
-  if (closestOriented.x > 0) {
+  if (closestOriented.x > 0 && CONSTANTS.RENDER_DEBUG_OBJECTS) {
     const ray = scene.add
       .line(
         0,
@@ -536,28 +555,30 @@ const calculateForces = (scene: Phaser.Scene) => {
           ? closestPoint
           : secondClosestPoint;
 
-      const ray = scene.add
-        .line(
-          0,
-          0,
-          dudePosition.x,
-          dudePosition.y,
-          nextPoint.x,
-          nextPoint.y,
-          0x00ff00,
-          0.1
-        )
-        .setOrigin(0, 0);
+      if (CONSTANTS.RENDER_DEBUG_OBJECTS) {
+        const ray = scene.add
+          .line(
+            0,
+            0,
+            dudePosition.x,
+            dudePosition.y,
+            nextPoint.x,
+            nextPoint.y,
+            0x00ff00,
+            0.1
+          )
+          .setOrigin(0, 0);
 
-      scene.tweens.add({
-        targets: ray,
-        alpha: { from: 1, to: 0 },
-        ease: "Linear",
-        duration: 100,
-        repeat: 0,
-        yoyo: false,
-        onComplete: () => ray.destroy()
-      });
+        scene.tweens.add({
+          targets: ray,
+          alpha: { from: 1, to: 0 },
+          ease: "Linear",
+          duration: 100,
+          repeat: 0,
+          yoyo: false,
+          onComplete: () => ray.destroy()
+        });
+      }
 
       accelerations[i].add(
         new Phaser.Math.Vector2(nextPoint.x, nextPoint.y)

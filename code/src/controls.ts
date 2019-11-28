@@ -1,4 +1,11 @@
-import { game, initGame, setCurrentStartTime, setPreviousElapsedTime, toggleDebugObjectsVisibility } from ".";
+import {
+  game,
+  initGame,
+  setCurrentStartTime,
+  setPreviousElapsedTime,
+  toggleDebugObjectsVisibility,
+  toggleNavmeshDebugVisibility
+} from ".";
 
 export const CONSTANTS = {
   TRIANGLE_HEIGHT: 20,
@@ -41,7 +48,8 @@ export const CONSTANTS = {
   MEAN_DUDE_FITNESS: 0.5,
   DUDE_FITNESS_STD_DEV: 0.4,
 
-  RENDER_DEBUG_OBJECTS: true
+  RENDER_DEBUG_OBJECTS: true,
+  RENDER_NAVMESH_DEBUG: false
 };
 
 const onSliderChange = (e: InputEvent) => {
@@ -81,6 +89,7 @@ export const onDOMReadyControlSetup = e => {
   const startButton = document.getElementById("start");
   const pauseButton = document.getElementById("pause");
   const debugButton = document.getElementById("debug");
+  const navmeshDebugButton = document.getElementById("navmeshDebug");
   const overlay: HTMLDivElement = document.querySelector(".wrapper .overlay");
 
   initButton.addEventListener("click", () => {
@@ -112,6 +121,16 @@ export const onDOMReadyControlSetup = e => {
     }
     CONSTANTS.RENDER_DEBUG_OBJECTS = !CONSTANTS.RENDER_DEBUG_OBJECTS;
     toggleDebugObjectsVisibility();
+  });
+
+  navmeshDebugButton.addEventListener("click", () => {
+    if (CONSTANTS.RENDER_NAVMESH_DEBUG) {
+      navmeshDebugButton.innerText = "Navmesh Debug On";
+    } else {
+      navmeshDebugButton.innerText = "Navmesh Debug Off";
+    }
+    CONSTANTS.RENDER_NAVMESH_DEBUG = !CONSTANTS.RENDER_NAVMESH_DEBUG;
+    toggleNavmeshDebugVisibility();
   });
 
   startButton.addEventListener("click", () => {
