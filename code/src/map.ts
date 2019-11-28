@@ -5,10 +5,10 @@ export default {
 
   fires: [
     {
-      position: { x: 20, y: 450 }
+      position: { x: 70, y: 550 }
     },
     {
-      position: { x: 20, y: 500 }
+      position: { x: 50, y: 500 }
     }
   ],
 

@@ -41,7 +41,7 @@ class Fire extends Phaser.GameObjects.Arc {
     const radius =
       CONSTANTS.MIN_SMOKE_RADIUS +
       (CONSTANTS.MAX_SMOKE_RADIUS - CONSTANTS.MIN_SMOKE_RADIUS) * Math.random();
-    const circle = scene.add.circle(this.x, this.y, radius, 0x626262);
+    const circle = scene.add.circle(this.x, this.y, radius, 0x090909, 0.4);
 
     const sign1 = Math.random() > 0.5 ? -1 : 1;
     const sign2 = Math.random() > 0.5 ? -1 : 1;

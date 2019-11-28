@@ -183,6 +183,13 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
   const signCount = tilemap.getObjectLayer("signs")["objects"].length;
 
+  const killDude = (dude: Dude) => {
+    console.log("Dude " + dude.name + " unfortunately perished in the fire!");
+    this.add.sprite(dude.x, dude.y, "skull");
+    numberOfDeadDudes++;
+    dude.destroy();
+  };
+
   tilemap.getObjectLayer("signs")["objects"].forEach((sign, index) => {
     const orientationX: number = sign.properties.find(
       p => p.name === "orientationX"
@@ -268,12 +275,13 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
   // ----- Adding Groups to the Physics Collider Engine -----
 
-  this.physics.add.collider(dudeGroup, fireGroup, (dude: Dude, fire) => {
-    console.log("Dude " + dude.name + " unfortunately perished in the fire!");
-    this.add.sprite(dude.x, dude.y, "skull");
-    numberOfDeadDudes++;
-    dude.destroy();
-  });
+  this.physics.add.overlap(
+    dudeGroup,
+    fireGroup,
+    (dude: Dude, fire: Phaser.GameObjects.Arc) => {
+      killDude(dude);
+    }
+  );
 
   this.physics.add.collider(somkeGroup, walls);
   this.physics.add.overlap(
@@ -282,12 +290,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     (dude: Dude, smoke: Phaser.GameObjects.Arc) => {
       dude.health -= smoke.alpha;
       if (dude.health <= 0) {
-        console.log(
-          "Dude " + dude.name + " unfortunately perished in the fire!"
-        );
-        this.add.sprite(dude.x, dude.y, "skull");
-        numberOfDeadDudes++;
-        dude.destroy();
+        killDude(dude);
       }
     }
   );
