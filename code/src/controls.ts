@@ -1,4 +1,4 @@
-import { game, initGame, setCurrentStartTime, setPreviousElapsedTime } from ".";
+import { game, initGame, setCurrentStartTime, setPreviousElapsedTime, toggleDebugObjectsVisibility } from ".";
 
 export const CONSTANTS = {
   TRIANGLE_HEIGHT: 20,
@@ -39,7 +39,9 @@ export const CONSTANTS = {
   DUDE_WEIGHT_STD_DEV: 20,
 
   MEAN_DUDE_FITNESS: 0.5,
-  DUDE_FITNESS_STD_DEV: 0.4
+  DUDE_FITNESS_STD_DEV: 0.4,
+
+  RENDER_DEBUG_OBJECTS: true
 };
 
 const onSliderChange = (e: InputEvent) => {
@@ -78,6 +80,7 @@ export const onDOMReadyControlSetup = e => {
   const dynamicSliders = document.getElementById("dynamic-sliders");
   const startButton = document.getElementById("start");
   const pauseButton = document.getElementById("pause");
+  const debugButton = document.getElementById("debug");
   const overlay: HTMLDivElement = document.querySelector(".wrapper .overlay");
 
   initButton.addEventListener("click", () => {
@@ -99,6 +102,16 @@ export const onDOMReadyControlSetup = e => {
       game.scene.pause("default");
       pauseButton.innerText = "Resume";
     }
+  });
+
+  debugButton.addEventListener("click", () => {
+    if (CONSTANTS.RENDER_DEBUG_OBJECTS) {
+      debugButton.innerText = "Debug On";
+    } else {
+      debugButton.innerText = "Debug Off";
+    }
+    CONSTANTS.RENDER_DEBUG_OBJECTS = !CONSTANTS.RENDER_DEBUG_OBJECTS;
+    toggleDebugObjectsVisibility();
   });
 
   startButton.addEventListener("click", () => {

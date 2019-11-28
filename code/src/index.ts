@@ -77,12 +77,16 @@ let currentStartTime: number = 0;
 let previousElapsedTime: number = 0;
 let currentElapsedTime: number = 0;
 let timeLabel: Phaser.GameObjects.Text;
+let despawnZones: Phaser.Physics.Arcade.StaticGroup;
 
 export const setCurrentStartTime = (time: number) => {
   currentStartTime = time;
 };
 export const setPreviousElapsedTime = (time: number) => {
   previousElapsedTime += (time - currentStartTime) / 1000;
+};
+export const toggleDebugObjectsVisibility = () => {
+  despawnZones.toggleVisible();
 };
 
 //globals
@@ -166,7 +170,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     tables.add(rect);
   });*/
 
-  const despawnZones = this.physics.add.staticGroup();
+  despawnZones = this.physics.add.staticGroup();
   tilemap.getObjectLayer("despawn-zones")["objects"].forEach(zone => {
     const rect = this.add.rectangle(
       zone.x + zone.width / 2,
