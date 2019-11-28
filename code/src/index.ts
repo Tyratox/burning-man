@@ -42,7 +42,7 @@ interface TraceableAttractiveTarget extends Traceable {
     x: number;
     y: number;
   };
-  orientation: {
+  orientation?: {
     x: number;
     y: number;
   };
@@ -65,7 +65,7 @@ const ACCELERATION_THRESHOLD = 0;
 const ACCELERATION_VALUE = 500;
 const FIRE_REPULSION = 5000;
 
-const DUDE_WALKING_FRICTION = 0.98;
+const DUDE_WALKING_FRICTION = 0.995;
 
 const SPEED_THRESHOLD = 7;
 
@@ -184,39 +184,66 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   const signCount = tilemap.getObjectLayer("signs")["objects"].length;
 
   tilemap.getObjectLayer("signs")["objects"].forEach((sign, index) => {
-    const orientationX: number = sign.properties.find(
-      p => p.name === "orientationX"
-    ).value;
-    const orientationY: number = sign.properties.find(
-      p => p.name === "orientationY"
-    ).value;
+    let orientationX =
+      sign.properties && sign.properties.find(p => p.name === "orientationX");
 
-    const triangle = this.add.isotriangle(
-      sign.x,
-      sign.y,
-      CONSTANTS.TRIANGLE_SIZE,
-      CONSTANTS.TRIANGLE_HEIGHT,
-      false,
-      0x237f52,
-      0x2ecc71,
-      0x27ae60
-    );
-    const orientationNorm = Math.sqrt(
-      orientationX * orientationX + orientationY * orientationY
-    );
+    orientationX = orientationX ? orientationX.value : null;
 
-    triangle.rotation =
-      (orientationX < 0 ? 1 : -1) * Math.acos(orientationY / orientationNorm);
+    let orientationY =
+      sign.properties && sign.properties.find(p => p.name === "orientationY");
 
-    attractiveTargets.push({
-      type: "sign",
-      index,
-      position: { x: sign.x, y: sign.y },
-      orientation: { x: orientationX, y: orientationY }
-    });
+    orientationY = orientationY ? orientationY.value : null;
+
+    const radius =
+      sign.properties && sign.properties.find(p => p.name === "radius");
+
+    if (orientationX !== null && orientationY !== null) {
+      const triangle = this.add.isotriangle(
+        sign.x,
+        sign.y,
+        CONSTANTS.TRIANGLE_SIZE,
+        CONSTANTS.TRIANGLE_HEIGHT,
+        false,
+        0x237f52,
+        0x2ecc71,
+        0x27ae60
+      );
+      const orientationNorm = Math.sqrt(
+        orientationX * orientationX + orientationY * orientationY
+      );
+
+      triangle.rotation =
+        (orientationX < 0 ? 1 : -1) * Math.acos(orientationY / orientationNorm);
+
+      attractiveTargets.push({
+        type: "sign",
+        index,
+        position: { x: sign.x, y: sign.y },
+        orientation: { x: orientationX, y: orientationY }
+      });
+    } else {
+      const circle = this.add.circle(
+        sign.x,
+        sign.y,
+        CONSTANTS.TRIANGLE_SIZE,
+        0x237f52
+      );
+
+      attractiveTargets.push({
+        type: "sign",
+        index,
+        position: { x: sign.x, y: sign.y }
+      });
+    }
 
     attractiveTargetGroup.add(
-      new AttractiveTarget(index, sign.x, sign.y, this)
+      new AttractiveTarget(
+        index,
+        sign.x,
+        sign.y,
+        this,
+        radius ? radius.value : undefined
+      )
     );
   });
 
@@ -368,9 +395,11 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
 
       //check orientation
       if (
-        orientation.x * (position.x - dudeX) +
-          orientation.y * (position.y - dudeY) <
-        0
+        orientation //if no orientation propety the sign / door is visible for all sides
+          ? orientation.x * (position.x - dudeX) +
+              orientation.y * (position.y - dudeY) <
+            0
+          : true
       ) {
         const currentDist = Math.sqrt(
           (position.x - dudeX) * (position.x - dudeX) +
@@ -437,56 +466,56 @@ const calculateForces = (scene: Phaser.Scene) => {
     const dudeBody = dudes[i].getBody();
     const dudePosition = { x: dudes[i].x, y: dudes[i].y };
 
-    const {
-      distance: closestWallDistance,
-      wall: closestWall
-    } = wallShape.reduce(
-      (bestResult, wall) => {
-        const distance = pointRectDist(
-          { x: dudeBody.x, y: dudeBody.y },
-          wall,
-          wall.width,
-          wall.height
-        );
+    // const {
+    //   distance: closestWallDistance,
+    //   wall: closestWall
+    // } = wallShape.reduce(
+    //   (bestResult, wall) => {
+    //     const distance = pointRectDist(
+    //       { x: dudeBody.x, y: dudeBody.y },
+    //       wall,
+    //       wall.width,
+    //       wall.height
+    //     );
 
-        if (distance < bestResult.distance) {
-          return { distance, wall };
-        }
+    //     if (distance < bestResult.distance) {
+    //       return { distance, wall };
+    //     }
 
-        return bestResult;
-      },
-      {
-        distance: Number.MAX_VALUE,
-        wall: new Phaser.Geom.Rectangle(-1, -1, 0, 0)
-      }
-    );
+    //     return bestResult;
+    //   },
+    //   {
+    //     distance: Number.MAX_VALUE,
+    //     wall: new Phaser.Geom.Rectangle(-1, -1, 0, 0)
+    //   }
+    // );
 
-    //if the wall is far away, that's okay. ALSO CHECK WHETHER THE DUDE IS IN FRONT OF THE WALL (easy for rectangular walls)
-    if (
-      closestWallDistance < CONSTANTS.ACCEPTABLE_WALL_DISTANCE &&
-      ((closestWall.x - closestWall.width / 2 <= dudeBody.x &&
-        closestWall.x + closestWall.width / 2 >= dudeBody.x) ||
-        (closestWall.y - closestWall.height / 2 <= dudeBody.y &&
-          closestWall.y + closestWall.height / 2 >= dudeBody.y))
-    ) {
-      //TODO: vector perpendicular to the wall
-      const wallRepulsion = new Phaser.Math.Vector2({
-        x: closestWall.x - dudePosition.x,
-        y: closestWall.y - dudePosition.y
-      }).normalize();
+    // //if the wall is far away, that's okay. ALSO CHECK WHETHER THE DUDE IS IN FRONT OF THE WALL (easy for rectangular walls)
+    // if (
+    //   closestWallDistance < CONSTANTS.ACCEPTABLE_WALL_DISTANCE &&
+    //   ((closestWall.x - closestWall.width / 2 <= dudeBody.x &&
+    //     closestWall.x + closestWall.width / 2 >= dudeBody.x) ||
+    //     (closestWall.y - closestWall.height / 2 <= dudeBody.y &&
+    //       closestWall.y + closestWall.height / 2 >= dudeBody.y))
+    // ) {
+    //   //TODO: vector perpendicular to the wall
+    //   const wallRepulsion = new Phaser.Math.Vector2({
+    //     x: closestWall.x - dudePosition.x,
+    //     y: closestWall.y - dudePosition.y
+    //   }).normalize();
 
-      accelerations[i].add(
-        wallRepulsion.scale(
-          CONSTANTS.WALL_REPULSION_FORCE / closestWallDistance
-        )
-      );
-    }
+    //   accelerations[i].add(
+    //     wallRepulsion.scale(
+    //       CONSTANTS.WALL_REPULSION_FORCE / closestWallDistance
+    //     )
+    //   );
+    // }
 
     //calculate directioncorrecting force
     const desiredVelocity = dudes[i].maxVelocity;
 
     //check if the dude isn't already tracking a path or hasn't recalculated it's path for half a second
-    if (dudes[i].path === null || now - dudes[i].pathTimestamp > 500) {
+    if (dudes[i].path === null) {
       //check if he see's a sign
       const sign = findClosestAttractiveTarget(dudes[i], scene);
 
@@ -494,43 +523,31 @@ const calculateForces = (scene: Phaser.Scene) => {
       if (sign.x > 0) {
         const path = navmesh.findPath({ x: dudes[i].x, y: dudes[i].y }, sign);
         dudes[i].path = path;
-        dudes[i].pathTimestamp = now;
+        dudes[i].nextNode = 0;
       } else {
         //do random stuff / generate a random path
+        dudes[i].visitedTargets = [];
       }
     }
 
     if (dudes[i].path !== null) {
       //follow the path that is just an array of points, find the two closest and take the one with the higher index
-      let closestPoint: { x: number; y: number } = dudes[i].path[0];
-      let closestPointDistance = dist2(closestPoint, dudePosition);
-      let closestPointIndex = 0;
+      if (
+        dist2(dudePosition, dudes[i].path[dudes[i].nextNode]) < Math.pow(25, 2)
+      ) {
+        dudes[i].nextNode++;
+      }
 
-      let secondClosestPoint = { x: 0, y: 0 };
-      let secondClosestPointDistance = Number.MAX_VALUE;
-      let secondClosestPointIndex = -1;
+      let nextPoint = dudes[i].path[dudes[i].nextNode];
 
-      for (let j = 1; j < dudes[i].path.length; j++) {
-        const p: { x: number; y: number } = dudes[i].path[j];
-        const d = dist2(p, dudePosition);
-        if (d < closestPointDistance) {
-          secondClosestPoint = closestPoint;
-          secondClosestPointDistance = closestPointDistance;
-          secondClosestPointIndex = closestPointIndex;
-
-          closestPoint = p;
-          closestPointDistance = d;
-          closestPointIndex = j;
-        } else if (d < secondClosestPointDistance) {
-          secondClosestPoint = p;
-          secondClosestPointDistance = d;
-          secondClosestPointIndex = j;
+      //check if we already overshot
+      if (dudes[i].nextNode + 1 < dudes[i].path.length) {
+        const successor = dudes[i].path[dudes[i].nextNode + 1];
+        if (dist2(dudePosition, successor) < dist2(dudePosition, nextPoint)) {
+          dudes[i].nextNode++;
+          nextPoint = successor;
         }
       }
-      const nextPoint =
-        closestPointIndex > secondClosestPointIndex
-          ? closestPoint
-          : secondClosestPoint;
 
       const ray = scene.add
         .line(

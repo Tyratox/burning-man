@@ -26,8 +26,9 @@ class Dude extends Phaser.GameObjects.Arc {
 
   //the currently tracked path
   visitedTargets: number[];
+
   path: { x: number; y: number }[];
-  pathTimestamp: number;
+  nextNode: number;
 
   constructor(x: number, y: number, name: string, scene: Phaser.Scene) {
     const weight = strictNormal(
