@@ -1,7 +1,7 @@
 import * as Phaser from "phaser";
 import PhaserNavMeshPlugin from "phaser-navmesh";
 
-import { CONSTANTS } from "./controls";
+import { CONSTANTS, disablePauseButton } from "./controls";
 import Dude from "./Dude";
 import map from "./map";
 import {
@@ -13,7 +13,7 @@ import {
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
 import AttractiveTarget from "./AttractiveTarget";
-import Names from "../assets/names.json"
+import Names from "../assets/names.json";
 
 interface Traceable {
   position: {
@@ -107,7 +107,6 @@ export const toggleNavmeshDebugVisibility = () => {
   }
 };
 
-
 // ----- Phaser initialization functions -----
 
 const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
@@ -167,7 +166,14 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   tilemap
     .getObjectLayer("dudes")
     ["objects"].forEach(dude =>
-      dudeGroup.add(new Dude(dude.x, dude.y, Names[Math.floor(Math.random() * Names.length)], this))
+      dudeGroup.add(
+        new Dude(
+          dude.x,
+          dude.y,
+          Names[Math.floor(Math.random() * Names.length)],
+          this
+        )
+      )
     );
 
   const somkeGroup = this.add.group();
@@ -315,7 +321,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     );
   });
 
-  totalNumberOfDudes = map.spawnPoints.length;
+  totalNumberOfDudes = dudeGroup.getLength();
 
   // Create Fire class instances
   map.fires.forEach(point =>
@@ -732,6 +738,7 @@ const updateTimer = function() {
 const update = function(this: Phaser.Scene) {
   if (totalNumberOfDudes == numberOfDeadDudes + numberOfSurvivorDudes) {
     this.scene.pause();
+    disablePauseButton();
   }
   calculateForces(this);
   //unstuckDudes();

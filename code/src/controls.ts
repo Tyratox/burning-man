@@ -141,3 +141,9 @@ export const onDOMReadyControlSetup = e => {
     game.scene.resume("default");
   });
 };
+
+export const disablePauseButton = () => {
+  const pauseButton = document.getElementById("pause");
+  pauseButton.setAttribute("disabled", "disabled");
+  pauseButton.style.backgroundColor = "grey";
+};
