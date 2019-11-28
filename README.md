@@ -57,6 +57,21 @@ Wang, Peng. (2016). Understanding Social-Force Model in Psychological Principles
 
 Social force model
 
+## Reproducibility
+
+In order to reproduce some of our results, open https://tyratox.github.io/burning-man/ in your browser.
+
+If you want to modify the code, then follow the instructions below:
+
+If Node.js is not already installed on your computer, start by installing Node.js from https://nodejs.org/en/download/
+
+If using git, use the commands:
+* git clone https://github.com/Tyratox/burning-man.git
+* cd burning-man
+* cd code
+* npm install
+* npm start
+
 ## Other
 
 (mention datasets you are going to use)
