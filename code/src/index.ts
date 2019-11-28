@@ -93,10 +93,10 @@ let navmesh: any;
 
 const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
   //load images if needed
-  this.load.image("dungeon-tiles", "/assets/map/dungeon-tileset.png");
-  this.load.image("skull", "/assets/skull.png");
-  this.load.image("fire", "/assets/fire.png");
-  this.load.tilemapTiledJSON("map", "/assets/map/default.json");
+  this.load.image("dungeon-tiles", "assets/map/dungeon-tileset.png");
+  this.load.image("skull", "assets/skull.png");
+  this.load.image("fire", "assets/fire.png");
+  this.load.tilemapTiledJSON("map", "assets/map/default.json");
 };
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
