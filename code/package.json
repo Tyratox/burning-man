@@ -10,7 +10,7 @@
   },
   "config": {
     "ghooks": {
-      "pre-commit": "cd code && npm run prettier && npm run build && cp style.css ../docs/style.css && mkdir ../docs/assets/ && cp ./assets/**/*.png ../docs/assets/ && cp ./assets/**/*.json ../docs/assets/ && touch ../.commit",
+      "pre-commit": "cd code && npm run prettier && npm run build && cp style.css ../docs/style.css && mkdir ../docs/assets/ && mkdir ../docs/assets/map/ && cp ./assets/*.png ../docs/assets/ && cp ./assets/map/*.png ../docs/assets/map/ && cp ./assets/map/*.json ../docs/assets/ && touch ../.commit",
       "post-commit": "if [ -a .commit ]; then rm .commit && git add ./docs/* && git commit --amend -C HEAD --no-verify; fi"
     }
   },
