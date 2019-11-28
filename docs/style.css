@@ -66,11 +66,11 @@ button {
 }
 
 /* initially these two are hidden */
-/*#game,
+#game,
 #dynamic-sliders,
 #start {
   display: none;
-}*/
+}
 
 .wrapper {
   position: relative;

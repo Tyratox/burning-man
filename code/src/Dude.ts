@@ -27,6 +27,7 @@ class Dude extends Phaser.GameObjects.Arc {
   //the currently tracked path
   visitedTargets: number[];
   path: { x: number; y: number }[];
+  pathTimestamp: number;
 
   constructor(x: number, y: number, name: string, scene: Phaser.Scene) {
     const weight = strictNormal(
@@ -62,6 +63,8 @@ class Dude extends Phaser.GameObjects.Arc {
 
     this.path = null;
     this.visitedTargets = [];
+    this.pathTimestamp = 0;
+
     this.fitness = fitness;
     this.weight = weight;
     this.age = age;
