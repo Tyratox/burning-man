@@ -17,3 +17,14 @@ export const distanceToLineSegment = (p: Vector, v: Vector, w: Vector) =>
 
 export const isLeftOfLine = (p: Vector, a: Vector, b: Vector) =>
   (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x) > 0;
+
+export const pointRectDist = (
+  p: Vector,
+  r: Vector,
+  rwidth: number,
+  rheight: number
+) => {
+  const cx = Math.max(Math.min(p.x, r.x + rwidth), r.x);
+  const cy = Math.max(Math.min(p.y, r.y + rheight), r.y);
+  return Math.sqrt((p.x - cx) * (p.x - cx) + (p.y - cy) * (p.y - cy));
+};

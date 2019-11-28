@@ -195,126 +195,126 @@
   <object id="132" x="1896" y="64" width="24" height="992"/>
  </objectgroup>
  <objectgroup id="3" name="doors" visible="0">
-  <object id="3" name="Door" type="door" x="111.372" y="379.543">
+  <object id="3" name="Door" type="door" x="128" y="392">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="-1"/>
    </properties>
    <point/>
   </object>
-  <object id="4" name="Door" type="door" x="111.372" y="487.984">
+  <object id="4" name="Door" type="door" x="128" y="488">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="-1"/>
    </properties>
    <point/>
   </object>
-  <object id="5" name="Door" type="door" x="555.393" y="370.75">
+  <object id="5" name="Door" type="door" x="544" y="392">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="-1"/>
    </properties>
    <point/>
   </object>
-  <object id="6" name="Door" type="door" x="562.72" y="490.914">
+  <object id="6" name="Door" type="door" x="544" y="496">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="-1"/>
    </properties>
    <point/>
   </object>
-  <object id="7" name="Door" type="door" x="145.076" y="720.985">
+  <object id="7" name="Door" type="door" x="128" y="720">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="1"/>
    </properties>
    <point/>
   </object>
-  <object id="8" name="Door" type="door" x="148.007" y="630.129">
+  <object id="8" name="Door" type="door" x="128" y="624">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="1"/>
    </properties>
    <point/>
   </object>
-  <object id="9" name="Door" type="door" x="880.715" y="389.801">
+  <object id="9" name="Door" type="door" x="864" y="384">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="-1"/>
    </properties>
    <point/>
   </object>
-  <object id="10" name="Door" type="door" x="880.715" y="486.518">
+  <object id="10" name="Door" type="door" x="864" y="496">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="-1"/>
    </properties>
    <point/>
   </object>
-  <object id="11" name="Door" type="door" x="655.041" y="630.129">
+  <object id="11" name="Door" type="door" x="640" y="624">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="1"/>
    </properties>
    <point/>
   </object>
-  <object id="12" name="Door" type="door" x="656.506" y="710.727">
+  <object id="12" name="Door" type="door" x="640" y="712">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="1"/>
    </properties>
    <point/>
   </object>
-  <object id="13" name="Door" type="door" x="820.633" y="625.733">
+  <object id="13" name="Door" type="door" x="832" y="624">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="1"/>
    </properties>
    <point/>
   </object>
-  <object id="14" name="Door" type="door" x="817.702" y="706.331">
+  <object id="14" name="Door" type="door" x="832" y="720">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="1"/>
    </properties>
    <point/>
   </object>
-  <object id="15" name="Door" type="door" x="1006.74" y="628.664">
+  <object id="15" name="Door" type="door" x="1024" y="632">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="1"/>
    </properties>
    <point/>
   </object>
-  <object id="16" name="Door" type="door" x="1009.67" y="709.261">
+  <object id="16" name="Door" type="door" x="1024" y="720">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="1"/>
    </properties>
    <point/>
   </object>
-  <object id="17" name="Door" type="door" x="1198.71" y="625.733">
+  <object id="17" name="Door" type="door" x="1216" y="632">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="1"/>
    </properties>
    <point/>
   </object>
-  <object id="18" name="Door" type="door" x="1201.64" y="704.865">
+  <object id="18" name="Door" type="door" x="1216" y="704">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="1"/>
    </properties>
    <point/>
   </object>
-  <object id="19" name="Door" type="door" x="1391.04" y="629.932">
+  <object id="19" name="Door" type="door" x="1405.04" y="628.932">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="1"/>
    </properties>
    <point/>
   </object>
-  <object id="20" name="Door" type="door" x="1393.61" y="713.658">
+  <object id="20" name="Door" type="door" x="1408.61" y="713.658">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="1"/>
