@@ -1336,7 +1336,7 @@
                  "visible":true,
                  "width":0,
                  "x":128,
-                 "y":392
+                 "y":370
                 }, 
                 {
                  "height":0,
@@ -1382,7 +1382,7 @@
                  "visible":true,
                  "width":0,
                  "x":544,
-                 "y":392
+                 "y":370
                 }, 
                 {
                  "height":0,
@@ -1474,7 +1474,7 @@
                  "visible":true,
                  "width":0,
                  "x":864,
-                 "y":384
+                 "y":370
                 }, 
                 {
                  "height":0,
@@ -2228,7 +2228,7 @@
                         {
                          "name":"orientationY",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }],
                  "rotation":0,
                  "type":"sign",
@@ -2236,18 +2236,6 @@
                  "width":0,
                  "x":1744,
                  "y":568
-                }, 
-                {
-                 "height":0,
-                 "id":31,
-                 "name":"Sign",
-                 "point":true,
-                 "rotation":0,
-                 "type":"sign",
-                 "visible":true,
-                 "width":0,
-                 "x":1736,
-                 "y":280
                 }, 
                 {
                  "height":0,
@@ -2368,6 +2356,29 @@
                  "width":0,
                  "x":1552,
                  "y":272
+                }, 
+                {
+                 "height":0,
+                 "id":128,
+                 "name":"Sign",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"orientationX",
+                         "type":"int",
+                         "value":1
+                        }, 
+                        {
+                         "name":"orientationY",
+                         "type":"int",
+                         "value":0
+                        }],
+                 "rotation":0,
+                 "type":"sign",
+                 "visible":true,
+                 "width":0,
+                 "x":1630,
+                 "y":265
                 }],
          "opacity":1,
          "type":"objectgroup",

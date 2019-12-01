@@ -200,7 +200,7 @@
   <object id="132" x="1896" y="64" width="24" height="992"/>
  </objectgroup>
  <objectgroup id="3" name="doors" visible="0">
-  <object id="3" name="Door" type="door" x="128" y="392">
+  <object id="3" name="Door" type="door" x="128" y="370">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="-1"/>
@@ -214,7 +214,7 @@
    </properties>
    <point/>
   </object>
-  <object id="5" name="Door" type="door" x="544" y="392">
+  <object id="5" name="Door" type="door" x="544" y="370">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="-1"/>
@@ -242,7 +242,7 @@
    </properties>
    <point/>
   </object>
-  <object id="9" name="Door" type="door" x="864" y="384">
+  <object id="9" name="Door" type="door" x="864" y="370">
    <properties>
     <property name="orientationX" type="int" value="0"/>
     <property name="orientationY" type="int" value="-1"/>
@@ -447,11 +447,8 @@
   <object id="30" name="Sign" type="sign" x="1744" y="568">
    <properties>
     <property name="orientationX" type="int" value="-1"/>
-    <property name="orientationY" type="int" value="0"/>
+    <property name="orientationY" type="int" value="1"/>
    </properties>
-   <point/>
-  </object>
-  <object id="31" name="Sign" type="sign" x="1736" y="280">
    <point/>
   </object>
   <object id="32" name="Sign" type="sign" x="893.904" y="159.73">
@@ -484,6 +481,13 @@
    <point/>
   </object>
   <object id="127" name="Sign" type="sign" x="1552" y="272">
+   <properties>
+    <property name="orientationX" type="int" value="1"/>
+    <property name="orientationY" type="int" value="0"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="128" name="Sign" type="sign" x="1630" y="265">
    <properties>
     <property name="orientationX" type="int" value="1"/>
     <property name="orientationY" type="int" value="0"/>
