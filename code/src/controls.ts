@@ -49,7 +49,8 @@ export const CONSTANTS = {
   DUDE_FITNESS_STD_DEV: 0.4,
 
   RENDER_DEBUG_OBJECTS: true,
-  RENDER_NAVMESH_DEBUG: false
+  RENDER_NAVMESH_DEBUG: false,
+  PATHFINDACTIVE:true
 };
 
 const onSliderChange = (e: InputEvent) => {
@@ -90,6 +91,7 @@ export const onDOMReadyControlSetup = e => {
   const pauseButton = document.getElementById("pause");
   const debugButton = document.getElementById("debug");
   const navmeshDebugButton = document.getElementById("navmeshDebug");
+  const pathFindButton = document.getElementById("pathFinding");
   const overlay: HTMLDivElement = document.querySelector(".wrapper .overlay");
 
   initButton.addEventListener("click", () => {
@@ -131,6 +133,15 @@ export const onDOMReadyControlSetup = e => {
     }
     CONSTANTS.RENDER_NAVMESH_DEBUG = !CONSTANTS.RENDER_NAVMESH_DEBUG;
     toggleNavmeshDebugVisibility();
+  });
+
+  pathFindButton.addEventListener("click", () => {
+    if (CONSTANTS.PATHFINDACTIVE) {
+      pathFindButton.innerText = "Pathfinding On";
+    } else {
+      pathFindButton.innerText = "Pathfinding Off";
+    }
+    CONSTANTS.PATHFINDACTIVE = !CONSTANTS.PATHFINDACTIVE;
   });
 
   startButton.addEventListener("click", () => {
