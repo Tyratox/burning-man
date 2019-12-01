@@ -256,7 +256,7 @@ As phaser includes a physics engine we can make use of this by determening the b
 When running the simulation, one might notice that the agents competing for a door are closer together. This is due to the fact, that all agents are pushing towards the door, and hence pushing them together. It worsens the situation, as the friction between the agents increases, which slows down the escape.  
     
 \subsubsection{Keeping the distance}
-Interestingly, we can observe how agents are pushed back into rooms. Sometimes one could even witness how some agents use another path to avoid the crowd. 
+Interestingly, we can observe how agents are pushed back into rooms. Sometimes one could even witness how some agents use another path to avoid the crowd. This is actually what we would expect because of the mutual repulsion of the agents. 
 
 \subsubsection{'Faster-is-Slower effect'}% insert citation to the papers
 There are already many published papers regarding the social-force-model. Of which many describe the 'Faster-is-Slower effect' \cite{Helbing, Wang}. The 'Faster-is-Slower effect' describes the phenomenon where the escape through an exit door is slower if the agents are pushing harder. When running our simulation on our default map, we did not observe this effect. The chances are, that this is due to the long corridor, where the agents make up time with a higher speed.

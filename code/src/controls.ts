@@ -137,9 +137,9 @@ export const onDOMReadyControlSetup = e => {
 
   pathFindButton.addEventListener("click", () => {
     if (CONSTANTS.PATHFINDACTIVE) {
-      pathFindButton.innerText = "Pathfinding On";
-    } else {
       pathFindButton.innerText = "Pathfinding Off";
+    } else {
+      pathFindButton.innerText = "Pathfinding On";
     }
     CONSTANTS.PATHFINDACTIVE = !CONSTANTS.PATHFINDACTIVE;
   });

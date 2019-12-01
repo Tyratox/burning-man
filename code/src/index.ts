@@ -8,7 +8,8 @@ import {
   isLeftOfLine,
   distanceToLineSegment,
   dist2,
-  pointRectDist
+  pointRectDist,
+  pointRectNormal
 } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
@@ -497,51 +498,43 @@ const calculateForces = (scene: Phaser.Scene) => {
 
     const dudeBody = dudes[i].getBody();
     const dudePosition = { x: dudes[i].x, y: dudes[i].y };
+/*
+    
+    const {
+      distance: closestWallDistance,
+      wall: closestWall
+    } = wallShape.reduce(
+      (bestResult, wall) => {
+        const distance = pointRectDist(
+          { x: dudeBody.x, y: dudeBody.y },
+          wall,
+          wall.width,
+          wall.height
+        );
 
-    // const {
-    //   distance: closestWallDistance,
-    //   wall: closestWall
-    // } = wallShape.reduce(
-    //   (bestResult, wall) => {
-    //     const distance = pointRectDist(
-    //       { x: dudeBody.x, y: dudeBody.y },
-    //       wall,
-    //       wall.width,
-    //       wall.height
-    //     );
+        if (distance < bestResult.distance) {
+          return { distance, wall };
+        }
 
-    //     if (distance < bestResult.distance) {
-    //       return { distance, wall };
-    //     }
+        return bestResult;
+      },
+      {
+        distance: Number.MAX_VALUE,
+        wall: new Phaser.Geom.Rectangle(-1, -1, 0, 0)
+      }
+    );
 
-    //     return bestResult;
-    //   },
-    //   {
-    //     distance: Number.MAX_VALUE,
-    //     wall: new Phaser.Geom.Rectangle(-1, -1, 0, 0)
-    //   }
-    // );
+    const pushDirection = pointRectNormal({ x: dudeBody.x, y: dudeBody.y },
+      closestWall,
+      closestWall.width,
+      closestWall.height
+    );
+    console.log(pushDirection);
 
-    // //if the wall is far away, that's okay. ALSO CHECK WHETHER THE DUDE IS IN FRONT OF THE WALL (easy for rectangular walls)
-    // if (
-    //   closestWallDistance < CONSTANTS.ACCEPTABLE_WALL_DISTANCE &&
-    //   ((closestWall.x - closestWall.width / 2 <= dudeBody.x &&
-    //     closestWall.x + closestWall.width / 2 >= dudeBody.x) ||
-    //     (closestWall.y - closestWall.height / 2 <= dudeBody.y &&
-    //       closestWall.y + closestWall.height / 2 >= dudeBody.y))
-    // ) {
-    //   //TODO: vector perpendicular to the wall
-    //   const wallRepulsion = new Phaser.Math.Vector2({
-    //     x: closestWall.x - dudePosition.x,
-    //     y: closestWall.y - dudePosition.y
-    //   }).normalize();
-
-    //   accelerations[i].add(
-    //     wallRepulsion.scale(
-    //       CONSTANTS.WALL_REPULSION_FORCE / closestWallDistance
-    //     )
-    //   );
-    // }
+    pushDirection.normalize();
+    const pushingForce = 0.001 * Math.exp(CONSTANTS.WALL_REPULSION_FORCE /closestWallDistance);
+    accelerations[i].add(pushDirection.scale(pushingForce));
+    */
 
     //calculate directioncorrecting force
     const desiredVelocity = dudes[i].maxVelocity;
