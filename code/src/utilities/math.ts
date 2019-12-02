@@ -1,5 +1,5 @@
 //https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-
+//https://gamedev.stackexchange.com/questions/44483/how-do-i-calculate-distance-between-a-point-and-an-axis-aligned-rectangle
 type Vector = { x: number; y: number };
 
 const sqr = (x: number) => x * x;
@@ -24,7 +24,28 @@ export const pointRectDist = (
   rwidth: number,
   rheight: number
 ) => {
-  const cx = Math.max(Math.min(p.x, r.x + rwidth), r.x);
-  const cy = Math.max(Math.min(p.y, r.y + rheight), r.y);
-  return Math.sqrt((p.x - cx) * (p.x - cx) + (p.y - cy) * (p.y - cy));
+  const center = new Phaser.Math.Vector2(r.x+rwidth/2,r.y+rheight/2);
+  const d = new Phaser.Math.Vector2(0,0); 
+  d.x = Math.max(Math.abs(center.x-r.x)-rwidth/2, 0);
+  d.y = Math.max(Math.abs(center.y-r.y)-rheight/2, 0);
+  return d.length();
+};
+
+export const pointRectNormal = (// returns the vector pointing from the closest point on the rect to the position p
+  p: Vector,
+  r: Vector,
+  rwidth: number,
+  rheight: number
+) => {
+  const center = new Phaser.Math.Vector2(r.x+rwidth/2,r.y+rheight/2);
+  const d = new Phaser.Math.Vector2(0,0); 
+  d.x = Math.max(Math.abs(center.x-p.x)-rwidth/2, 0);
+  d.y = Math.max(Math.abs(center.y-p.y)-rheight/2, 0);
+  if(p.x<center.x){
+    d.x*=-1;
+  }
+  if(p.y<center.y){
+    d.y*=-1;
+  }
+  return d;
 };

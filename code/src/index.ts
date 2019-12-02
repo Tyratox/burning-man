@@ -8,7 +8,8 @@ import {
   isLeftOfLine,
   distanceToLineSegment,
   dist2,
-  pointRectDist
+  pointRectDist,
+  pointRectNormal
 } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
@@ -497,123 +498,132 @@ const calculateForces = (scene: Phaser.Scene) => {
 
     const dudeBody = dudes[i].getBody();
     const dudePosition = { x: dudes[i].x, y: dudes[i].y };
+/*
+    
+    const {
+      distance: closestWallDistance,
+      wall: closestWall
+    } = wallShape.reduce(
+      (bestResult, wall) => {
+        const distance = pointRectDist(
+          { x: dudeBody.x, y: dudeBody.y },
+          wall,
+          wall.width,
+          wall.height
+        );
 
-    // const {
-    //   distance: closestWallDistance,
-    //   wall: closestWall
-    // } = wallShape.reduce(
-    //   (bestResult, wall) => {
-    //     const distance = pointRectDist(
-    //       { x: dudeBody.x, y: dudeBody.y },
-    //       wall,
-    //       wall.width,
-    //       wall.height
-    //     );
+        if (distance < bestResult.distance) {
+          return { distance, wall };
+        }
 
-    //     if (distance < bestResult.distance) {
-    //       return { distance, wall };
-    //     }
+        return bestResult;
+      },
+      {
+        distance: Number.MAX_VALUE,
+        wall: new Phaser.Geom.Rectangle(-1, -1, 0, 0)
+      }
+    );
 
-    //     return bestResult;
-    //   },
-    //   {
-    //     distance: Number.MAX_VALUE,
-    //     wall: new Phaser.Geom.Rectangle(-1, -1, 0, 0)
-    //   }
-    // );
+    const pushDirection = pointRectNormal({ x: dudeBody.x, y: dudeBody.y },
+      closestWall,
+      closestWall.width,
+      closestWall.height
+    );
+    console.log(pushDirection);
 
-    // //if the wall is far away, that's okay. ALSO CHECK WHETHER THE DUDE IS IN FRONT OF THE WALL (easy for rectangular walls)
-    // if (
-    //   closestWallDistance < CONSTANTS.ACCEPTABLE_WALL_DISTANCE &&
-    //   ((closestWall.x - closestWall.width / 2 <= dudeBody.x &&
-    //     closestWall.x + closestWall.width / 2 >= dudeBody.x) ||
-    //     (closestWall.y - closestWall.height / 2 <= dudeBody.y &&
-    //       closestWall.y + closestWall.height / 2 >= dudeBody.y))
-    // ) {
-    //   //TODO: vector perpendicular to the wall
-    //   const wallRepulsion = new Phaser.Math.Vector2({
-    //     x: closestWall.x - dudePosition.x,
-    //     y: closestWall.y - dudePosition.y
-    //   }).normalize();
-
-    //   accelerations[i].add(
-    //     wallRepulsion.scale(
-    //       CONSTANTS.WALL_REPULSION_FORCE / closestWallDistance
-    //     )
-    //   );
-    // }
+    pushDirection.normalize();
+    const pushingForce = 0.001 * Math.exp(CONSTANTS.WALL_REPULSION_FORCE /closestWallDistance);
+    accelerations[i].add(pushDirection.scale(pushingForce));
+    */
 
     //calculate directioncorrecting force
     const desiredVelocity = dudes[i].maxVelocity;
 
-    //check if the dude isn't already tracking a path or hasn't recalculated it's path for half a second
-    if (dudes[i].path === null || dudes[i].nextNode < dudes[i].path.length) {
-      //check if he see's a sign
-      const sign = findClosestAttractiveTarget(dudes[i], scene);
+    if(CONSTANTS.PATHFINDACTIVE){
+      //check if the dude isn't already tracking a path or hasn't recalculated it's path for half a second
+      if (dudes[i].path === null) {
+        //check if he see's a sign
+        const sign = findClosestAttractiveTarget(dudes[i], scene);
 
-      //calculate here the desired velocity from the target value only if we have a target
-      if (sign.x > 0) {
-        const path = navmesh.findPath({ x: dudes[i].x, y: dudes[i].y }, sign);
-        dudes[i].path = path;
-        dudes[i].nextNode = 0;
-      } else {
-        //do random stuff / generate a random path
-        dudes[i].visitedTargets = [];
-      }
-    }
-
-    if (dudes[i].path !== null) {
-      //follow the path that is just an array of points, find the two closest and take the one with the higher index
-      if (
-        dist2(dudePosition, dudes[i].path[dudes[i].nextNode]) < Math.pow(25, 2)
-      ) {
-        dudes[i].nextNode++;
-      }
-
-      let nextPoint = dudes[i].path[dudes[i].nextNode];
-
-      //check if we already overshot
-      if (dudes[i].nextNode + 1 < dudes[i].path.length) {
-        const successor = dudes[i].path[dudes[i].nextNode + 1];
-        if (dist2(dudePosition, successor) < dist2(dudePosition, nextPoint)) {
-          dudes[i].nextNode++;
-          nextPoint = successor;
+        //calculate here the desired velocity from the target value only if we have a target
+        if (sign.x > 0) {
+            const path = navmesh.findPath({ x: dudes[i].x, y: dudes[i].y }, sign);
+            dudes[i].path = path;
+            dudes[i].nextNode = 0;
+        } else {
+          //do random stuff / generate a random path
+          dudes[i].visitedTargets = [];
         }
       }
 
-      if (CONSTANTS.RENDER_DEBUG_OBJECTS) {
-        const ray = scene.add
-          .line(
-            0,
-            0,
-            dudePosition.x,
-            dudePosition.y,
-            nextPoint.x,
-            nextPoint.y,
-            0x00ff00,
-            0.1
-          )
-          .setOrigin(0, 0);
+      if (dudes[i].path !== null) {
+        //follow the path that is just an array of points, find the two closest and take the one with the higher index
+        if (
+          dist2(dudePosition, dudes[i].path[dudes[i].nextNode]) < Math.pow(25, 2)
+        ) {
+          dudes[i].nextNode++;
+        }
 
-        scene.tweens.add({
-          targets: ray,
-          alpha: { from: 1, to: 0 },
-          ease: "Linear",
-          duration: 100,
-          repeat: 0,
-          yoyo: false,
-          onComplete: () => ray.destroy()
-        });
+        let nextPoint = dudes[i].path[dudes[i].nextNode];
+
+        //check if we already overshot
+        if (dudes[i].nextNode + 1 < dudes[i].path.length) {
+          const successor = dudes[i].path[dudes[i].nextNode + 1];
+          if (dist2(dudePosition, successor) < dist2(dudePosition, nextPoint)) {
+            dudes[i].nextNode++;
+            nextPoint = successor;
+          }
+        }
+
+        if (CONSTANTS.RENDER_DEBUG_OBJECTS) {
+          const ray = scene.add
+            .line(
+              0,
+              0,
+              dudePosition.x,
+              dudePosition.y,
+              nextPoint.x,
+              nextPoint.y,
+              0x00ff00,
+              0.1
+            )
+            .setOrigin(0, 0);
+
+          scene.tweens.add({
+            targets: ray,
+            alpha: { from: 1, to: 0 },
+            ease: "Linear",
+            duration: 100,
+            repeat: 0,
+            yoyo: false,
+            onComplete: () => ray.destroy()
+          });
+        }
+        //apply direction correcting force
+        accelerations[i].add(
+          new Phaser.Math.Vector2(nextPoint.x, nextPoint.y)
+            .subtract(dudes[i].getBody().position)
+            .normalize()
+            .scale(desiredVelocity)
+            .subtract(dudes[i].getBody().velocity) // subtract current velocity
+            .scale(dudes[i].normalizedFitness / dudes[i].normalizedWeight) //reaction time
+        );
       }
+    }else{// if Pathfinding is deactivated
+      const sign = findClosestAttractiveTarget(dudes[i], scene);
 
-      accelerations[i].add(
-        new Phaser.Math.Vector2(nextPoint.x, nextPoint.y)
-          .subtract(dudes[i].getBody().position)
-          .normalize()
-          .scale(desiredVelocity)
-          .subtract(dudes[i].getBody().velocity) // subtract current velocity
-          .scale(dudes[i].normalizedFitness / dudes[i].normalizedWeight) //reaction time
-      );
+        //calculate here the desired velocity from the target value only if we have a target
+        if (sign.x > 0) {
+          //apply direction correcting force
+          accelerations[i].add(
+            new Phaser.Math.Vector2(sign.x, sign.y)
+              .subtract(dudes[i].getBody().position)
+              .normalize()
+              .scale(desiredVelocity)
+              .subtract(dudes[i].getBody().velocity) // subtract current velocity
+              .scale(dudes[i].normalizedFitness / dudes[i].normalizedWeight) //reaction time
+          );
+        }
     }
 
     //calculate repulison between dudes and all visible fires
