@@ -547,7 +547,7 @@ const calculateForces = (scene: Phaser.Scene) => {
     const desiredVelocity = dudes[i].maxVelocity;
 
     //check if the dude isn't already tracking a path or hasn't recalculated it's path for half a second
-    if (dudes[i].path === null) {
+    if (dudes[i].path === null || dudes[i].nextNode < dudes[i].path.length) {
       //check if he see's a sign
       const sign = findClosestAttractiveTarget(dudes[i], scene);
 
@@ -617,18 +617,18 @@ const calculateForces = (scene: Phaser.Scene) => {
     }
 
     //calculate repulison between dudes and all visible fires
-    let visibleFires = rayTrace(dudes[i], repulsiveTargets, scene);
-    let repulsionSum = new Phaser.Math.Vector2(0, 0);
-    let repulsion = new Phaser.Math.Vector2(0, 0);
+    // let visibleFires = rayTrace(dudes[i], repulsiveTargets, scene);
+    // let repulsionSum = new Phaser.Math.Vector2(0, 0);
+    // let repulsion = new Phaser.Math.Vector2(0, 0);
 
-    visibleFires.forEach(fire => {
-      repulsion.x = dudeBody.x - fire.position.x;
-      repulsion.y = dudeBody.y - fire.position.y;
-      let len = repulsion.length();
-      repulsion.normalize().scale(FIRE_REPULSION * (Math.exp(1 / len) - 1));
-      repulsionSum.add(repulsion);
-    });
-    accelerations[i].add(repulsionSum);
+    // visibleFires.forEach(fire => {
+    //   repulsion.x = dudeBody.x - fire.position.x;
+    //   repulsion.y = dudeBody.y - fire.position.y;
+    //   let len = repulsion.length();
+    //   repulsion.normalize().scale(FIRE_REPULSION * (Math.exp(1 / len) - 1));
+    //   repulsionSum.add(repulsion);
+    // });
+    // accelerations[i].add(repulsionSum);
 
     dudeBody.velocity.scale(DUDE_WALKING_FRICTION);
 

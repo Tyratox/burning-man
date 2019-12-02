@@ -64,7 +64,7 @@ class Dude extends Phaser.GameObjects.Arc {
 
     this.path = null;
     this.visitedTargets = [];
-    this.pathTimestamp = 0;
+    this.nextNode = 0;
 
     this.fitness = fitness;
     this.weight = weight;
