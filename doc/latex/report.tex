@@ -11,8 +11,7 @@
 \usepackage{inconsolata}
 \usepackage{xcolor}
 \usepackage[nottoc,numbib]{tocbibind}
-
-
+\usepackage{float}
 
 \definecolor{codeRed}{RGB}{231,76,60}
 \definecolor{codeBlue}{RGB}{52,152,219}
@@ -162,7 +161,7 @@ The model is separated into different pieces. First of all we had to create a mo
 
 \subsection{Environment model}
 
-Before agents can react to a fire an environment has to be created which in our case is a building but is in general not restricted to buildings and could thus also be applied to other settings such as a festival. As the environment is one of the parameters that in a successful model should be easy to change, a subset of a preexisting format definition is used. The environment consists of object layers of \texttt{signs}, \texttt{agents}, \texttt{doors}, \texttt{physical-walls}, \texttt{navmesh} and \texttt{despawn-zones}. The \texttt{signs} and \texttt{doors} layers contain points indicating the position of the safety signs and the doors. They are separate as they represent different things. The safety signs represent actual signs that the agents follow should they be visible. The location of the doors on the other hand are remembered by the agents and thus do not have to be visible for the agent to know it's location. In addition both signs can have the two properties \texttt{orientationX} and \texttt{orientationY} indicating the direction of a $180$ degree angle from which the sign is visible. Another property signs can have is \texttt{radius} which, if defined, overrides the default radius for marking a sign as visited. The reasons will be made clear in the description of the agent model. The \texttt{agents} layer also consists of points indicating the spawn points of the agents. \texttt{physical-walls}, as the name might suggest, defines the location of the walls using rectangles. This layer is used for giving the environment a shape as the agents cannot walk through these walls. In addition this layer is used for the raytracing algorithm as the agents should not be able to see signs if there's a wall in between but more to that in the agent model description. The \texttt{navmesh} layer defines the navigation mesh mode of rectangles. This mesh defines the points an agent can use for navigation when walking into the direction of a sign or a door. The details of this navigation mesh are also described in the next section about the agent model. Last but not least there's the \texttt{despawn-zones} layer where rectangles are used to define areas that will, when colliding with an agent, remove it from the simulation and count them as in safety.
+Before agents can react to a fire an environment has to be created which in our case is a building but is in general not restricted to buildings and could thus also be applied to other settings such as a festival. As the environment is one of the parameters that in a successful model should be easy to change, a subset of a preexisting format definition is used. The environment consists of the so-called object layers \texttt{signs}, \texttt{agents}, \texttt{doors}, \texttt{physical-walls}, \texttt{navmesh} and \texttt{despawn-zones}. The \texttt{signs} and \texttt{doors} layers contain points indicating the position of the safety signs and the doors. They are separate as they represent different things. The safety signs represent actual signs that the agents follow should they be visible. The location of the doors on the other hand are remembered by the agents and thus do not have to be visible for the agent to know it's location. In addition both signs can have the two properties \texttt{orientationX} and \texttt{orientationY} indicating the direction of a $180$ degree angle from which the sign is visible. Another property signs can have is \texttt{radius} which, if defined, overrides the default radius for marking a sign as visited. The reasons will be made clear in the description of the agent model. The \texttt{agents} layer also consists of points indicating the spawn points of the agents. \texttt{physical-walls}, as the name might suggest, defines the location of the walls using rectangles. This layer is used for giving the environment a shape as the agents cannot walk through these walls. In addition this layer is used for the raytracing algorithm as the agents should not be able to see signs if there's a wall in between but more to that in the agent model description. The \texttt{navmesh} layer defines the navigation mesh mode of rectangles. This mesh defines the points an agent can use for navigation when walking into the direction of a sign or a door. The details of this navigation mesh are also described in the next section about the agent model. Last but not least there's the \texttt{despawn-zones} layer where rectangles are used to define areas that will, when colliding with an agent, remove it from the simulation and count them as in safety.
 
 \subsection{Agent model}
 The agents representing the people are approximated as a circle in the physics engine. Each agent has different intrinsic properties, most of which are generated randomly based on a normal distribution with selected mean and standard deviation values. To have more realistic values we cap the random distribution within the standard deviation as the actual probability of some value far away would otherwise not be zero, just very small.
@@ -194,6 +193,15 @@ After the generation of these random values, the agents are a sole product of th
 The implementation of this model is done in javascript using a game library called phaser that already includes a physics engine and has means of drawing the result onto a \texttt{HTML} canvas meaning the whole simulation can easily be rendered on a webpage and doesn't require any setup.
 
 \subsection{Environment construction}
+As people are at least to some extent the product of their environment, it is very important that the simulations does not have a fixed environment in which all simulations take place. In fact it is one of the most important parameters when looking at the results, i.e. how many people survived a fire emergency. People in a totally enclosed room have no chance of escaping whereas agents sitting next to an escape zone will have no issues. To make the change of this parameter as accessible as possible, the implementation uses an open source format called \texttt{Tiled's map format} (TMX).
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{assets/tiled-editor}\\
+	The editing screen of Tiled
+\end{figure}
+
+Using this editor anyone with basic computer skills is able to adjust the given examples or of course define their own settings enabling people using this model as a basic evaluation method of the safety in a case of fire.
 
 \subsection{Agent behaviour}
 
@@ -209,7 +217,7 @@ As phaser includes a physics engine we can make use of this by simulating the be
     Agent repulsion can be implemented rather easily: for every pair of agents a force
     
     \begin{align*}
-    	f_r = c_1 \cdot e^{\frac{c_2}{d}}
+    	f_r = c_1 \cdot e^{-\frac{d}{c_2}}
     \end{align*}
     
     where $c_1$ and $c_2$ are adjustable parameters but constant for the two agents and $d$ is the distance between the two agents. As the force is proportional to $e^{-d}$, the force is exponentially decreasing when linearly increasing the distance, i.e. exponentially increasing when linearly decreasing it. The initial values for $c_1$ and $c_2$ were empirically determined and are dependant on phasers units and on the agent attraction force.
@@ -222,19 +230,51 @@ As phaser includes a physics engine we can make use of this by simulating the be
     	f_a = c_3 / d
     \end{align*}
     
-    but of course directed in the opposite direction of $f_r$. As $f_r$ is exponentially dependant on $d$ and $f_a$ just linearly there is a distance $d_0$ for which the two forces are in balance and the two agents will stay if no other force would act on them.
+    but of course directed in the opposite direction of $f_r$. As $f_r$ is exponentially dependant on $d$ and $f_a$ just linearly there is a distance $d_0$ for which the two forces are in balance and the two agents will stay in place if no other force would act on them.
 
     \item Target attraction
     
     For checking what signs are visible, we iterate over all of them and use a technique called raytracing. This means we draw a line from the agent's position to the sign's position and check whether this line intersects any rectangle defined in the environments \texttt{physical-walls} layer. 
     
+    \begin{figure}[H]
+		\centering
+		\includegraphics[width=0.25\linewidth]{assets/raytrace-blocked}\\
+		An agent's vision blocked by a wall
+	\end{figure}
+	
+	In the figure above the agent is surrounded by walls meaning a line between the agent and the sign would intersect the front wall and thus in this case the agent wouldn't move towards the sign.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.25\linewidth]{assets/raytrace-visible}\\
+		An agent's sight of a sign visualized by a red ''ray''
+	\end{figure}
     
+    If that's not the case, the sign is indeed visible and we can apply a force into the direction of the sign. This works fine until you introduce obstacles drawn in gray instead of black which stands for a wall. Obstacles collide with the agent as de walls, meaning the agent won't ''climb'' over it, the difference is that the agent can see ''through'' or over an obstacle. A good example for obstacles are tables.
     
-    If that's not the case, the sign is indeed visible and we can apply 
+    \begin{figure}[H]
+		\centering
+		\includegraphics[width=0.25\linewidth]{assets/without-navmesh}\\
+		An agent stuck within obstacles as the direct force\\
+		in the direction of the sign doensn't help
+	\end{figure}
+	
+	Now the issue with directly applying a force to the agent into the direction of the ray becomes obvious, the agent will get stuck as it cannot move through the wall. To circumvent this issue, an so called pathfinding algorithm is used, once the agent sees a sign. Now the agent doesn't just move into the targets direction but rather finds a way to the target and this way is able to walk around obstacles. The way this pathfinding algorithm works is by using the \texttt{navmesh} layer in the environment definition that is made up of rectangles which the agent can use as a path. It then creates an ordered list of points that the agent must follow in order to get to the target.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.5\linewidth]{assets/with-navmesh}\\
+		An agent boxed in obstacles while seeing a sign\\
+		who's using a pathfinding algorithm to find a way
+	\end{figure}
     
 \end{itemize}
 
 \section{Simulation Results and Discussion}
+
+Some Ideas for experiments: One door for example 100 dudes. Vary the desired velocity and observe how long it takes until all have passed the door.
+With obstactle in front of the door versus without, observe how long it takes.
+
 
 \subsection{Choosing start parameters}
 
