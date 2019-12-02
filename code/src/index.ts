@@ -182,7 +182,8 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   dudeGroup = this.add.group();
   tilemap
     .getObjectLayer("dudes")
-    ["objects"].forEach(dude =>
+    ["objects"].slice(0, CONSTANTS.DUDE_COUNT_CAP)
+    .forEach(dude =>
       dudeGroup.add(
         new Dude(
           dude.x,
