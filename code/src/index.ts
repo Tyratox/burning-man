@@ -7,7 +7,8 @@ import { dist2 } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
 import AttractiveTarget from "./AttractiveTarget";
-import Names from "../assets/names.json";
+
+const Names = require("../assets/names.json");
 
 interface Traceable {
   position: {
@@ -173,7 +174,8 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   dudeGroup = this.add.group();
   tilemap
     .getObjectLayer("dudes")
-    ["objects"].forEach(dude =>
+    ["objects"].slice(0, CONSTANTS.DUDE_COUNT_CAP)
+    .forEach(dude =>
       dudeGroup.add(
         new Dude(
           dude.x,
