@@ -160,90 +160,78 @@ We also would like to add a side note about the project title \textit{burning ma
 
 The model is separated into different pieces. First of all we had to create a model for the building in which the evacuation takes place. Next a model for the individual agents, here representing humans, had to be created and evaluated.
 
-\subsection{Building model}
+\subsection{Environment model}
 
-Before agents can react to a fire inside a building, a building has to be defined and created. As the simulation in the end will take place on a computer screen, we first of all have to give the building or the \textit{map} a \texttt{width} and a \texttt{height}.
-
-The next obvious property any building has are walls. Walls define rooms, corridors and give the map its shape. We define the walls to be lines drawn from some coordinate $(x_1, y_1)$ to some other coordinate $(x_2, y_2)$. As the simulation takes place in a physics engine, the walls can't be just line but must be a rectangle of some sort and thus the model also requires a \texttt{wallThickness} property. For now this property is the same for all walls, even though this may not be accurate it almost wont't affect the result of the simulation so it is a appropriate simplification. Such a setting would already be enough for the agents to be randomly moving around and interact with each other but such a simulation isn't even remotely interesting for our purpose as the general behaviour of agents in an emergency is pretty clear. First we want to indicate the location of the doors so that the agents can find the next exit without having us to place safety signs into the rooms themselves. Outside the rooms, safety signs should be used for orientation. Both, the doors and the signs, have the property \texttt{orientation} that gives a normal vector for the direction the door or sign is visible from. In \texttt{tables} we can define additional obstacles which in our case are tables, thus also the naming. The definition consists of two points of a rectangle, the top left and the bottom right corner. These obstacles are different from walls as do not obstract the line of sight when looking for a safety signs. When following the safety signs, at some point a safe zone or escape zone is or at least should be reached where the agents are removed from the simulation. These \texttt{despawnZones} are again described by the top left and the bottom right corner of a rectangle.
-
-\begin{lstlisting}[language=javascript]
-{
-    width  : 1900,
-    height : 1100,
-    wallThickness: 10,
-    walls  : [
-       [{ x: 0, y: 0 },    { x: 1900, y: 0 }],
-       [{ x: 0, y: 1100 }, { x: 1900, y: 1100 }],
-       ...
-    ],
-    doors: [
-        {
-            position    : { x: 85, y: 425 },
-            orientation : { x: 0, y: -1 }
-        },
-        {
-            position    : { x: 445, y: 425 },
-            orientation : { x: 0, y: -1 }
-        },
-        ...
-    ],
-    signs: [
-        {
-            position: { x: 550, y: 538 },
-            orientation: { x: -1, y: 0 }
-        },
-        {
-            position: { x: 1125, y: 538 },
-            orientation: { x: -1, y: 0 }
-        },
-        ...
-    ],
-    tables: [
-        [{ x: 70, y: 70 },  { x: 110, y: 170 }],
-        [{ x: 70, y: 225 }, { x: 110, y: 325 }],
-        ...
-    ],
-    despawnZone: [
-        [{ x: 1275, y: 115 }, { x: 1585, y: 420 }]
-    ],
-    spawnPoints: [
-        { x: 200, y: 538 },
-        { x: 900, y: 520 },
-        ...
-    ],
-    fires: [{position: { x: 20, y: 450 }}, {position: { x: 20, y: 500 }}],
-}
-\end{lstlisting}
+Before agents can react to a fire an environment has to be created which in our case is a building but is in general not restricted to buildings and could thus also be applied to other settings such as a festival. As the environment is one of the parameters that in a successful model should be easy to change, a subset of a preexisting format definition is used. The environment consists of object layers of \texttt{signs}, \texttt{agents}, \texttt{doors}, \texttt{physical-walls}, \texttt{navmesh} and \texttt{despawn-zones}. The \texttt{signs} and \texttt{doors} layers contain points indicating the position of the safety signs and the doors. They are separate as they represent different things. The safety signs represent actual signs that the agents follow should they be visible. The location of the doors on the other hand are remembered by the agents and thus do not have to be visible for the agent to know it's location. In addition both signs can have the two properties \texttt{orientationX} and \texttt{orientationY} indicating the direction of a $180$ degree angle from which the sign is visible. Another property signs can have is \texttt{radius} which, if defined, overrides the default radius for marking a sign as visited. The reasons will be made clear in the description of the agent model. The \texttt{agents} layer also consists of points indicating the spawn points of the agents. \texttt{physical-walls}, as the name might suggest, defines the location of the walls using rectangles. This layer is used for giving the environment a shape as the agents cannot walk through these walls. In addition this layer is used for the raytracing algorithm as the agents should not be able to see signs if there's a wall in between but more to that in the agent model description. The \texttt{navmesh} layer defines the navigation mesh mode of rectangles. This mesh defines the points an agent can use for navigation when walking into the direction of a sign or a door. The details of this navigation mesh are also described in the next section about the agent model. Last but not least there's the \texttt{despawn-zones} layer where rectangles are used to define areas that will, when colliding with an agent, remove it from the simulation and count them as in safety.
 
 \subsection{Agent model}
-The agents representing the people are approximated as a circle in the physics engine. They have the following properties, most of which are generated randomly based ond a normal distribution with selected mean and standard deviation values. To have more realistic values we cap the random distribution within the standard deviation as the actual probability of some value far away would otherwise not be zero, just very small.
+The agents representing the people are approximated as a circle in the physics engine. Each agent has different intrinsic properties, most of which are generated randomly based on a normal distribution with selected mean and standard deviation values. To have more realistic values we cap the random distribution within the standard deviation as the actual probability of some value far away would otherwise not be zero, just very small.
 
-First we calculate the basic intrinsic properties \texttt{weight, fitness} and \texttt{age} based on the described capped normal distribution. The radius or size of the agent is then also chosen from the capped normal distrubution but is then also multiplied with the \textit{normalized} \texttt{weight} and divided by the \textit{normalized} \texttt{fitness}. By \textit{normalized} we refer to the proportion of the random value to the mean for the given value. This factor $\frac{1}{\texttt{|agility|}} = \frac{\texttt{|weight|}}{|fitness|}$ (the $|\cdot|$ refers to the \textit{normalized} value) or rather its inverse is also used when generating the \texttt{maxVelocity} and the \texttt{maxAcceleration}, both of these values are multipled with this factor \texttt{agility} after being randomly chosen from the respective capped normal distrubution. As visual sight is a very important in emergency situations for finding safety signs and can also be distrubed by for example smoke, we also generate the property \texttt{visualRange} from another capped normal distrubution whose result is then divided by the \textit{normalized} age.
+First we calculate the basic properties \texttt{weight, fitness} and \texttt{age} based on the described capped normal distribution. The radius or size of the agent is then also chosen from the capped normal distrubution but is then also multiplied with the \textit{normalized} \texttt{weight} and divided by the \textit{normalized} \texttt{fitness}. By \textit{normalized} we refer to the proportion of the random value to the mean for the given value. This factor $\frac{1}{\texttt{|agility|}} = \frac{\texttt{|weight|}}{|fitness|}$ (the $|\cdot|$ refers to the \textit{normalized} value) or rather its inverse is also used when generating the \texttt{maxVelocity} and the \texttt{maxAcceleration}, both of these values are multipled with this factor \texttt{agility} after being randomly chosen from the respective capped normal distrubution. As visual sight is a very important in emergency situations for finding safety signs and can also be distrubed by for example smoke, we also generate the property \texttt{visualRange} from another capped normal distribution whose result is then divided by the \textit{normalized} age.
 
-\section{Implementation}
-
-The implementation of this model is done in javascript using a game library called phaser that already includes a physics engine and has means of drawing the result onto a \texttt{HTML} canvas. Phaser uses so called \textit{scenes} that themself contain so called \texttt{GameObjects}. These \texttt{GameObjects} can either be just drawn onto the canvas or also be added to the physics engine which allows them to interact with the world. The walls are simple rectangles with enabled physics that are grouped together in a \texttt{Phaser.GameObjects.Group}. As the agents are approximated by circles, the extend the class \texttt{Phaser.GameObjects.Arc}, add themselves directly to the scene and enable physics. All agents are also grouped together which now allows us to tell the phaser physics engine to calculate collisions between the the groups and also within the group of our agents as they can run into each other. In contrast the doors and signs are simply drawn and not added to the physics engine as they are just there for interpretating the simulation. The tables, despawnzones and fires are added analogously.
-
-\subsection{Agent behaviour}
-
-As phaser includes a physics engine we can make use of this by determening the behaviour of the agents based on forces acting on them where the final movement is the vector addition of all these forces. Phaser accepts a \texttt{update} function that is called every time a new frame is calculated. In this callback function the following forces are calculated:
+After the generation of these random values, the agents are a sole product of their environment, their behaviour is based on a set of simple rules.
 
 \begin{itemize}
     \item Wall repulsion
     
-    To model human behaviour, agents should in general not like to stand too close to walls which means we have to find the closest wall and check whether this distance is acceptable. If that's not the case, a force perpendicular to the wall and proportional to the distance is applied to the agent, forcing him to move away. The tricky part here is that the walls are line segments and not infinite lines, so the general math for calculating distances had to be changed and a check whether an agent is in front of the wall had to be added.
+    To model human behaviour, agents should in general prefer to move away from walls as most humans prefer to have some space around them.
 
     \item Agent repulsion
     
-    In general people do not like to stand close to each other, especially not in emergency situations. To simulate this behaviour an force exponential in the inverse of the distance is applied to agents standing close to each other.
+    For the same reason people do not like to stand close to each other, especially not in emergency situations. To model this, the agents will thus move away from each other if their distance is small.
 
     \item Agent attraction
     
-    Even tough people do not like to stand close to each other, they still tend to form groups and do not like to act on their own. As the exponential repulsion only kicks in for small distances we can also add a linear attraction between the agents, forcing them to form groups. As soon as the linear attraction and the exponential repulsion balance out, the two affected agents will try to keep this distance.
+    Even tough people do not like to stand close to each other, they still tend to form groups and do not like to act on their own. Thus the agents are instructed to move closer together as long as the distance between them is in the acceptable range.
 
     \item Target attraction
     
-    Last but definitely not least, the agents have to do something and not just stand around. In the best case, the agents should try to reach one of the defined escape zones. In real life, safety signs guide people to these safe zones so our simulations tries to copy this behaviour by raytracing to all signs and check whether the sight is obstructed by a wall. Additionally it has to be checked wheter the sign can be seen from a given position as they should only be followed in one direction. A force in the direction of the closest not-obstructed sign is then applied to the agent hopefully guiding him in the direction of the escape zone. In the implementation section it was mentioned that there are also doors having the same behaviour as signs but they are differently marked as they do not represent a safety sign but rather the intuitive behaviour of people leaving the current room they're in. Both of these forces are made visible by drawing a line to the target the raytracing algorithm selected.
+    Last but definitely not least, the agents have to do something and not just stand around. In the best case, the agents should try to reach one of the defined escape zones. In real life, safety signs guide people to these safe zones so the agents are instructed to always be on the lookout for visible signs guiding them to safety. In real life not all small rooms do have safety signs in them as for humans the only viable option in an emergency is to first leave the room they're in. As the agents should follow this behaviour, doors function similar to signs except that they do not have to be visible. This allows to simulate some kind of memory of the agents and enables them to leave the room even without have seen a safety sign. Another type of memory that is simulated is the remembrance of already visited signs and doors as real humans will not follow the same sign twice if the direction the sign points in didn't lead to an exit the first time around. An exception is made to this, when an agent doesn't have any target anymore they ''forget'' everything they visited before and start from scratch. This allows for some more complex behaviours such as an agent being pushed back into the room he just was in because of other agents rushing the hallway. If the memory wasn't cleared, the agent now wouldn't leave the room a second time which of course would be a real bad behaviour.
+\end{itemize}
+
+\section{Implementation}
+
+The implementation of this model is done in javascript using a game library called phaser that already includes a physics engine and has means of drawing the result onto a \texttt{HTML} canvas meaning the whole simulation can easily be rendered on a webpage and doesn't require any setup.
+
+\subsection{Environment construction}
+
+\subsection{Agent behaviour}
+
+As phaser includes a physics engine we can make use of this by simulating the behaviour of the agents based on forces acting on them where the final movement is the vector addition of all these forces. Phaser has an \texttt{update} function that is called every time a new frame is calculated. which is perfectly suited for such a task. The different behavioural rules are implemented as follows
+
+\begin{itemize}
+    \item Wall repulsion
+    
+    -
+
+    \item Agent repulsion
+    
+    Agent repulsion can be implemented rather easily: for every pair of agents a force
+    
+    \begin{align*}
+    	f_r = c_1 \cdot e^{\frac{c_2}{d}}
+    \end{align*}
+    
+    where $c_1$ and $c_2$ are adjustable parameters but constant for the two agents and $d$ is the distance between the two agents. As the force is proportional to $e^{-d}$, the force is exponentially decreasing when linearly increasing the distance, i.e. exponentially increasing when linearly decreasing it. The initial values for $c_1$ and $c_2$ were empirically determined and are dependant on phasers units and on the agent attraction force.
+
+    \item Agent attraction
+    
+    The agent attraction force is, in contrast to the agent repulsion force, linearly dependant on the distance $d$
+    
+    \begin{align*}
+    	f_a = c_3 / d
+    \end{align*}
+    
+    but of course directed in the opposite direction of $f_r$. As $f_r$ is exponentially dependant on $d$ and $f_a$ just linearly there is a distance $d_0$ for which the two forces are in balance and the two agents will stay if no other force would act on them.
+
+    \item Target attraction
+    
+    For checking what signs are visible, we iterate over all of them and use a technique called raytracing. This means we draw a line from the agent's position to the sign's position and check whether this line intersects any rectangle defined in the environments \texttt{physical-walls} layer. 
+    
+    
+    
+    If that's not the case, the sign is indeed visible and we can apply 
+    
 \end{itemize}
 
 \section{Simulation Results and Discussion}

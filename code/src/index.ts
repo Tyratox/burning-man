@@ -498,7 +498,7 @@ const calculateForces = (scene: Phaser.Scene) => {
 
     const dudeBody = dudes[i].getBody();
     const dudePosition = { x: dudes[i].x, y: dudes[i].y };
-/*
+    /*
     
     const {
       distance: closestWallDistance,
@@ -539,17 +539,17 @@ const calculateForces = (scene: Phaser.Scene) => {
     //calculate directioncorrecting force
     const desiredVelocity = dudes[i].maxVelocity;
 
-    if(CONSTANTS.PATHFINDACTIVE){
+    if (CONSTANTS.PATHFINDACTIVE) {
       //check if the dude isn't already tracking a path or hasn't recalculated it's path for half a second
-      if (dudes[i].path === null) {
+      if (dudes[i].path === null || dudes[i].nextNode >= dudes[i].path.length) {
         //check if he see's a sign
         const sign = findClosestAttractiveTarget(dudes[i], scene);
 
         //calculate here the desired velocity from the target value only if we have a target
         if (sign.x > 0) {
-            const path = navmesh.findPath({ x: dudes[i].x, y: dudes[i].y }, sign);
-            dudes[i].path = path;
-            dudes[i].nextNode = 0;
+          const path = navmesh.findPath({ x: dudes[i].x, y: dudes[i].y }, sign);
+          dudes[i].path = path;
+          dudes[i].nextNode = 0;
         } else {
           //do random stuff / generate a random path
           dudes[i].visitedTargets = [];
@@ -559,7 +559,9 @@ const calculateForces = (scene: Phaser.Scene) => {
       if (dudes[i].path !== null) {
         //follow the path that is just an array of points, find the two closest and take the one with the higher index
         if (
-          dist2(dudePosition, dudes[i].path[dudes[i].nextNode]) < Math.pow(25, 2)
+          dist2(dudePosition, dudes[i].path[dudes[i].nextNode]) <
+            Math.pow(25, 2) &&
+          dudes[i].nextNode + 1 < dudes[i].path.length
         ) {
           dudes[i].nextNode++;
         }
@@ -609,21 +611,22 @@ const calculateForces = (scene: Phaser.Scene) => {
             .scale(dudes[i].normalizedFitness / dudes[i].normalizedWeight) //reaction time
         );
       }
-    }else{// if Pathfinding is deactivated
+    } else {
+      // if Pathfinding is deactivated
       const sign = findClosestAttractiveTarget(dudes[i], scene);
 
-        //calculate here the desired velocity from the target value only if we have a target
-        if (sign.x > 0) {
-          //apply direction correcting force
-          accelerations[i].add(
-            new Phaser.Math.Vector2(sign.x, sign.y)
-              .subtract(dudes[i].getBody().position)
-              .normalize()
-              .scale(desiredVelocity)
-              .subtract(dudes[i].getBody().velocity) // subtract current velocity
-              .scale(dudes[i].normalizedFitness / dudes[i].normalizedWeight) //reaction time
-          );
-        }
+      //calculate here the desired velocity from the target value only if we have a target
+      if (sign.x > 0) {
+        //apply direction correcting force
+        accelerations[i].add(
+          new Phaser.Math.Vector2(sign.x, sign.y)
+            .subtract(dudes[i].getBody().position)
+            .normalize()
+            .scale(desiredVelocity)
+            .subtract(dudes[i].getBody().velocity) // subtract current velocity
+            .scale(dudes[i].normalizedFitness / dudes[i].normalizedWeight) //reaction time
+        );
+      }
     }
 
     //calculate repulison between dudes and all visible fires
@@ -647,9 +650,12 @@ const calculateForces = (scene: Phaser.Scene) => {
       const dude1 = dudes[i],
         dude2 = dudes[j];
 
-      const distance = dude1
-        .getBody()
-        .position.distance(dude2.getBody().position);
+      const distance = Math.max(
+        dude1.getBody().position.distance(dude2.getBody().position) -
+          dude1.radius -
+          dude2.radius,
+        dude1.radius + dude2.radius
+      );
 
       //the smaller the distance the bigger the force
       //the bigger the distance the smaller the force
@@ -657,10 +663,8 @@ const calculateForces = (scene: Phaser.Scene) => {
       //OR => force ~ e^{1/distance} => exponentially increasing with small distances
 
       const pushingForce =
-        distance > 50
-          ? 0
-          : CONSTANTS.DUDE_REPULSION_LINEAR *
-            Math.exp(CONSTANTS.DUDE_REPULSION_EXPONENTIAL / distance);
+        CONSTANTS.DUDE_REPULSION_LINEAR *
+        Math.exp(-distance / CONSTANTS.DUDE_REPULSION_EXPONENTIAL);
 
       //the bigger the distance the smaller the pulling force
       const pullingForce = CONSTANTS.DUDE_GROUP_ATTRACTION / distance;

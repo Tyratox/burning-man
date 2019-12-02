@@ -11,9 +11,9 @@ export const CONSTANTS = {
   TRIANGLE_HEIGHT: 20,
   TRIANGLE_SIZE: 10,
 
-  DUDE_REPULSION_LINEAR: 1 / 1000,
-  DUDE_REPULSION_EXPONENTIAL: 500,
-  DUDE_GROUP_ATTRACTION: 500,
+  DUDE_REPULSION_LINEAR: 10,
+  DUDE_REPULSION_EXPONENTIAL: 10,
+  DUDE_GROUP_ATTRACTION: 1,
   ACCEPTABLE_WALL_DISTANCE: 30,
   WALL_REPULSION_FORCE: 50,
   DEFAULT_DESIRED_VELOCITY: 100,
@@ -50,7 +50,7 @@ export const CONSTANTS = {
 
   RENDER_DEBUG_OBJECTS: true,
   RENDER_NAVMESH_DEBUG: false,
-  PATHFINDACTIVE:true
+  PATHFINDACTIVE: true
 };
 
 const onSliderChange = (e: InputEvent) => {
@@ -137,11 +137,12 @@ export const onDOMReadyControlSetup = e => {
 
   pathFindButton.addEventListener("click", () => {
     if (CONSTANTS.PATHFINDACTIVE) {
-      pathFindButton.innerText = "Pathfinding Off";
-    } else {
+      CONSTANTS.PATHFINDACTIVE = false;
       pathFindButton.innerText = "Pathfinding On";
+    } else {
+      CONSTANTS.PATHFINDACTIVE = true;
+      pathFindButton.innerText = "Pathfinding Off";
     }
-    CONSTANTS.PATHFINDACTIVE = !CONSTANTS.PATHFINDACTIVE;
   });
 
   startButton.addEventListener("click", () => {
