@@ -10,7 +10,8 @@
     "jsx": "react",
     "allowJs": true,
     "moduleResolution": "node",
-    "typeRoots": ["./src"]
+    "typeRoots": ["./src"],
+    "resolveJsonModule": true
   },
   "exclude": ["node_modules"]
 }

@@ -4,18 +4,23 @@ import {
   setCurrentStartTime,
   setPreviousElapsedTime,
   toggleDebugObjectsVisibility,
-  toggleNavmeshDebugVisibility
+  toggleNavmeshDebugVisibility,
+  previousElapsedTime,
+  currentElapsedTime,
+  totalNumberOfDudes,
+  numberOfDeadDudes,
+  numberOfSurvivorDudes
 } from ".";
 
 export const CONSTANTS = {
   TRIANGLE_HEIGHT: 20,
   TRIANGLE_SIZE: 10,
 
-  DUDE_REPULSION_LINEAR: 1 / 1000,
-  DUDE_REPULSION_EXPONENTIAL: 500,
-  DUDE_GROUP_ATTRACTION: 500,
+  DUDE_REPULSION_LINEAR: 20,
+  DUDE_REPULSION_EXPONENTIAL: 10,
+  DUDE_GROUP_ATTRACTION: 0,
   ACCEPTABLE_WALL_DISTANCE: 30,
-  WALL_REPULSION_FORCE: 50,
+  WALL_REPULSION_FORCE: 10,
   DEFAULT_DESIRED_VELOCITY: 100,
 
   MAX_SMOKE_RADIUS: 20,
@@ -50,7 +55,7 @@ export const CONSTANTS = {
 
   RENDER_DEBUG_OBJECTS: true,
   RENDER_NAVMESH_DEBUG: false,
-  PATHFINDACTIVE:true
+  PATHFINDACTIVE: true
 };
 
 const onSliderChange = (e: InputEvent) => {
@@ -100,7 +105,8 @@ export const onDOMReadyControlSetup = e => {
     dynamicSliders.style.display = "block";
     startButton.style.display = "block";
 
-    initGame();
+    const select: HTMLSelectElement = document.querySelector("#map-selector");
+    initGame(select.value);
   });
 
   pauseButton.addEventListener("click", () => {
@@ -137,11 +143,12 @@ export const onDOMReadyControlSetup = e => {
 
   pathFindButton.addEventListener("click", () => {
     if (CONSTANTS.PATHFINDACTIVE) {
-      pathFindButton.innerText = "Pathfinding Off";
-    } else {
+      CONSTANTS.PATHFINDACTIVE = false;
       pathFindButton.innerText = "Pathfinding On";
+    } else {
+      CONSTANTS.PATHFINDACTIVE = true;
+      pathFindButton.innerText = "Pathfinding Off";
     }
-    CONSTANTS.PATHFINDACTIVE = !CONSTANTS.PATHFINDACTIVE;
   });
 
   startButton.addEventListener("click", () => {
@@ -153,8 +160,30 @@ export const onDOMReadyControlSetup = e => {
   });
 };
 
-export const disablePauseButton = () => {
+export const simulationFinished = () => {
   const pauseButton = document.getElementById("pause");
   pauseButton.setAttribute("disabled", "disabled");
   pauseButton.style.backgroundColor = "grey";
+
+  const dynamicSliders = document.getElementById("dynamic-sliders");
+  dynamicSliders.style.display = "none";
+
+  const results = document.getElementById("results");
+  results.style.display = "block";
+  const textarea: HTMLTextAreaElement = document.querySelector(
+    "#results textarea"
+  );
+
+  const values = {
+    ...CONSTANTS,
+    TIME: previousElapsedTime + currentElapsedTime,
+    AGENTS_TOTAL: totalNumberOfDudes,
+    AGENTS_DEAD: numberOfDeadDudes,
+    AGENTS_SAFE: numberOfSurvivorDudes
+  };
+
+  const csv = '"' + Object.keys(values).join('", "');
+  '"\n' + '"' + Object.values(values).join('", "') + '"\n';
+
+  textarea.value = csv;
 };
