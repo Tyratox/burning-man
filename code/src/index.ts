@@ -7,7 +7,8 @@ import { dist2 } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
 import AttractiveTarget from "./AttractiveTarget";
-import Names from "../assets/names.json";
+
+const Names = require("../assets/names.json");
 
 interface Traceable {
   position: {
