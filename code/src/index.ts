@@ -78,6 +78,7 @@ let navmesh: any;
 let timeLabel: Phaser.GameObjects.Text;
 let despawnZones: Phaser.Physics.Arcade.StaticGroup;
 let walls: Phaser.Physics.Arcade.StaticGroup;
+let tablesGroup: Phaser.Physics.Arcade.StaticGroup;
 let doorGroup: Phaser.GameObjects.Group;
 let attractiveTargetGroup: Phaser.Physics.Arcade.StaticGroup;
 
@@ -92,6 +93,7 @@ export const toggleDebugObjectsVisibility = () => {
   walls.toggleVisible();
   doorGroup.toggleVisible();
   attractiveTargetGroup.toggleVisible();
+  tablesGroup.toggleVisible();
 };
 export const toggleNavmeshDebugVisibility = () => {
   if (navmesh.isDebugEnabled()) {
@@ -109,8 +111,7 @@ const preload: (map: string) => ScenePreloadCallback = map =>
     this.load.image("skull", "assets/skull.png");
     this.load.image("fire", "assets/fire.png");
     this.load.tilemapTiledJSON("map", `assets/${map}/default.json`);
-    this.load.image("tiles", "assets/map/tileset.png");
-    this.load.image("old-tiles", "assets/map/dungeon-tileset.png");
+    this.load.image("tiles", "assets/map/minimal-tileset.png");
   };
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
@@ -129,20 +130,10 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     true
   );
 
-  const tileset = tilemap.addTilesetImage("Custom", "tiles");
-  const oldTileset = tilemap.addTilesetImage("Dungeon_Tileset", "old-tiles");
-  const floorLayer = tilemap.createStaticLayer(
-    "floor",
-    [tileset, oldTileset],
-    0,
-    0
-  );
-  const wallLayer = tilemap.createStaticLayer(
-    "walls",
-    [tileset, oldTileset],
-    0,
-    0
-  );
+  const tileset = tilemap.addTilesetImage("minimal-tileset", "tiles");
+  const floorLayer = tilemap.createStaticLayer("floor", [tileset], 0, 0);
+  const wallLayer = tilemap.createStaticLayer("walls", [tileset], 0, 0);
+  const tablesLayer = tilemap.createStaticLayer("tables", [tileset], 0, 0);
 
   //@ts-ignore
   navmesh = this.navMeshPlugin.buildMeshFromTiled(
@@ -196,17 +187,18 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   const somkeGroup = this.add.group();
   const fireGroup = this.add.group();
 
-  const tables = this.physics.add.staticGroup();
+  tablesGroup = this.physics.add.staticGroup();
   tilemap
     .getObjectLayer("obstacles")
     ["objects"].forEach(obstacle =>
-      tables.add(
+      tablesGroup.add(
         this.add.rectangle(
           obstacle.x + obstacle.width / 2,
           obstacle.y + obstacle.height / 2,
           obstacle.width,
           obstacle.height,
-          0x9b9b9b
+          0x8e44ad,
+          0.3
         )
       )
     );
@@ -385,7 +377,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   );
   this.physics.add.collider(dudeGroup, dudeGroup);
   this.physics.add.collider(dudeGroup, walls);
-  this.physics.add.collider(dudeGroup, tables);
+  this.physics.add.collider(dudeGroup, tablesGroup);
   this.physics.add.collider(dudeGroup, despawnZones, (dude: Dude, zone) => {
     console.log("Dude " + dude.name + " is a survivor!");
     numberOfSurvivorDudes++;
