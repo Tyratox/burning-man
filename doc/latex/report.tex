@@ -144,7 +144,7 @@
 
 \section{Abstract}
 
-This paper describes a model for the behaviour of people in the event of fire and it's simulation. The model tries to incorporate the general repulsion of people standing too close, the formation of groups in panic situations, the placement of exit signs and many smaller factor such as different weights and ages. In order to make observations on the defined model, it is simulated using a physics engine using javascript that makes it accessible from any place at any time and allows for reproducible and verifiable results. The paper also defines a general format for describing a ground plan of a building that can directly be imported into the model simulation. Combined with the right simulation parameters, this features allows the evaluation of the safety in buildings in the case of fire.
+This paper describes a model for the behaviour of people in the event of fire and it's simulation. The model tries to incorporate the general repulsion of people standing too close, the formation of groups in panic situations, the placement of exit signs and many other factors such as different speeds. In order to make observations on the defined model, it is simulated using a physics engine using javascript that makes it accessible from any place at any time and allows for reproducible and verifiable results. The paper defines a general parameterized model of the environment and the agents which, with the right choice of simulation parameters, even allow for a safety evaluation of specific settings. Simulations using this model were able to verify results of other papers but also put them into perspective.
 
 \section{Introduction and Motivations}
 
@@ -157,18 +157,18 @@ We also would like to add a side note about the project title \textit{burning ma
 
 \section{Description of the Model}
 
-The model is separated into different pieces. First of all we had to create a model for the building in which the evacuation takes place. Next a model for the individual agents, here representing humans, had to be created and evaluated.
+For readability this chapter is split as the definition of the environment is to some extent independent of the agent's model.
 
 \subsection{Environment model}
 
 Before agents can react to a fire an environment has to be created which in our case is a building but is in general not restricted to buildings and could thus also be applied to other settings such as a festival. As the environment is one of the parameters that in a successful model should be easy to change, a subset of a preexisting format definition is used. The environment consists of the so-called object layers \texttt{signs}, \texttt{agents}, \texttt{doors}, \texttt{physical-walls}, \texttt{navmesh} and \texttt{despawn-zones}. The \texttt{signs} and \texttt{doors} layers contain points indicating the position of the safety signs and the doors. They are separate as they represent different things. The safety signs represent actual signs that the agents follow should they be visible. The location of the doors on the other hand are remembered by the agents and thus do not have to be visible for the agent to know it's location. In addition both signs can have the two properties \texttt{orientationX} and \texttt{orientationY} indicating the direction of a $180$ degree angle from which the sign is visible. Another property signs can have is \texttt{radius} which, if defined, overrides the default radius for marking a sign as visited. The reasons will be made clear in the description of the agent model. The \texttt{agents} layer also consists of points indicating the spawn points of the agents. \texttt{physical-walls}, as the name might suggest, defines the location of the walls using rectangles. This layer is used for giving the environment a shape as the agents cannot walk through these walls. In addition this layer is used for the raytracing algorithm as the agents should not be able to see signs if there's a wall in between but more to that in the agent model description. The \texttt{navmesh} layer defines the navigation mesh mode of rectangles. This mesh defines the points an agent can use for navigation when walking into the direction of a sign or a door. The details of this navigation mesh are also described in the next section about the agent model. Last but not least there's the \texttt{despawn-zones} layer where rectangles are used to define areas that will, when colliding with an agent, remove it from the simulation and count them as in safety.
 
 \subsection{Agent model}
-The agents representing the people are approximated as a circle in the physics engine. Each agent has different intrinsic properties, most of which are generated randomly based on a normal distribution with selected mean and standard deviation values. To have more realistic values we cap the random distribution within the standard deviation as the actual probability of some value far away would otherwise not be zero, just very small.
+For the agent model a so-called social force model is used. In short agents behave like particles in newtonian physics. Every agent has a mass, position and velocity and on every agent act a bunch of forces resulting in an acceleration according to the famous $F=m\cdot a$. The agents representing the people are approximated as a circle in the physics engine where each agent has different intrinsic properties, most of which are generated randomly based on a normal distribution with selected mean and standard deviation values. To have more realistic values we cap the random distribution within the standard deviation as the actual probability of some value far away would otherwise not be zero, just very small.
 
-First we calculate the basic properties \texttt{weight, fitness} and \texttt{age} based on the described capped normal distribution. The radius or size of the agent is then also chosen from the capped normal distrubution but is then also multiplied with the \textit{normalized} \texttt{weight} and divided by the \textit{normalized} \texttt{fitness}. By \textit{normalized} we refer to the proportion of the random value to the mean for the given value. This factor $\frac{1}{\texttt{|agility|}} = \frac{\texttt{|weight|}}{|fitness|}$ (the $|\cdot|$ refers to the \textit{normalized} value) or rather its inverse is also used when generating the \texttt{maxVelocity} and the \texttt{maxAcceleration}, both of these values are multipled with this factor \texttt{agility} after being randomly chosen from the respective capped normal distrubution. As visual sight is a very important in emergency situations for finding safety signs and can also be distrubed by for example smoke, we also generate the property \texttt{visualRange} from another capped normal distribution whose result is then divided by the \textit{normalized} age.
+First we calculate the basic properties \texttt{weight, fitness} and \texttt{age} based on the described capped normal distribution. The radius or size of the agent is then also chosen from the capped normal distrubution but is then also multiplied with the \textit{normalized} \texttt{weight} and divided by the \textit{normalized} \texttt{fitness}. By \textit{normalized} we refer to the proportion of the random value to the mean for the given value. This factor $\frac{1}{\texttt{|agility|}} = \frac{\texttt{|weight|}}{\texttt{|fitness|}}$ (the $|\cdot|$ refers to the \textit{normalized} value) or rather its inverse is also used when generating the \texttt{maxVelocity} and the \texttt{maxAcceleration}, both of these values are multipled with this factor \texttt{agility} after being randomly chosen from the respective capped normal distrubution. As visual sight is a very important in emergency situations for finding safety signs and can also be disturbed by for example smoke, the property \texttt{visualRange} is also generated from another capped normal distribution whose result is then divided by the \textit{normalized} age.
 
-After the generation of these random values, the agents are a sole product of their environment, their behaviour is based on a set of simple rules.
+After the generation of these random values, the agents are a sole product of their environment and their behaviour is based on a set of simple rules.
 
 \begin{itemize}
     \item Wall repulsion
@@ -251,22 +251,26 @@ As phaser includes a physics engine we can make use of this by simulating the be
 	\end{figure}
     
     If that's not the case, the sign is indeed visible and we can apply a force into the direction of the sign. This works fine until you introduce obstacles drawn in gray instead of black which stands for a wall. Obstacles collide with the agent as de walls, meaning the agent won't ''climb'' over it, the difference is that the agent can see ''through'' or over an obstacle. A good example for obstacles are tables.
-    
-    \begin{figure}[H]
-		\centering
-		\includegraphics[width=0.25\linewidth]{assets/without-navmesh}\\
-		An agent stuck within obstacles as the direct force\\
-		in the direction of the sign doensn't help
-	\end{figure}
 	
-	Now the issue with directly applying a force to the agent into the direction of the ray becomes obvious, the agent will get stuck as it cannot move through the wall. To circumvent this issue, an so called pathfinding algorithm is used, once the agent sees a sign. Now the agent doesn't just move into the targets direction but rather finds a way to the target and this way is able to walk around obstacles. The way this pathfinding algorithm works is by using the \texttt{navmesh} layer in the environment definition that is made up of rectangles which the agent can use as a path. It then creates an ordered list of points that the agent must follow in order to get to the target.
+	Now the issue with directly applying a force to the agent into the direction of the ray becomes obvious, the agent will get stuck as it cannot move through the wall. To circumvent this issue, an so called pathfinding algorithm is used, once the agent sees a sign. Now the agent doesn't just move into the targets direction but rather finds a way to the target and this way is able to walk around obstacles. The way this pathfinding algorithm works is by using the \texttt{navmesh} layer in the environment definition that is made up of rectangles which the agent can use as a path. It then creates an ordered list of points that the agent can follow in order to get to the target position.
 	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.5\linewidth]{assets/with-navmesh}\\
-		An agent boxed in obstacles while seeing a sign\\
-		who's using a pathfinding algorithm to find a way
-	\end{figure}
+	\begin{minipage}{.4\textwidth}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=.5\linewidth]{assets/without-navmesh}\\
+			Agent stuck within obstacles
+		\end{figure}
+	\end{minipage}
+	\begin{minipage}{.2\textwidth}	
+	\vfill\hfill
+	\end{minipage}
+	\begin{minipage}{.4\textwidth}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=1\linewidth]{assets/with-navmesh}\\
+			Agent boxed in obstacles using pathfinding
+		\end{figure}
+	\end{minipage}
     
 \end{itemize}
 
@@ -276,7 +280,11 @@ Some Ideas for experiments: One door for example 100 dudes. Vary the desired vel
 With obstactle in front of the door versus without, observe how long it takes.
 
 
-\subsection{Choosing start parameters}
+\subsection{Experiment 1}
+
+\subsection{Experiment 2}
+
+\subsection{Experiment 3}
 
 \subsection{Interpretation of the simulation result}
 
