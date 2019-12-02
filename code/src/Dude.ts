@@ -104,6 +104,10 @@ class Dude extends Phaser.GameObjects.Arc {
   getBody() {
     return getBody(this);
   }
+
+  getPosition() {
+    return new Phaser.Math.Vector2(this.x, this.y);
+  }
 }
 
 export default Dude;

@@ -1,16 +1,9 @@
 import * as Phaser from "phaser";
 import PhaserNavMeshPlugin from "phaser-navmesh";
 
-import { CONSTANTS, disablePauseButton } from "./controls";
+import { CONSTANTS, simulationFinished } from "./controls";
 import Dude from "./Dude";
-import map from "./map";
-import {
-  isLeftOfLine,
-  distanceToLineSegment,
-  dist2,
-  pointRectDist,
-  pointRectNormal
-} from "./utilities/math";
+import { dist2 } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
 import AttractiveTarget from "./AttractiveTarget";
@@ -71,13 +64,13 @@ const DUDE_WALKING_FRICTION = 0.995;
 
 const SPEED_THRESHOLD = 7;
 
-let totalNumberOfDudes = 0;
-let numberOfDeadDudes = 0;
-let numberOfSurvivorDudes = 0;
+export let totalNumberOfDudes = 0;
+export let numberOfDeadDudes = 0;
+export let numberOfSurvivorDudes = 0;
 
 let currentStartTime: number = 0;
-let previousElapsedTime: number = 0;
-let currentElapsedTime: number = 0;
+export let previousElapsedTime: number = 0;
+export let currentElapsedTime: number = 0;
 
 //globals
 let dudeGroup: Phaser.GameObjects.Group;
@@ -110,21 +103,46 @@ export const toggleNavmeshDebugVisibility = () => {
 
 // ----- Phaser initialization functions -----
 
-const preload: ScenePreloadCallback = function(this: Phaser.Scene) {
-  //load images if needed
-  this.load.image("dungeon-tiles", "assets/map/dungeon-tileset.png");
-  this.load.image("skull", "assets/skull.png");
-  this.load.image("fire", "assets/fire.png");
-  this.load.tilemapTiledJSON("map", "assets/map/default.json");
-};
+const preload: (map: string) => ScenePreloadCallback = map =>
+  function(this: Phaser.Scene) {
+    //load images if needed
+    this.load.image("skull", "assets/skull.png");
+    this.load.image("fire", "assets/fire.png");
+    this.load.tilemapTiledJSON("map", `assets/${map}/default.json`);
+    this.load.image("tiles", "assets/map/tileset.png");
+    this.load.image("old-tiles", "assets/map/dungeon-tileset.png");
+  };
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
   //generate map, yehei
   //https://stackabuse.com/phaser-3-and-tiled-building-a-platformer/
   const tilemap = this.make.tilemap({ key: "map" });
-  const tileset = tilemap.addTilesetImage("Dungeon_Tileset", "dungeon-tiles");
-  const floorLayer = tilemap.createStaticLayer("floor", tileset, 0, 0);
-  const wallLayer = tilemap.createStaticLayer("walls", tileset, 0, 0);
+  this.game.scale.setGameSize(tilemap.widthInPixels, tilemap.heightInPixels);
+  this.physics.world.setBounds(
+    0,
+    0,
+    tilemap.widthInPixels,
+    tilemap.heightInPixels,
+    true,
+    true,
+    true,
+    true
+  );
+
+  const tileset = tilemap.addTilesetImage("Custom", "tiles");
+  const oldTileset = tilemap.addTilesetImage("Dungeon_Tileset", "old-tiles");
+  const floorLayer = tilemap.createStaticLayer(
+    "floor",
+    [tileset, oldTileset],
+    0,
+    0
+  );
+  const wallLayer = tilemap.createStaticLayer(
+    "walls",
+    [tileset, oldTileset],
+    0,
+    0
+  );
 
   //@ts-ignore
   navmesh = this.navMeshPlugin.buildMeshFromTiled(
@@ -140,8 +158,6 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     drawPortals: false
   });
   navmesh.disableDebug();
-
-  //walls.setCollisionBetween(1, walls.tilesTotal);
 
   //additional layer for raytracing
   walls = this.physics.add.staticGroup();
@@ -181,6 +197,19 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   const fireGroup = this.add.group();
 
   const tables = this.physics.add.staticGroup();
+  tilemap
+    .getObjectLayer("obstacles")
+    ["objects"].forEach(obstacle =>
+      tables.add(
+        this.add.rectangle(
+          obstacle.x + obstacle.width / 2,
+          obstacle.y + obstacle.height / 2,
+          obstacle.width,
+          obstacle.height,
+          0x9b9b9b
+        )
+      )
+    );
   /*map.tables.forEach(([from, to]) => {
     const rect = this.add.rectangle(
       from.x + (to.x - from.x) / 2,
@@ -325,11 +354,13 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   totalNumberOfDudes = dudeGroup.getLength();
 
   // Create Fire class instances
-  map.fires.forEach(point =>
-    fireGroup.add(
-      new Fire(this, point.position.x, point.position.y, somkeGroup)
-    )
-  );
+  if (tilemap.getObjectLayer("fires")) {
+    tilemap
+      .getObjectLayer("fires")
+      ["objects"].forEach(fire =>
+        fireGroup.add(new Fire(this, fire.x, fire.y, somkeGroup))
+      );
+  }
 
   // ----- Adding Groups to the Physics Collider Engine -----
 
@@ -387,7 +418,7 @@ const rayTrace = <T extends Traceable>(
   traceables: T[],
   scene: Phaser.Scene
 ) => {
-  const { x: dudeX, y: dudeY } = dude.getBody();
+  const { x: dudeX, y: dudeY } = dude;
 
   const visible = traceables.filter(element => {
     const { position } = element;
@@ -416,7 +447,7 @@ const rayTrace = <T extends Traceable>(
 };
 
 const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
-  const { x: dudeX, y: dudeY } = dude.getBody();
+  const { x: dudeX, y: dudeY } = dude;
 
   // feedback when stuck. potential field
   const visible = rayTrace(dude, attractiveTargets, scene);
@@ -441,7 +472,7 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
 
         //if the sight isn't intersected, the distance is shorter and it wasn't visited before return the new one
         return !dude.visitedTargets.includes(element.index) &&
-          best.distance > currentDist
+          best.distance >= currentDist
           ? { distance: currentDist, position }
           : best;
       }
@@ -451,15 +482,13 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
     { distance: Number.MAX_VALUE, position: { x: -1, y: -1 } }
   ).position;
 
-  const offset = dude.radius;
-
   if (closestOriented.x > 0 && CONSTANTS.RENDER_DEBUG_OBJECTS) {
     const ray = scene.add
       .line(
         0,
         0,
-        dudeX + offset,
-        dudeY + offset,
+        dudeX,
+        dudeY,
         closestOriented.x,
         closestOriented.y,
         0xff0000,
@@ -496,11 +525,9 @@ const calculateForces = (scene: Phaser.Scene) => {
   for (let i = 0; i < dudes.length; i++) {
     //calculate push force on every agent from the nearest piece of wall
 
-    const dudeBody = dudes[i].getBody();
     const dudePosition = { x: dudes[i].x, y: dudes[i].y };
-    /*
-    
-    const {
+
+    /*const {
       distance: closestWallDistance,
       wall: closestWall
     } = wallShape.reduce(
@@ -524,17 +551,17 @@ const calculateForces = (scene: Phaser.Scene) => {
       }
     );
 
-    const pushDirection = pointRectNormal({ x: dudeBody.x, y: dudeBody.y },
+    const pushDirection = pointRectNormal(
+      { x: dudeBody.x, y: dudeBody.y },
       closestWall,
       closestWall.width,
       closestWall.height
     );
-    console.log(pushDirection);
 
     pushDirection.normalize();
-    const pushingForce = 0.001 * Math.exp(CONSTANTS.WALL_REPULSION_FORCE /closestWallDistance);
-    accelerations[i].add(pushDirection.scale(pushingForce));
-    */
+    const pushingForce =
+      10 * Math.exp(-closestWallDistance / CONSTANTS.WALL_REPULSION_FORCE);
+    accelerations[i].add(pushDirection.scale(pushingForce));*/
 
     //calculate directioncorrecting force
     const desiredVelocity = dudes[i].maxVelocity;
@@ -604,7 +631,7 @@ const calculateForces = (scene: Phaser.Scene) => {
         //apply direction correcting force
         accelerations[i].add(
           new Phaser.Math.Vector2(nextPoint.x, nextPoint.y)
-            .subtract(dudes[i].getBody().position)
+            .subtract(dudes[i].getPosition())
             .normalize()
             .scale(desiredVelocity)
             .subtract(dudes[i].getBody().velocity) // subtract current velocity
@@ -614,13 +641,12 @@ const calculateForces = (scene: Phaser.Scene) => {
     } else {
       // if Pathfinding is deactivated
       const sign = findClosestAttractiveTarget(dudes[i], scene);
-
       //calculate here the desired velocity from the target value only if we have a target
       if (sign.x > 0) {
         //apply direction correcting force
         accelerations[i].add(
           new Phaser.Math.Vector2(sign.x, sign.y)
-            .subtract(dudes[i].getBody().position)
+            .subtract(dudes[i].getPosition())
             .normalize()
             .scale(desiredVelocity)
             .subtract(dudes[i].getBody().velocity) // subtract current velocity
@@ -643,7 +669,7 @@ const calculateForces = (scene: Phaser.Scene) => {
     // });
     // accelerations[i].add(repulsionSum);
 
-    dudeBody.velocity.scale(DUDE_WALKING_FRICTION);
+    dudes[i].getBody().velocity.scale(DUDE_WALKING_FRICTION);
 
     //calculate repulsion and attraction between dudes, start at j=i+1 to prevent doing it twice
     for (let j = i + 1; j < dudes.length; j++) {
@@ -651,7 +677,7 @@ const calculateForces = (scene: Phaser.Scene) => {
         dude2 = dudes[j];
 
       const distance = Math.max(
-        dude1.getBody().position.distance(dude2.getBody().position) -
+        dude1.getPosition().distance(dude2.getPosition()) -
           dude1.radius -
           dude2.radius,
         dude1.radius + dude2.radius
@@ -672,9 +698,9 @@ const calculateForces = (scene: Phaser.Scene) => {
       const force = pushingForce - pullingForce;
 
       const directionForDude1 = dude1
-        .getBody()
-        .position.clone()
-        .subtract(dude2.getBody().position)
+        .getPosition()
+        .clone()
+        .subtract(dude2.getPosition())
         .normalize();
 
       accelerations[i].add(
@@ -690,47 +716,6 @@ const calculateForces = (scene: Phaser.Scene) => {
     dudes[index].getBody().setAcceleration(acceleration.x, acceleration.y)
   );
 };
-
-/*// If a dude gets stuck this function helps out
-const unstuckDudes = () => {
-  dudeGroup.children.getArray().forEach((dude: Dude) => {
-    const curr = dude.getBody();
-    const sign = dude.getSign();
-    let accelerationVector = curr.acceleration;
-    // Check if dude is currently too slow and he observes a force, e.g. she/he/it is stuck
-    if (
-      curr.speed < SPEED_THRESHOLD &&
-      accelerationVector.length() > ACCELERATION_THRESHOLD
-    ) {
-      const changeDirection = new Phaser.Math.Vector2(
-        accelerationVector.y,
-        -accelerationVector.x
-      ).normalize();
-      // Check for the direction of the acceleration vector
-      if (Math.abs(accelerationVector.x) < Math.abs(accelerationVector.y)) {
-        // Negate the acceleration vector if it is in the 1. or 3. quadrant of the coordinate system
-        if (
-          (curr.x < sign.x && curr.y < sign.y) ||
-          (curr.x > sign.x && curr.y > sign.y)
-        ) {
-          changeDirection.negate();
-        }
-      } else {
-        // Negate the acceleration vector if it is in the 2. or 4. quadrant of the coordinate system
-        if (
-          (curr.x > sign.x && curr.y < sign.y) ||
-          (curr.x > sign.x && curr.y < sign.y)
-        ) {
-          changeDirection.negate();
-        }
-      }
-      changeDirection.scale(ACCELERATION_VALUE);
-      // Help dude out of stuckness
-      //curr.velocity.add(changeDirection);
-      curr.acceleration.add(changeDirection);
-    }
-  });
-};*/
 
 const updateTimer = function() {
   currentElapsedTime = (game.getTime() - currentStartTime) / 1000;
@@ -752,48 +737,46 @@ const updateTimer = function() {
 const update = function(this: Phaser.Scene) {
   if (totalNumberOfDudes == numberOfDeadDudes + numberOfSurvivorDudes) {
     this.scene.pause();
-    disablePauseButton();
+    simulationFinished();
   }
   calculateForces(this);
   //unstuckDudes();
   updateTimer();
 };
 
-const scene: CreateSceneFromObjectConfig = {
-  preload: preload,
-  create: create,
-  update: update
-};
-
-const config: GameConfig = {
-  type: Phaser.AUTO,
-  parent: "game",
-  width: map.width,
-  height: map.height,
-  scene,
-  plugins: {
-    scene: [
-      {
-        key: "NavMeshPlugin",
-        plugin: PhaserNavMeshPlugin,
-        mapping: "navMeshPlugin",
-        start: true
-      }
-    ]
-  },
-  physics: {
-    default: "arcade",
-    arcade: {
-      gravity: { x: 0, y: 0 },
-      fps: 30
-    }
-  },
-  backgroundColor: 0xffffff
-};
-
 export let game: Phaser.Game = null;
 
-export const initGame = () => {
+export const initGame = (map = "map") => {
+  const config: GameConfig = {
+    type: Phaser.AUTO,
+    parent: "game",
+    width: 1,
+    height: 1,
+    scene: {
+      preload: preload(map),
+      create: create,
+      update: update
+    },
+    plugins: {
+      scene: [
+        {
+          key: "NavMeshPlugin",
+          plugin: PhaserNavMeshPlugin,
+          mapping: "navMeshPlugin",
+          start: true
+        }
+      ]
+    },
+    physics: {
+      default: "arcade",
+      arcade: {
+        gravity: { x: 0, y: 0 },
+        fps: 30
+      }
+    },
+    backgroundColor: 0xffffff
+  };
+
   game = new Phaser.Game(config);
 };
 
