@@ -198,6 +198,10 @@ export const updateStatistics = () => {
     "Nr. of Survivors: " + controller.numberOfEscapedAgents;
   deathSurvivorRate.innerHTML =
     "Rate: " +
+<<<<<<< HEAD
     (controller.numberOfEscapedAgents / controller.totalNumberOfAgents) * 100 +
+=======
+    ((numberOfSurvivorDudes / totalNumberOfDudes) * 100).toFixed(2) +
+>>>>>>> 47f8b48daa276ed0821a7d945e4c44cdcf360d96
     " %";
 };

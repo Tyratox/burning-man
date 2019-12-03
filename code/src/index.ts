@@ -144,7 +144,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     controller.onHitTarget
   );
   // ----- Initialize Timer -----
-  timer.timeLabel = this.add.text(150, 105, "00:00", {
+  timer.timeLabel = this.add.text(150, 75, "00:00", {
     font: "100px Arial",
     fill: "#000"
   });

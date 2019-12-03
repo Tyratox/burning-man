@@ -2145,7 +2145,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -2574,7 +2574,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -3432,7 +3432,7 @@
         {
          "columns":9,
          "firstgid":1,
-         "image":"minimal-tileset.png",
+         "image":"..\/tileset\/minimal-tileset.png",
          "imageheight":352,
          "imagewidth":288,
          "margin":0,
