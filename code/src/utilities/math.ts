@@ -1,5 +1,6 @@
 //https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
 //https://gamedev.stackexchange.com/questions/44483/how-do-i-calculate-distance-between-a-point-and-an-axis-aligned-rectangle
+import * as Phaser from "phaser";
 type Vector = { x: number; y: number };
 
 const sqr = (x: number) => x * x;
