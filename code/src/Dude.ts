@@ -14,15 +14,8 @@ class Dude extends Phaser.GameObjects.Arc {
   health: number;
   name: string;
 
-  //should't be changed, just informational
-  fitness: number;
-  normalizedFitness: number;
-
-  weight: number;
-  normalizedWeight: number;
-
-  age: number;
-  normalizedAge: number;
+  //can be used as a reference for weight, around 1
+  normalizedRadius: number;
 
   //the currently tracked path
   visitedTargets: number[];
@@ -31,70 +24,37 @@ class Dude extends Phaser.GameObjects.Arc {
   nextNode: number;
 
   constructor(x: number, y: number, name: string, scene: Phaser.Scene) {
-    const weight = strictNormal(
-      CONSTANTS.MEAN_DUDE_WEIGHT,
-      CONSTANTS.DUDE_WEIGHT_STD_DEV
+    const r = strictNormal(
+      CONSTANTS.MEAN_DUDE_RADIUS,
+      CONSTANTS.DUDE_RADIUS_STD_DEV
     );
-    const normalizedWeight = normalFactor(weight, CONSTANTS.MEAN_DUDE_WEIGHT);
-
-    const fitness = strictNormal(
-      CONSTANTS.MEAN_DUDE_FITNESS,
-      CONSTANTS.DUDE_FITNESS_STD_DEV
-    );
-    const normalizedFitness = normalFactor(
-      fitness,
-      CONSTANTS.MEAN_DUDE_FITNESS
-    );
-
-    const normalizedAgility = normalizedFitness / normalizedWeight;
-
-    const age = strictNormal(
-      CONSTANTS.MEAN_DUDE_AGE,
-      CONSTANTS.DUDE_AGE_STD_DEV
-    );
-    const normalizedAge = normalFactor(age, CONSTANTS.MEAN_DUDE_AGE);
-
-    const r =
-      strictNormal(CONSTANTS.MEAN_DUDE_RADIUS, CONSTANTS.DUDE_RADIUS_STD_DEV) *
-      (1 / normalizedAgility);
 
     super(scene, x, y, r, 0, 360, true, 0xf1c40f, 1);
-
-    scene.children.add(this);
+    this.normalizedRadius = normalFactor(r, CONSTANTS.MEAN_DUDE_RADIUS);
 
     this.path = null;
     this.visitedTargets = [];
     this.nextNode = 0;
 
-    this.fitness = fitness;
-    this.weight = weight;
-    this.age = age;
+    this.maxVelocity = strictNormal(
+      CONSTANTS.MEAN_DUDE_MAX_VELOCITY,
+      CONSTANTS.DUDE_MAX_ACCELERATION_STD_DEV
+    );
 
-    this.normalizedWeight = normalizedWeight;
-    this.normalizedFitness = normalizedFitness;
-    this.normalizedAge = normalizedAge;
+    this.maxAcceleration = strictNormal(
+      CONSTANTS.MEAN_DUDE_MAX_VELOCITY,
+      CONSTANTS.DUDE_MAX_ACCELERATION_STD_DEV
+    );
 
-    this.maxVelocity =
-      strictNormal(
-        CONSTANTS.MEAN_DUDE_MAX_VELOCITY,
-        CONSTANTS.DUDE_MAX_ACCELERATION_STD_DEV
-      ) * normalizedAgility;
-
-    this.maxAcceleration =
-      strictNormal(
-        CONSTANTS.MEAN_DUDE_MAX_VELOCITY,
-        CONSTANTS.DUDE_MAX_ACCELERATION_STD_DEV
-      ) * normalizedAgility;
-
-    this.visualRange =
-      strictNormal(
-        CONSTANTS.MEAN_DUDE_VISUAL_RANGE,
-        CONSTANTS.DUDE_VISUAL_RANGE_STD_DEV
-      ) / this.normalizedAge;
+    this.visualRange = strictNormal(
+      CONSTANTS.MEAN_DUDE_VISUAL_RANGE,
+      CONSTANTS.DUDE_VISUAL_RANGE_STD_DEV
+    );
 
     this.health = 4000;
     this.name = name;
 
+    scene.children.add(this); //add the the scene
     scene.physics.world.enable(this); //adds body / enables physics
     this.getBody()
       .setCollideWorldBounds(true)

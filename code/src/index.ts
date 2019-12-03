@@ -25,7 +25,6 @@ interface Traceable {
 
 type ScenePreloadCallback = Phaser.Types.Scenes.ScenePreloadCallback;
 type SceneCreateCallback = Phaser.Types.Scenes.SceneCreateCallback;
-type CreateSceneFromObjectConfig = Phaser.Types.Scenes.CreateSceneFromObjectConfig;
 type GameConfig = Phaser.Types.Core.GameConfig;
 
 export const getBody = (
@@ -487,7 +486,7 @@ const findClosestAttractiveTarget = (dude: Dude, scene: Phaser.Scene) => {
         closestOriented.x,
         closestOriented.y,
         0xff0000,
-        0.1
+        1
       )
       .setOrigin(0, 0);
 
@@ -565,7 +564,7 @@ const calculateForces = (scene: Phaser.Scene) => {
           dudePosition.x - pushDirection.x,
           dudePosition.y - pushDirection.y,
           0x0000ff,
-          0.1
+          1
         )
         .setOrigin(0, 0);
 
@@ -638,7 +637,7 @@ const calculateForces = (scene: Phaser.Scene) => {
               nextPoint.x,
               nextPoint.y,
               0x00ff00,
-              0.1
+              1
             )
             .setOrigin(0, 0);
 
@@ -659,7 +658,6 @@ const calculateForces = (scene: Phaser.Scene) => {
             .normalize()
             .scale(desiredVelocity)
             .subtract(dudes[i].getBody().velocity) // subtract current velocity
-            .scale(dudes[i].normalizedFitness / dudes[i].normalizedWeight) //reaction time
         );
       }
     } else {
@@ -674,7 +672,6 @@ const calculateForces = (scene: Phaser.Scene) => {
             .normalize()
             .scale(desiredVelocity)
             .subtract(dudes[i].getBody().velocity) // subtract current velocity
-            .scale(dudes[i].normalizedFitness / dudes[i].normalizedWeight) //reaction time
         );
       }
     }
@@ -730,10 +727,10 @@ const calculateForces = (scene: Phaser.Scene) => {
         .normalize();
 
       accelerations[i].add(
-        directionForDude1.clone().scale(force / dude1.normalizedWeight)
+        directionForDude1.clone().scale(force / dude1.normalizedRadius)
       );
       accelerations[j].add(
-        directionForDude1.negate().scale(force / dude2.normalizedWeight)
+        directionForDude1.negate().scale(force / dude2.normalizedRadius)
       );
     }
   }
