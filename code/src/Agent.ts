@@ -8,7 +8,6 @@ const normalFactor = (value: number, mean: number) => value / mean;
 
 class Agent extends Phaser.GameObjects.Arc {
   desiredVelocity: number;
-  maxAcceleration: number; // IS NOT USED
   visualRange: number;
   reactionTime: number;
 
@@ -31,7 +30,7 @@ class Agent extends Phaser.GameObjects.Arc {
     );
 
     super(scene, x, y, r, 0, 360, true, 0xf1c40f, 1);
-    this.normalizedRadius = normalFactor(r, CONSTANTS.MEAN_DUDE_RADIUS);
+    this.normalizedRadius = normalFactor(r, CONSTANTS.MEAN_DUDE_RADIUS);// THIS DOES NOT MAKE ANY SENSE.
 
     this.path = null;
     this.visitedTargets = [];
@@ -40,11 +39,6 @@ class Agent extends Phaser.GameObjects.Arc {
     this.desiredVelocity = strictNormal(
       CONSTANTS.MEAN_DUDE_DESIRED_VELOCITY,
       CONSTANTS.DUDE_DESIRED_VELOCITY_STD_DEV
-    );
-
-    this.maxAcceleration = strictNormal(
-      CONSTANTS.MEAN_DUDE_MAX_ACCELERATION,
-      CONSTANTS.DUDE_MAX_ACCELERATION_STD_DEV
     );
 
     this.visualRange = strictNormal(

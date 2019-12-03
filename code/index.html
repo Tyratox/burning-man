@@ -41,7 +41,7 @@
             id="MEAN_DUDE_DESIRED_VELOCITY"
             type="range"
             autocomplete="off"
-            min="100"
+            min="0"
             max="500"
             value="125"
             step="5"
@@ -58,32 +58,6 @@
             max="200"
             value="50"
             step="5"
-          />
-          <input type="text" autocomplete="off" readonly />
-        </div>
-        <div>
-          <label>Mean agent max acceleration</label>
-          <input
-            id="MEAN_DUDE_MAX_ACCELERATION"
-            type="range"
-            autocomplete="off"
-            min="30"
-            max="100"
-            value="50"
-            step="5"
-          />
-          <input type="text" autocomplete="off" readonly />
-        </div>
-        <div>
-          <label>Agent max acceleration SD</label>
-          <input
-            id="DUDE_MAX_ACCELERATION_STD_DEV"
-            type="range"
-            autocomplete="off"
-            min="0"
-            max="50"
-            value="10"
-            step="1"
           />
           <input type="text" autocomplete="off" readonly />
         </div>
@@ -142,7 +116,7 @@
         <div>
           <label>Mean agent reaction time</label>
           <input
-            id="MEAN_DUDE_VISUAL_RANGE"
+            id="MEAN_DUDE_REACTIONTIME"
             type="range"
             autocomplete="off"
             min="1"
@@ -155,7 +129,7 @@
         <div>
           <label>Agent reaction time SD</label>
           <input
-            id="DUDE_VISUAL_RANGE_STD_DEV"
+            id="DUDE_REACTIONTIME_STD_DEV"
             type="range"
             autocomplete="off"
             min="0"
@@ -183,20 +157,20 @@
       <h2>Dynamic settings</h2>
       <div class="columns">
         <div>
-          <label>Linear factor for group repulsion</label>
+          <label>Linear factor for agent repulsion</label>
           <input
             id="DUDE_REPULSION_LINEAR"
             type="range"
             autocomplete="off"
             min="0"
-            max="100"
+            max="2000"
             value="20"
             step="1"
           />
           <input type="text" autocomplete="off" readonly />
         </div>
         <div>
-          <label>Exponential factor for group repulsion</label>
+          <label>Exponential factor for agent repulsion</label>
           <input
             id="DUDE_REPULSION_EXPONENTIAL"
             type="range"
@@ -204,17 +178,17 @@
             min="1"
             max="1000"
             value="10"
-            step="1"
+            step="10"
           />
           <input type="text" autocomplete="off" readonly />
         </div>
         <div>
-          <label>Linear factor for group attraction</label>
+          <label>Factor for linear agent attraction</label>
           <input
             id="DUDE_GROUP_ATTRACTION"
             type="range"
             autocomplete="off"
-            min="1"
+            min="0"
             max="100"
             value="0"
             step="1"
@@ -222,12 +196,12 @@
           <input type="text" autocomplete="off" readonly />
         </div>
         <div>
-          <label>Acceptable wall distance</label>
+          <label>Linear factor for wall repulsion</label>
           <input
-            id="ACCEPTABLE_WALL_DISTANCE"
+            id="WALL_REPULSION_LINEAR"
             type="range"
             autocomplete="off"
-            min="1"
+            min="0"
             max="2000"
             value="30"
             step="1"
@@ -235,27 +209,14 @@
           <input type="text" autocomplete="off" readonly />
         </div>
         <div>
-          <label>Wall repulsion force</label>
+          <label>Exponential factor for wall repulsion</label>
           <input
-            id="WALL_REPULSION_FORCE"
+            id="WALL_REPULSION_EXPONENTIAL"
             type="range"
             autocomplete="off"
-            min="10"
+            min="1"
             max="1000"
             value="500"
-            step="10"
-          />
-          <input type="text" autocomplete="off" readonly />
-        </div>
-        <div>
-          <label>Default desired velocity (pathfinding)</label>
-          <input
-            id="DEFAULT_DESIRED_VELOCITY"
-            type="range"
-            autocomplete="off"
-            min="10"
-            max="500"
-            value="100"
             step="10"
           />
           <input type="text" autocomplete="off" readonly />
