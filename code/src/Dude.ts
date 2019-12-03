@@ -5,7 +5,7 @@ import { CONSTANTS } from "./controls";
 
 const strictNormal = (mean: number, dev: number) =>
   Math.min(Math.max(randomNormal({ mean, dev }), mean - dev), mean + dev);
-const normalFactor = (value: number, mean: number) => value / value;
+const normalFactor = (value: number, mean: number) => value / mean;
 
 class Dude extends Phaser.GameObjects.Arc {
   maxVelocity: number;
