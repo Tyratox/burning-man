@@ -31,7 +31,7 @@ export const CONSTANTS = {
   SMOKE_VELOCITY: 30,
   FIRE_RADIUS: 20,
 
-  SMOKE_EMISSION_RATE: 200,// not used, slider
+  SMOKE_EMISSION_RATE: 200, // not used, slider
   MAX_SMOKE_PARTICLES_PER_FIRE: 100,
 
   MEAN_DUDE_MAX_VELOCITY: 125,
@@ -46,13 +46,13 @@ export const CONSTANTS = {
   MEAN_DUDE_VISUAL_RANGE: 2000,
   DUDE_VISUAL_RANGE_STD_DEV: 500,
 
-  MEAN_DUDE_AGE: 40,// used -> agility
+  MEAN_DUDE_AGE: 40, // used -> agility
   DUDE_AGE_STD_DEV: 20,
 
-  MEAN_DUDE_WEIGHT: 70,// used -> weight
+  MEAN_DUDE_WEIGHT: 70, // used -> weight
   DUDE_WEIGHT_STD_DEV: 20,
 
-  MEAN_DUDE_FITNESS: 0.5,// used -> agility
+  MEAN_DUDE_FITNESS: 0.5, // used -> agility
   DUDE_FITNESS_STD_DEV: 0.4,
 
   RENDER_DEBUG_OBJECTS: true,
@@ -209,5 +209,7 @@ export const updateStatistics = () => {
   nrOfDeaths.innerHTML = "Nr. of Deaths: " + numberOfDeadDudes;
   nrOfSurvivor.innerHTML = "Nr. of Survivors: " + numberOfSurvivorDudes;
   deathSurvivorRate.innerHTML =
-    "Rate: " + (numberOfSurvivorDudes / totalNumberOfDudes) * 100 + " %";
+    "Rate: " +
+    ((numberOfSurvivorDudes / totalNumberOfDudes) * 100).toFixed(2) +
+    " %";
 };

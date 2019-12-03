@@ -112,7 +112,7 @@ const preload: (map: string) => ScenePreloadCallback = map =>
     this.load.image("skull", "assets/skull.png");
     this.load.image("fire", "assets/fire.png");
     this.load.tilemapTiledJSON("map", `assets/${map}/default.json`);
-    this.load.image("tiles", "assets/map/minimal-tileset.png");
+    this.load.image("tiles", "assets/tileset/minimal-tileset.png");
   };
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
@@ -396,7 +396,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     }
   );
   // ----- Initialize Timer -----
-  timeLabel = this.add.text(150, 105, "00:00", {
+  timeLabel = this.add.text(150, 75, "00:00", {
     font: "100px Arial",
     fill: "#000"
   });
