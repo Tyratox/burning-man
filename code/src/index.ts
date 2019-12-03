@@ -233,8 +233,6 @@ const calculateForces = (scene: Phaser.Scene) => {
     //---- end of section wall repulsion ----*/
 
     //---- begin section calculate directioncorrecting force ----
-    const desiredVelocity = agents[i].maxVelocity;
-
     if (CONSTANTS.PATHFINDACTIVE) {
       //check if the dude isn't already tracking a path or hasn't recalculated it's path for half a second
       if (
@@ -310,7 +308,7 @@ const calculateForces = (scene: Phaser.Scene) => {
           new Phaser.Math.Vector2(nextPoint.x, nextPoint.y)
             .subtract(agents[i].getPosition())
             .normalize()
-            .scale(desiredVelocity)
+            .scale(agents[i].desiredVelocity)
             .subtract(agents[i].getBody().velocity) // subtract current velocity
             .scale(1 / agents[i].reactionTime)
         );
@@ -325,7 +323,7 @@ const calculateForces = (scene: Phaser.Scene) => {
           new Phaser.Math.Vector2(sign.x, sign.y)
             .subtract(agents[i].getPosition())
             .normalize()
-            .scale(desiredVelocity)
+            .scale(agents[i].desiredVelocity)
             .subtract(agents[i].getBody().velocity) // subtract current velocity
             .scale(1 / agents[i].reactionTime)
         );

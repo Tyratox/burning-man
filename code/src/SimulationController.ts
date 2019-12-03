@@ -57,24 +57,22 @@ class SimulationController {
     this.fireGroup = scene.physics.add.staticGroup();
   }
 
-  addNavmeshObject(navmesh: any) {}
-
-  toggleDebugObjectsVisibility() {
+  toggleDebugObjectsVisibility = () => {
     this.despawnZoneGroup.toggleVisible();
     this.wallGroup.toggleVisible();
     this.doorGroup.toggleVisible();
     this.attractiveTargetGroup.toggleVisible();
     this.tableGroup.toggleVisible();
-  }
-  toggleNavmeshDebugVisibility() {
+  };
+  toggleNavmeshDebugVisibility = () => {
     if (this.navmesh.isDebugEnabled()) {
       this.navmesh.disableDebug();
     } else {
       this.navmesh.enableDebug();
     }
-  }
+  };
 
-  generateVisualMap() {
+  generateVisualMap = () => {
     const tilemap = this.scene.make.tilemap({ key: "map" });
     this.scene.game.scale.setGameSize(
       tilemap.widthInPixels,
@@ -97,7 +95,7 @@ class SimulationController {
     const tablesLayer = tilemap.createStaticLayer("tables", [tileset], 0, 0);
 
     return tilemap;
-  }
+  };
 
   initializePathfinding(tilemap: Phaser.Tilemaps.Tilemap) {
     //@ts-ignore
@@ -119,7 +117,7 @@ class SimulationController {
     this.navmesh = navmesh;
   }
 
-  addWall(rect: Phaser.Types.Tilemaps.TiledObject) {
+  addWall = (rect: Phaser.Types.Tilemaps.TiledObject) => {
     this.wallShape.push(
       new Phaser.Geom.Rectangle(rect.x, rect.y, rect.width, rect.height)
     );
@@ -133,9 +131,9 @@ class SimulationController {
         0.3
       )
     );
-  }
+  };
 
-  addAgent(agentLocation: Phaser.Types.Tilemaps.TiledObject) {
+  addAgent = (agentLocation: Phaser.Types.Tilemaps.TiledObject) => {
     const agent = new Agent(
       agentLocation.x,
       agentLocation.y,
@@ -152,9 +150,9 @@ class SimulationController {
       .setFriction(0.9, 0.9);
 
     this.agentGroup.add(agent);
-  }
+  };
 
-  addObstacle(obstacle: Phaser.Types.Tilemaps.TiledObject) {
+  addObstacle = (obstacle: Phaser.Types.Tilemaps.TiledObject) => {
     if (obstacle.ellipse) {
       this.tableGroup.add(
         this.scene.add.ellipse(
@@ -178,9 +176,9 @@ class SimulationController {
         )
       );
     }
-  }
+  };
 
-  addDespawnZone(zone: Phaser.Types.Tilemaps.TiledObject) {
+  addDespawnZone = (zone: Phaser.Types.Tilemaps.TiledObject) => {
     this.despawnZoneGroup.add(
       this.scene.add.rectangle(
         zone.x + zone.width / 2,
@@ -190,9 +188,9 @@ class SimulationController {
         0xffeaa7
       )
     );
-  }
+  };
 
-  addSign(sign: Phaser.Types.Tilemaps.TiledObject, index: number) {
+  addSign = (sign: Phaser.Types.Tilemaps.TiledObject, index: number) => {
     let orientationX =
       sign.properties &&
       sign.properties.find(
@@ -263,44 +261,44 @@ class SimulationController {
         radius ? radius.value : undefined
       )
     );
-  }
+  };
 
-  addFire(fire: Phaser.Types.Tilemaps.TiledObject) {
+  addFire = (fire: Phaser.Types.Tilemaps.TiledObject) => {
     this.fireGroup.add(new Fire(this.scene, fire.x, fire.y, this.somkeGroup));
-  }
+  };
 
-  onAgentDeath(agent: Agent) {
+  onAgentDeath = (agent: Agent) => {
     console.log("Dude " + agent.name + " unfortunately perished in the fire!");
     this.scene.add.sprite(agent.x, agent.y, "skull");
 
     this.numberOfDeadAgents++;
     agent.destroy();
-  }
+  };
 
-  onSmokeContact(agent: Agent, smoke: Phaser.GameObjects.Arc) {
+  onSmokeContact = (agent: Agent, smoke: Phaser.GameObjects.Arc) => {
     agent.health -= smoke.alpha * 10;
 
     if (agent.health <= 0) {
       this.onAgentDeath(agent);
     }
-  }
+  };
 
-  onDespawn(agent: Agent, zone: Phaser.GameObjects.Rectangle) {
+  onDespawn = (agent: Agent, zone: Phaser.GameObjects.Rectangle) => {
     updateSurvivorPhrase("Dude " + agent.name + " is a survivor!");
 
     console.log("Dude " + agent.name + " is a survivor!");
     this.numberOfEscapedAgents++;
     agent.destroy();
-  }
+  };
 
-  onHitTarget(agent: Agent, target: AttractiveTarget) {
+  onHitTarget = (agent: Agent, target: AttractiveTarget) => {
     agent.visitedTargets.push(target.index);
     agent.path = null;
-  }
+  };
 
-  resetAgentCount() {
+  resetAgentCount = () => {
     this.totalNumberOfAgents = this.agentGroup.getLength();
-  }
+  };
 }
 
 export default SimulationController;

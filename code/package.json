@@ -48,6 +48,7 @@
     "webpack-merge": "^4.2.1"
   },
   "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/preset-typescript": "^7.6.0",
     "@types/lodash": "^4.14.144",
     "lodash": "^4.17.15",
