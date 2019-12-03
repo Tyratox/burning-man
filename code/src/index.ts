@@ -1,9 +1,14 @@
 import * as Phaser from "phaser";
 import PhaserNavMeshPlugin from "phaser-navmesh";
 
-import { CONSTANTS, simulationFinished } from "./controls";
+import {
+  CONSTANTS,
+  simulationFinished,
+  updateStatistics,
+  updateSurvivorPhrase
+} from "./controls";
 import Dude from "./Dude";
-import { dist2 } from "./utilities/math";
+import { dist2, pointRectNormal } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
 import AttractiveTarget from "./AttractiveTarget";
@@ -57,13 +62,8 @@ const repulsiveTargets: TraceableRepulsiveTarget[] = [];
 
 const wallShape: Phaser.Geom.Rectangle[] = [];
 
-const ACCELERATION_THRESHOLD = 0;
-const ACCELERATION_VALUE = 500;
 const FIRE_REPULSION = 5000;
-
 const DUDE_WALKING_FRICTION = 0.995;
-
-const SPEED_THRESHOLD = 7;
 
 export let totalNumberOfDudes = 0;
 export let numberOfDeadDudes = 0;
@@ -192,42 +192,29 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   tablesGroup = this.physics.add.staticGroup();
   tilemap
     .getObjectLayer("obstacles")
-    ["objects"].forEach(obstacle => {
-      if (obstacle.rectangle) {
-        tablesGroup.add(
-          this.add.rectangle(
-            obstacle.x + obstacle.width / 2,
-            obstacle.y + obstacle.height / 2,
-            obstacle.width,
-            obstacle.height,
-            0x8e44ad,
-            0.3
+    ["objects"].forEach(obstacle =>
+      obstacle.ellipse
+        ? tablesGroup.add(
+            this.add.ellipse(
+              obstacle.x + obstacle.width / 2,
+              obstacle.y + obstacle.height / 2,
+              obstacle.width,
+              obstacle.height,
+              0xd35400,
+              0.3
+            )
           )
-        )
-      } else {
-        tablesGroup.add(
-          this.add.ellipse(
-            obstacle.x + obstacle.width / 2,
-            obstacle.y + obstacle.height / 2,
-            obstacle.width,
-            obstacle.height,
-            0x8e44ad,
-            0.3
+        : tablesGroup.add(
+            this.add.rectangle(
+              obstacle.x + obstacle.width / 2,
+              obstacle.y + obstacle.height / 2,
+              obstacle.width,
+              obstacle.height,
+              0x8e44ad,
+              0.3
+            )
           )
-        )
-      }
-    });
-  /*map.tables.forEach(([from, to]) => {
-    const rect = this.add.rectangle(
-      from.x + (to.x - from.x) / 2,
-      from.y + (to.y - from.y) / 2,
-      to.x - from.x + halfThickness,
-      to.y - from.y + halfThickness,
-      0x000000
     );
-
-    tables.add(rect);
-  });*/
 
   despawnZones = this.physics.add.staticGroup();
   tilemap.getObjectLayer("despawn-zones")["objects"].forEach(zone => {
@@ -394,6 +381,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   this.physics.add.collider(dudeGroup, walls);
   this.physics.add.collider(dudeGroup, tablesGroup);
   this.physics.add.collider(dudeGroup, despawnZones, (dude: Dude, zone) => {
+    updateSurvivorPhrase("Dude " + dude.name + " is a survivor!");
     console.log("Dude " + dude.name + " is a survivor!");
     numberOfSurvivorDudes++;
     dude.destroy();
@@ -534,17 +522,18 @@ const calculateForces = (scene: Phaser.Scene) => {
 
     const dudePosition = { x: dudes[i].x, y: dudes[i].y };
 
-    /*const {
+    //* ---- begin section wall repulsion ---
+    const {
       distance: closestWallDistance,
       wall: closestWall
     } = wallShape.reduce(
       (bestResult, wall) => {
-        const distance = pointRectDist(
-          { x: dudeBody.x, y: dudeBody.y },
+        const distance = pointRectNormal(
+          dudePosition,
           wall,
           wall.width,
           wall.height
-        );
+        ).length();
 
         if (distance < bestResult.distance) {
           return { distance, wall };
@@ -559,18 +548,46 @@ const calculateForces = (scene: Phaser.Scene) => {
     );
 
     const pushDirection = pointRectNormal(
-      { x: dudeBody.x, y: dudeBody.y },
+      dudePosition,
       closestWall,
       closestWall.width,
       closestWall.height
     );
 
-    pushDirection.normalize();
-    const pushingForce =
-      10 * Math.exp(-closestWallDistance / CONSTANTS.WALL_REPULSION_FORCE);
-    accelerations[i].add(pushDirection.scale(pushingForce));*/
+    if (CONSTANTS.RENDER_DEBUG_OBJECTS) {
+      // draw lines that represent the normal vector to the closest wall
+      const pushdirwall = scene.add
+        .line(
+          0,
+          0,
+          dudePosition.x,
+          dudePosition.y,
+          dudePosition.x - pushDirection.x,
+          dudePosition.y - pushDirection.y,
+          0x0000ff,
+          0.1
+        )
+        .setOrigin(0, 0);
 
-    //calculate directioncorrecting force
+      scene.tweens.add({
+        targets: pushdirwall,
+        alpha: { from: 1, to: 0 },
+        ease: "Linear",
+        duration: 100,
+        repeat: 0,
+        yoyo: false,
+        onComplete: () => pushdirwall.destroy()
+      });
+    }
+
+    pushDirection.normalize();
+    const wallpushingForce =
+      CONSTANTS.WALL_REPULSION_LINEAR *
+      Math.exp(-closestWallDistance / CONSTANTS.WALL_REPULSION_EXPONENTIAL);
+    accelerations[i].add(pushDirection.scale(wallpushingForce));
+    //---- end of section wall repulsion ----*/
+
+    //---- begin section calculate directioncorrecting force ----
     const desiredVelocity = dudes[i].maxVelocity;
 
     if (CONSTANTS.PATHFINDACTIVE) {
@@ -661,22 +678,24 @@ const calculateForces = (scene: Phaser.Scene) => {
         );
       }
     }
-
-    //calculate repulison between dudes and all visible fires
-    // let visibleFires = rayTrace(dudes[i], repulsiveTargets, scene);
-    // let repulsionSum = new Phaser.Math.Vector2(0, 0);
-    // let repulsion = new Phaser.Math.Vector2(0, 0);
-
-    // visibleFires.forEach(fire => {
-    //   repulsion.x = dudeBody.x - fire.position.x;
-    //   repulsion.y = dudeBody.y - fire.position.y;
-    //   let len = repulsion.length();
-    //   repulsion.normalize().scale(FIRE_REPULSION * (Math.exp(1 / len) - 1));
-    //   repulsionSum.add(repulsion);
-    // });
-    // accelerations[i].add(repulsionSum);
+    // ---- end section directioncorrecting force ----
 
     dudes[i].getBody().velocity.scale(DUDE_WALKING_FRICTION);
+
+    // calculate repulison between dudes and all visible fires
+    const visibleFires = rayTrace(dudes[i], repulsiveTargets, scene);
+    const repulsionSum = new Phaser.Math.Vector2(0, 0);
+    const repulsion = new Phaser.Math.Vector2(0, 0);
+
+    visibleFires.forEach(fire => {
+      repulsion.x = dudePosition.x - fire.position.x;
+      repulsion.y = dudePosition.y - fire.position.y;
+
+      const len = repulsion.length();
+      repulsion.normalize().scale(FIRE_REPULSION * (Math.exp(1 / len) - 1));
+      repulsionSum.add(repulsion);
+    });
+    accelerations[i].add(repulsionSum);
 
     //calculate repulsion and attraction between dudes, start at j=i+1 to prevent doing it twice
     for (let j = i + 1; j < dudes.length; j++) {
@@ -697,7 +716,7 @@ const calculateForces = (scene: Phaser.Scene) => {
 
       const pushingForce =
         CONSTANTS.DUDE_REPULSION_LINEAR *
-        Math.exp(-distance / CONSTANTS.DUDE_REPULSION_EXPONENTIAL);
+        Math.exp(CONSTANTS.DUDE_REPULSION_EXPONENTIAL / distance);
 
       //the bigger the distance the smaller the pulling force
       const pullingForce = CONSTANTS.DUDE_GROUP_ATTRACTION / distance;
@@ -749,6 +768,7 @@ const update = function(this: Phaser.Scene) {
   calculateForces(this);
   //unstuckDudes();
   updateTimer();
+  updateStatistics(); // only when dude escapes or dies
 };
 
 export let game: Phaser.Game = null;

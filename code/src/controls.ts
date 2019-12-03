@@ -18,12 +18,12 @@ export const CONSTANTS = {
 
   DUDE_COUNT_CAP: 100,
 
-  DUDE_REPULSION_LINEAR: 20,
-  DUDE_REPULSION_EXPONENTIAL: 10,
+  DUDE_REPULSION_LINEAR: 0.1,
+  DUDE_REPULSION_EXPONENTIAL: 100,
   DUDE_GROUP_ATTRACTION: 0,
-  ACCEPTABLE_WALL_DISTANCE: 30,
-  WALL_REPULSION_FORCE: 10,
-  DEFAULT_DESIRED_VELOCITY: 100,
+  WALL_REPULSION_LINEAR: 20,
+  WALL_REPULSION_EXPONENTIAL: 10,
+  DEFAULT_DESIRED_VELOCITY: 100, //not used, slider
 
   MAX_SMOKE_RADIUS: 20,
   MIN_SMOKE_RADIUS: 10,
@@ -31,14 +31,14 @@ export const CONSTANTS = {
   SMOKE_VELOCITY: 30,
   FIRE_RADIUS: 20,
 
-  SMOKE_EMISSION_RATE: 200,
+  SMOKE_EMISSION_RATE: 200,// not used, slider
   MAX_SMOKE_PARTICLES_PER_FIRE: 100,
 
   MEAN_DUDE_MAX_VELOCITY: 125,
   DUDE_MAX_VELOCITY_STD_DEV: 50,
 
-  MEAN_DUDE_MAX_ACCELERATION: 50,
-  DUDE_MAX_ACCELERATION_STD_DEV: 10,
+  MEAN_DUDE_MAX_ACCELERATION: 50, // not used, slider
+  DUDE_MAX_ACCELERATION_STD_DEV: 10, //not used , no slider
 
   MEAN_DUDE_RADIUS: 12,
   DUDE_RADIUS_STD_DEV: 2,
@@ -46,13 +46,13 @@ export const CONSTANTS = {
   MEAN_DUDE_VISUAL_RANGE: 2000,
   DUDE_VISUAL_RANGE_STD_DEV: 500,
 
-  MEAN_DUDE_AGE: 40,
+  MEAN_DUDE_AGE: 40,// used -> agility
   DUDE_AGE_STD_DEV: 20,
 
-  MEAN_DUDE_WEIGHT: 70,
+  MEAN_DUDE_WEIGHT: 70,// used -> weight
   DUDE_WEIGHT_STD_DEV: 20,
 
-  MEAN_DUDE_FITNESS: 0.5,
+  MEAN_DUDE_FITNESS: 0.5,// used -> agility
   DUDE_FITNESS_STD_DEV: 0.4,
 
   RENDER_DEBUG_OBJECTS: true,
@@ -184,7 +184,30 @@ export const simulationFinished = () => {
     AGENTS_SAFE: numberOfSurvivorDudes
   };
 
-  const csv = '"' + Object.keys(values).join('", "') + '"\n' + '"' + Object.values(values).join('", "') + '"\n';
+  const csv =
+    '"' +
+    Object.keys(values).join('", "') +
+    '"\n' +
+    '"' +
+    Object.values(values).join('", "') +
+    '"\n';
 
   textarea.value = csv;
+};
+
+export const updateSurvivorPhrase = (phrase: string) => {
+  document.getElementById("survivorPhrase").innerHTML = phrase + "\n";
+};
+
+export const updateStatistics = () => {
+  // totalNumberOfDudes
+  // numberOfDeadDudes
+  // numberOfSurvivorDudes
+  const nrOfDeaths = document.getElementById("countDeath");
+  const nrOfSurvivor = document.getElementById("countSurvivor");
+  const deathSurvivorRate = document.getElementById("deathSurvivorRate");
+  nrOfDeaths.innerHTML = "Nr. of Deaths: " + numberOfDeadDudes;
+  nrOfSurvivor.innerHTML = "Nr. of Survivors: " + numberOfSurvivorDudes;
+  deathSurvivorRate.innerHTML =
+    "Rate: " + (numberOfSurvivorDudes / totalNumberOfDudes) * 100 + " %";
 };

@@ -98,7 +98,8 @@ class Dude extends Phaser.GameObjects.Arc {
     scene.physics.world.enable(this); //adds body / enables physics
     this.getBody()
       .setCollideWorldBounds(true)
-      .setBounce(0, 0);
+      .setBounce(0, 0)
+      .setFriction(0.9, 0.9);
   }
 
   getBody() {
