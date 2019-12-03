@@ -3,7 +3,7 @@ import PhaserNavMeshPlugin from "phaser-navmesh";
 
 import { CONSTANTS, simulationFinished, updateStatistics, updateSurvivorPhrase } from "./controls";
 import Dude from "./Dude";
-import { dist2 } from "./utilities/math";
+import { dist2,pointRectNormal } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
 import AttractiveTarget from "./AttractiveTarget";
@@ -79,6 +79,7 @@ let navmesh: any;
 let timeLabel: Phaser.GameObjects.Text;
 let despawnZones: Phaser.Physics.Arcade.StaticGroup;
 let walls: Phaser.Physics.Arcade.StaticGroup;
+let tablesGroup: Phaser.Physics.Arcade.StaticGroup;
 let doorGroup: Phaser.GameObjects.Group;
 let attractiveTargetGroup: Phaser.Physics.Arcade.StaticGroup;
 
@@ -93,6 +94,7 @@ export const toggleDebugObjectsVisibility = () => {
   walls.toggleVisible();
   doorGroup.toggleVisible();
   attractiveTargetGroup.toggleVisible();
+  tablesGroup.toggleVisible();
 };
 export const toggleNavmeshDebugVisibility = () => {
   if (navmesh.isDebugEnabled()) {
@@ -110,8 +112,7 @@ const preload: (map: string) => ScenePreloadCallback = map =>
     this.load.image("skull", "assets/skull.png");
     this.load.image("fire", "assets/fire.png");
     this.load.tilemapTiledJSON("map", `assets/${map}/default.json`);
-    this.load.image("tiles", "assets/map/tileset.png");
-    this.load.image("old-tiles", "assets/map/dungeon-tileset.png");
+    this.load.image("tiles", "assets/map/minimal-tileset.png");
   };
 
 const create: SceneCreateCallback = function(this: Phaser.Scene) {
@@ -130,20 +131,10 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     true
   );
 
-  const tileset = tilemap.addTilesetImage("Custom", "tiles");
-  const oldTileset = tilemap.addTilesetImage("Dungeon_Tileset", "old-tiles");
-  const floorLayer = tilemap.createStaticLayer(
-    "floor",
-    [tileset, oldTileset],
-    0,
-    0
-  );
-  const wallLayer = tilemap.createStaticLayer(
-    "walls",
-    [tileset, oldTileset],
-    0,
-    0
-  );
+  const tileset = tilemap.addTilesetImage("minimal-tileset", "tiles");
+  const floorLayer = tilemap.createStaticLayer("floor", [tileset], 0, 0);
+  const wallLayer = tilemap.createStaticLayer("walls", [tileset], 0, 0);
+  const tablesLayer = tilemap.createStaticLayer("tables", [tileset], 0, 0);
 
   //@ts-ignore
   navmesh = this.navMeshPlugin.buildMeshFromTiled(
@@ -183,7 +174,8 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   dudeGroup = this.add.group();
   tilemap
     .getObjectLayer("dudes")
-    ["objects"].forEach(dude =>
+    ["objects"].slice(0, CONSTANTS.DUDE_COUNT_CAP)
+    .forEach(dude =>
       dudeGroup.add(
         new Dude(
           dude.x,
@@ -197,17 +189,18 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   const somkeGroup = this.add.group();
   const fireGroup = this.add.group();
 
-  const tables = this.physics.add.staticGroup();
+  tablesGroup = this.physics.add.staticGroup();
   tilemap
     .getObjectLayer("obstacles")
     ["objects"].forEach(obstacle =>
-      tables.add(
+      tablesGroup.add(
         this.add.rectangle(
           obstacle.x + obstacle.width / 2,
           obstacle.y + obstacle.height / 2,
           obstacle.width,
           obstacle.height,
-          0x9b9b9b
+          0x8e44ad,
+          0.3
         )
       )
     );
@@ -386,7 +379,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   );
   this.physics.add.collider(dudeGroup, dudeGroup);
   this.physics.add.collider(dudeGroup, walls);
-  this.physics.add.collider(dudeGroup, tables);
+  this.physics.add.collider(dudeGroup, tablesGroup);
   this.physics.add.collider(dudeGroup, despawnZones, (dude: Dude, zone) => {
     updateSurvivorPhrase("Dude " + dude.name + " is a survivor!");
     console.log("Dude " + dude.name + " is a survivor!");
@@ -529,17 +522,18 @@ const calculateForces = (scene: Phaser.Scene) => {
 
     const dudePosition = { x: dudes[i].x, y: dudes[i].y };
 
-    /*const {
+    //* ---- begin section wall repulsion ---
+    const {
       distance: closestWallDistance,
       wall: closestWall
     } = wallShape.reduce(
       (bestResult, wall) => {
-        const distance = pointRectDist(
-          { x: dudeBody.x, y: dudeBody.y },
+        const distance = pointRectNormal(
+          dudePosition,
           wall,
           wall.width,
           wall.height
-        );
+        ).length();
 
         if (distance < bestResult.distance) {
           return { distance, wall };
@@ -554,18 +548,45 @@ const calculateForces = (scene: Phaser.Scene) => {
     );
 
     const pushDirection = pointRectNormal(
-      { x: dudeBody.x, y: dudeBody.y },
+      dudePosition,
       closestWall,
       closestWall.width,
       closestWall.height
     );
 
-    pushDirection.normalize();
-    const pushingForce =
-      10 * Math.exp(-closestWallDistance / CONSTANTS.WALL_REPULSION_FORCE);
-    accelerations[i].add(pushDirection.scale(pushingForce));*/
+    if(CONSTANTS.RENDER_DEBUG_OBJECTS) {// draw lines that represent the normal vector to the closest wall
+      const pushdirwall = scene.add
+      .line(
+        0,
+        0,
+        dudePosition.x,
+        dudePosition.y,
+        dudePosition.x-pushDirection.x,
+        dudePosition.y-pushDirection.y,
+        0x0000ff,
+        0.1
+      )
+      .setOrigin(0, 0);
 
-    //calculate directioncorrecting force
+    scene.tweens.add({
+      targets: pushdirwall,
+      alpha: { from: 1, to: 0 },
+      ease: "Linear",
+      duration: 100,
+      repeat: 0,
+      yoyo: false,
+      onComplete: () => pushdirwall.destroy()
+    });
+  }
+ 
+    pushDirection.normalize(); console.log("push dir", pushDirection.length());
+    const wallpushingForce =
+        CONSTANTS.WALL_REPULSION_LINEAR *
+        Math.exp(-closestWallDistance / CONSTANTS.WALL_REPULSION_EXPONENTIAL);
+    accelerations[i].add(pushDirection.scale(wallpushingForce));
+    //---- end of section wall repulsion ----*/
+    
+    //---- begin section calculate directioncorrecting force ----
     const desiredVelocity = dudes[i].maxVelocity;
 
     if (CONSTANTS.PATHFINDACTIVE) {
@@ -641,6 +662,7 @@ const calculateForces = (scene: Phaser.Scene) => {
         );
       }
     } else {
+      
       // if Pathfinding is deactivated
       const sign = findClosestAttractiveTarget(dudes[i], scene);
       //calculate here the desired velocity from the target value only if we have a target
@@ -656,6 +678,7 @@ const calculateForces = (scene: Phaser.Scene) => {
         );
       }
     }
+    // ---- end section directioncorrecting force ----
 
     //calculate repulison between dudes and all visible fires
     // let visibleFires = rayTrace(dudes[i], repulsiveTargets, scene);
@@ -704,13 +727,14 @@ const calculateForces = (scene: Phaser.Scene) => {
         .clone()
         .subtract(dude2.getPosition())
         .normalize();
-
+/*
       accelerations[i].add(
         directionForDude1.clone().scale(force / dude1.normalizedWeight)
       );
       accelerations[j].add(
         directionForDude1.negate().scale(force / dude2.normalizedWeight)
       );
+      */
     }
   }
 

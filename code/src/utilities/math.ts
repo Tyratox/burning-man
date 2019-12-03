@@ -18,19 +18,6 @@ export const distanceToLineSegment = (p: Vector, v: Vector, w: Vector) =>
 export const isLeftOfLine = (p: Vector, a: Vector, b: Vector) =>
   (b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x) > 0;
 
-export const pointRectDist = (
-  p: Vector,
-  r: Vector,
-  rwidth: number,
-  rheight: number
-) => {
-  const center = new Phaser.Math.Vector2(r.x + rwidth / 2, r.y + rheight / 2);
-  const d = new Phaser.Math.Vector2(0, 0);
-  d.x = Math.max(Math.abs(center.x - r.x) - rwidth / 2, 0);
-  d.y = Math.max(Math.abs(center.y - r.y) - rheight / 2, 0);
-  return d.length();
-};
-
 export const pointRectNormal = (
   // returns the vector pointing from the closest point on the rect to the position p
   p: Vector,
@@ -42,6 +29,7 @@ export const pointRectNormal = (
   const d = new Phaser.Math.Vector2(0, 0);
   d.x = Math.max(Math.abs(center.x - p.x) - rwidth / 2, 0);
   d.y = Math.max(Math.abs(center.y - p.y) - rheight / 2, 0);
+  
   if (p.x < center.x) {
     d.x *= -1;
   }

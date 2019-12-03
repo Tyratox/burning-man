@@ -17,9 +17,23 @@
       <h2>Static settings</h2>
       <select id="map-selector">
         <option selected value="map">ETH Polysnack</option>
-        <option value="map1">Bad map</option>
+        <option value="map1">Experiment 1</option>
+        <option value="map2">Experiment 2</option>
       </select>
       <div class="columns">
+        <div>
+          <label>Dude count cap</label>
+          <input
+            id="DUDE_COUNT_CAP"
+            type="range"
+            autocomplete="off"
+            min="1"
+            max="100"
+            value="100"
+            step="1"
+          />
+          <input type="text" autocomplete="off" readonly />
+        </div>
         <div>
           <label>Mean dude max velocity</label>
           <input

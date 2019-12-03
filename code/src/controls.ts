@@ -16,11 +16,14 @@ export const CONSTANTS = {
   TRIANGLE_HEIGHT: 20,
   TRIANGLE_SIZE: 10,
 
+  DUDE_COUNT_CAP: 100,
+
   DUDE_REPULSION_LINEAR: 20,
   DUDE_REPULSION_EXPONENTIAL: 10,
   DUDE_GROUP_ATTRACTION: 0,
   ACCEPTABLE_WALL_DISTANCE: 30,
-  WALL_REPULSION_FORCE: 10,
+  WALL_REPULSION_LINEAR: 20,
+  WALL_REPULSION_EXPONENTIAL: 10,
   DEFAULT_DESIRED_VELOCITY: 100,
 
   MAX_SMOKE_RADIUS: 20,
@@ -182,8 +185,7 @@ export const simulationFinished = () => {
     AGENTS_SAFE: numberOfSurvivorDudes
   };
 
-  const csv = '"' + Object.keys(values).join('", "');
-  '"\n' + '"' + Object.values(values).join('", "') + '"\n';
+  const csv = '"' + Object.keys(values).join('", "') + '"\n' + '"' + Object.values(values).join('", "') + '"\n';
 
   textarea.value = csv;
 };
