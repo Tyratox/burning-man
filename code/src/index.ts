@@ -1,7 +1,7 @@
 import * as Phaser from "phaser";
 import PhaserNavMeshPlugin from "phaser-navmesh";
 
-import { CONSTANTS, simulationFinished } from "./controls";
+import { CONSTANTS, simulationFinished, updateStatistics, updateSurvivorPhrase } from "./controls";
 import Dude from "./Dude";
 import { dist2,pointRectNormal } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
@@ -381,6 +381,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   this.physics.add.collider(dudeGroup, walls);
   this.physics.add.collider(dudeGroup, tablesGroup);
   this.physics.add.collider(dudeGroup, despawnZones, (dude: Dude, zone) => {
+    updateSurvivorPhrase("Dude " + dude.name + " is a survivor!");
     console.log("Dude " + dude.name + " is a survivor!");
     numberOfSurvivorDudes++;
     dude.destroy();
@@ -767,6 +768,7 @@ const update = function(this: Phaser.Scene) {
   calculateForces(this);
   //unstuckDudes();
   updateTimer();
+  updateStatistics(); // only when dude escapes or dies
 };
 
 export let game: Phaser.Game = null;
