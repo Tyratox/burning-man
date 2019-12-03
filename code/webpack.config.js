@@ -32,7 +32,10 @@ module.exports = {
               ],
               "@babel/preset-typescript"
             ],
-            plugins: ["@babel/plugin-proposal-object-rest-spread"]
+            plugins: [
+              "@babel/plugin-proposal-object-rest-spread",
+              "@babel/plugin-proposal-class-properties"
+            ]
           }
         }
       },

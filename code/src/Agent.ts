@@ -25,13 +25,21 @@ class Agent extends Phaser.GameObjects.Arc {
   nextNode: number;
 
   constructor(x: number, y: number, name: string, scene: Phaser.Scene) {
-    const r = strictNormal(
-      CONSTANTS.MEAN_DUDE_RADIUS,
-      CONSTANTS.DUDE_RADIUS_STD_DEV
+    super(
+      scene,
+      x,
+      y,
+      strictNormal(CONSTANTS.MEAN_DUDE_RADIUS, CONSTANTS.DUDE_RADIUS_STD_DEV),
+      0,
+      360,
+      true,
+      0xf1c40f,
+      1
     );
-
-    super(scene, x, y, r, 0, 360, true, 0xf1c40f, 1);
-    this.normalizedRadius = normalFactor(r, CONSTANTS.MEAN_DUDE_RADIUS);
+    this.normalizedRadius = normalFactor(
+      this.radius,
+      CONSTANTS.MEAN_DUDE_RADIUS
+    );
 
     this.path = null;
     this.visitedTargets = [];
@@ -61,16 +69,16 @@ class Agent extends Phaser.GameObjects.Arc {
     this.name = name;
   }
 
-  getBody() {
+  getBody = () => {
     //@ts-ignore
     const body: Phaser.Physics.Arcade.Body = this.body;
 
     return body;
-  }
+  };
 
-  getPosition() {
+  getPosition = () => {
     return new Phaser.Math.Vector2(this.x, this.y);
-  }
+  };
 }
 
 export default Agent;
