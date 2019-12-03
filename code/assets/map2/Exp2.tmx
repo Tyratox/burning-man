@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="30" height="17" tilewidth="32" tileheight="32" infinite="0" nextlayerid="12" nextobjectid="318">
  <editorsettings>
-  <export target="default.json" format="json"/>
+  <export target="../maps/map2.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" name="minimal-tileset" tilewidth="32" tileheight="32" tilecount="99" columns="9">
   <image source="../maps/minimal-tileset.png" width="288" height="352"/>
