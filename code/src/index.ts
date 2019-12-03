@@ -3,7 +3,7 @@ import PhaserNavMeshPlugin from "phaser-navmesh";
 
 import { CONSTANTS, simulationFinished } from "./controls";
 import Dude from "./Dude";
-import { dist2 } from "./utilities/math";
+import { dist2,pointRectNormal } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
 import AttractiveTarget from "./AttractiveTarget";
@@ -521,17 +521,18 @@ const calculateForces = (scene: Phaser.Scene) => {
 
     const dudePosition = { x: dudes[i].x, y: dudes[i].y };
 
-    /*const {
+    //* ---- begin section wall repulsion ---
+    const {
       distance: closestWallDistance,
       wall: closestWall
     } = wallShape.reduce(
       (bestResult, wall) => {
-        const distance = pointRectDist(
-          { x: dudeBody.x, y: dudeBody.y },
+        const distance = pointRectNormal(
+          dudePosition,
           wall,
           wall.width,
           wall.height
-        );
+        ).length();
 
         if (distance < bestResult.distance) {
           return { distance, wall };
@@ -546,18 +547,45 @@ const calculateForces = (scene: Phaser.Scene) => {
     );
 
     const pushDirection = pointRectNormal(
-      { x: dudeBody.x, y: dudeBody.y },
+      dudePosition,
       closestWall,
       closestWall.width,
       closestWall.height
     );
 
-    pushDirection.normalize();
-    const pushingForce =
-      10 * Math.exp(-closestWallDistance / CONSTANTS.WALL_REPULSION_FORCE);
-    accelerations[i].add(pushDirection.scale(pushingForce));*/
+    if(CONSTANTS.RENDER_DEBUG_OBJECTS) {// draw lines that represent the normal vector to the closest wall
+      const pushdirwall = scene.add
+      .line(
+        0,
+        0,
+        dudePosition.x,
+        dudePosition.y,
+        dudePosition.x-pushDirection.x,
+        dudePosition.y-pushDirection.y,
+        0x0000ff,
+        0.1
+      )
+      .setOrigin(0, 0);
 
-    //calculate directioncorrecting force
+    scene.tweens.add({
+      targets: pushdirwall,
+      alpha: { from: 1, to: 0 },
+      ease: "Linear",
+      duration: 100,
+      repeat: 0,
+      yoyo: false,
+      onComplete: () => pushdirwall.destroy()
+    });
+  }
+ 
+    pushDirection.normalize(); console.log("push dir", pushDirection.length());
+    const wallpushingForce =
+        CONSTANTS.WALL_REPULSION_LINEAR *
+        Math.exp(-closestWallDistance / CONSTANTS.WALL_REPULSION_EXPONENTIAL);
+    accelerations[i].add(pushDirection.scale(wallpushingForce));
+    //---- end of section wall repulsion ----*/
+    
+    //---- begin section calculate directioncorrecting force ----
     const desiredVelocity = dudes[i].maxVelocity;
 
     if (CONSTANTS.PATHFINDACTIVE) {
@@ -633,6 +661,7 @@ const calculateForces = (scene: Phaser.Scene) => {
         );
       }
     } else {
+      
       // if Pathfinding is deactivated
       const sign = findClosestAttractiveTarget(dudes[i], scene);
       //calculate here the desired velocity from the target value only if we have a target
@@ -648,6 +677,7 @@ const calculateForces = (scene: Phaser.Scene) => {
         );
       }
     }
+    // ---- end section directioncorrecting force ----
 
     //calculate repulison between dudes and all visible fires
     // let visibleFires = rayTrace(dudes[i], repulsiveTargets, scene);
@@ -696,13 +726,14 @@ const calculateForces = (scene: Phaser.Scene) => {
         .clone()
         .subtract(dude2.getPosition())
         .normalize();
-
+/*
       accelerations[i].add(
         directionForDude1.clone().scale(force / dude1.normalizedWeight)
       );
       accelerations[j].add(
         directionForDude1.negate().scale(force / dude2.normalizedWeight)
       );
+      */
     }
   }
 
