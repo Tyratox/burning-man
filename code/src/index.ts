@@ -1,9 +1,14 @@
 import * as Phaser from "phaser";
 import PhaserNavMeshPlugin from "phaser-navmesh";
 
-import { CONSTANTS, simulationFinished, updateStatistics, updateSurvivorPhrase } from "./controls";
+import {
+  CONSTANTS,
+  simulationFinished,
+  updateStatistics,
+  updateSurvivorPhrase
+} from "./controls";
 import Dude from "./Dude";
-import { dist2,pointRectNormal } from "./utilities/math";
+import { dist2, pointRectNormal } from "./utilities/math";
 import { onDOMReadyControlSetup } from "./controls";
 import Fire from "./Fire";
 import AttractiveTarget from "./AttractiveTarget";
@@ -193,16 +198,27 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   tilemap
     .getObjectLayer("obstacles")
     ["objects"].forEach(obstacle =>
-      tablesGroup.add(
-        this.add.rectangle(
-          obstacle.x + obstacle.width / 2,
-          obstacle.y + obstacle.height / 2,
-          obstacle.width,
-          obstacle.height,
-          0x8e44ad,
-          0.3
-        )
-      )
+      obstacle.ellipse
+        ? tablesGroup.add(
+            this.add.ellipse(
+              obstacle.x + obstacle.width / 2,
+              obstacle.y + obstacle.height / 2,
+              obstacle.width,
+              obstacle.height,
+              0x8e44ad,
+              0.3
+            )
+          )
+        : tablesGroup.add(
+            this.add.rectangle(
+              obstacle.x + obstacle.width / 2,
+              obstacle.y + obstacle.height / 2,
+              obstacle.width,
+              obstacle.height,
+              0x8e44ad,
+              0.3
+            )
+          )
     );
   /*map.tables.forEach(([from, to]) => {
     const rect = this.add.rectangle(
@@ -554,38 +570,40 @@ const calculateForces = (scene: Phaser.Scene) => {
       closestWall.height
     );
 
-    if(CONSTANTS.RENDER_DEBUG_OBJECTS) {// draw lines that represent the normal vector to the closest wall
+    if (CONSTANTS.RENDER_DEBUG_OBJECTS) {
+      // draw lines that represent the normal vector to the closest wall
       const pushdirwall = scene.add
-      .line(
-        0,
-        0,
-        dudePosition.x,
-        dudePosition.y,
-        dudePosition.x-pushDirection.x,
-        dudePosition.y-pushDirection.y,
-        0x0000ff,
-        0.1
-      )
-      .setOrigin(0, 0);
+        .line(
+          0,
+          0,
+          dudePosition.x,
+          dudePosition.y,
+          dudePosition.x - pushDirection.x,
+          dudePosition.y - pushDirection.y,
+          0x0000ff,
+          0.1
+        )
+        .setOrigin(0, 0);
 
-    scene.tweens.add({
-      targets: pushdirwall,
-      alpha: { from: 1, to: 0 },
-      ease: "Linear",
-      duration: 100,
-      repeat: 0,
-      yoyo: false,
-      onComplete: () => pushdirwall.destroy()
-    });
-  }
- 
-    pushDirection.normalize(); console.log("push dir", pushDirection.length());
+      scene.tweens.add({
+        targets: pushdirwall,
+        alpha: { from: 1, to: 0 },
+        ease: "Linear",
+        duration: 100,
+        repeat: 0,
+        yoyo: false,
+        onComplete: () => pushdirwall.destroy()
+      });
+    }
+
+    pushDirection.normalize();
+    console.log("push dir", pushDirection.length());
     const wallpushingForce =
-        CONSTANTS.WALL_REPULSION_LINEAR *
-        Math.exp(-closestWallDistance / CONSTANTS.WALL_REPULSION_EXPONENTIAL);
+      CONSTANTS.WALL_REPULSION_LINEAR *
+      Math.exp(-closestWallDistance / CONSTANTS.WALL_REPULSION_EXPONENTIAL);
     accelerations[i].add(pushDirection.scale(wallpushingForce));
     //---- end of section wall repulsion ----*/
-    
+
     //---- begin section calculate directioncorrecting force ----
     const desiredVelocity = dudes[i].maxVelocity;
 
@@ -662,7 +680,6 @@ const calculateForces = (scene: Phaser.Scene) => {
         );
       }
     } else {
-      
       // if Pathfinding is deactivated
       const sign = findClosestAttractiveTarget(dudes[i], scene);
       //calculate here the desired velocity from the target value only if we have a target
@@ -727,7 +744,7 @@ const calculateForces = (scene: Phaser.Scene) => {
         .clone()
         .subtract(dude2.getPosition())
         .normalize();
-/*
+      /*
       accelerations[i].add(
         directionForDude1.clone().scale(force / dude1.normalizedWeight)
       );

@@ -185,14 +185,20 @@ export const simulationFinished = () => {
     AGENTS_SAFE: numberOfSurvivorDudes
   };
 
-  const csv = '"' + Object.keys(values).join('", "') + '"\n' + '"' + Object.values(values).join('", "') + '"\n';
+  const csv =
+    '"' +
+    Object.keys(values).join('", "') +
+    '"\n' +
+    '"' +
+    Object.values(values).join('", "') +
+    '"\n';
 
   textarea.value = csv;
 };
 
 export const updateSurvivorPhrase = (phrase: string) => {
-  document.getElementById("survivorPhrase").innerHTML = phrase + '\n';
-}
+  document.getElementById("survivorPhrase").innerHTML = phrase + "\n";
+};
 
 export const updateStatistics = () => {
   // totalNumberOfDudes
@@ -203,6 +209,6 @@ export const updateStatistics = () => {
   const deathSurvivorRate = document.getElementById("deathSurvivorRate");
   nrOfDeaths.innerHTML = "Nr. of Deaths: " + numberOfDeadDudes;
   nrOfSurvivor.innerHTML = "Nr. of Survivors: " + numberOfSurvivorDudes;
-  deathSurvivorRate.innerHTML = "Rate: " + (numberOfSurvivorDudes / totalNumberOfDudes) * 100 + " %";
-
+  deathSurvivorRate.innerHTML =
+    "Rate: " + (numberOfSurvivorDudes / totalNumberOfDudes) * 100 + " %";
 };

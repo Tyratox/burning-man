@@ -29,7 +29,7 @@ export const pointRectNormal = (
   const d = new Phaser.Math.Vector2(0, 0);
   d.x = Math.max(Math.abs(center.x - p.x) - rwidth / 2, 0);
   d.y = Math.max(Math.abs(center.y - p.y) - rheight / 2, 0);
-  
+
   if (p.x < center.x) {
     d.x *= -1;
   }
