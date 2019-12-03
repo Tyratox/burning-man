@@ -28,8 +28,8 @@ const preload: (map: string) => ScenePreloadCallback = map =>
     //load images if needed
     this.load.image("skull", "assets/skull.png");
     this.load.image("fire", "assets/fire.png");
-    this.load.tilemapTiledJSON("map", `assets/${map}/default.json`);
-    this.load.image("tiles", "assets/map/minimal-tileset.png");
+    this.load.tilemapTiledJSON("map", `assets/maps/${map}.json`);
+    this.load.image("tiles", "assets/maps/minimal-tileset.png");
 
     controller = new SimulationController(this);
   };
