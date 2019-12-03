@@ -69,7 +69,7 @@
 3,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,30,10,10,10,10,10,10,2
 </data>
  </layer>
- <objectgroup id="4" name="navmesh" visible="0">
+ <objectgroup id="4" name="navmesh">
   <object id="2" x="24" y="24" width="688" height="496"/>
   <object id="3" x="728" y="24" width="208" height="496"/>
   <object id="4" x="712" y="248" width="16" height="48"/>
@@ -78,8 +78,8 @@
  <objectgroup id="6" name="physical-walls">
   <object id="5" x="0" y="0" width="960" height="18"/>
   <object id="7" x="0" y="526" width="960" height="18"/>
-  <object id="8" x="718" y="304" width="18" height="222"/>
-  <object id="10" x="718" y="18" width="18" height="222"/>
+  <object id="8" x="718" y="304" width="34" height="222"/>
+  <object id="10" x="718" y="18" width="34" height="222"/>
   <object id="11" x="942" y="18" width="18" height="508"/>
   <object id="12" x="0" y="18" width="18" height="508"/>
  </objectgroup>

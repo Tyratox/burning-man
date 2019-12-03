@@ -192,18 +192,31 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   tablesGroup = this.physics.add.staticGroup();
   tilemap
     .getObjectLayer("obstacles")
-    ["objects"].forEach(obstacle =>
-      tablesGroup.add(
-        this.add.rectangle(
-          obstacle.x + obstacle.width / 2,
-          obstacle.y + obstacle.height / 2,
-          obstacle.width,
-          obstacle.height,
-          0x8e44ad,
-          0.3
+    ["objects"].forEach(obstacle => {
+      if (obstacle.rectangle) {
+        tablesGroup.add(
+          this.add.rectangle(
+            obstacle.x + obstacle.width / 2,
+            obstacle.y + obstacle.height / 2,
+            obstacle.width,
+            obstacle.height,
+            0x8e44ad,
+            0.3
+          )
         )
-      )
-    );
+      } else {
+        tablesGroup.add(
+          this.add.ellipse(
+            obstacle.x + obstacle.width / 2,
+            obstacle.y + obstacle.height / 2,
+            obstacle.width,
+            obstacle.height,
+            0x8e44ad,
+            0.3
+          )
+        )
+      }
+    });
   /*map.tables.forEach(([from, to]) => {
     const rect = this.add.rectangle(
       from.x + (to.x - from.x) / 2,
