@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="60" height="34" tilewidth="32" tileheight="32" infinite="0" nextlayerid="14" nextobjectid="383">
+<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="60" height="34" tilewidth="32" tileheight="32" infinite="0" nextlayerid="14" nextobjectid="387">
  <editorsettings>
-  <export target="default.json" format="json"/>
+  <export target="../maps/map.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" name="minimal-tileset" tilewidth="32" tileheight="32" tilecount="99" columns="9">
-  <image source="../tileset/minimal-tileset.png" width="288" height="352"/>
+  <image source="../maps/minimal-tileset.png" width="288" height="352"/>
  </tileset>
  <layer id="1" name="floor" width="60" height="34">
   <data encoding="csv">
@@ -189,7 +189,7 @@
   <object id="72" x="1440" y="664" width="136" height="104"/>
   <object id="73" x="24" y="352" width="88" height="72"/>
   <object id="74" x="112" y="352" width="32" height="72"/>
-  <object id="75" x="144" y="352" width="384" height="72"/>
+  <object id="75" x="144" y="352" width="80" height="72"/>
   <object id="76" x="528" y="352" width="32" height="72"/>
   <object id="77" x="560" y="352" width="184" height="72"/>
   <object id="78" x="112" y="440" width="32" height="208"/>
@@ -243,7 +243,7 @@
   <object id="330" x="224" y="24" width="192" height="40"/>
   <object id="331" x="416" y="24" width="328" height="40"/>
   <object id="332" x="512" y="288" width="232" height="64"/>
-  <object id="333" x="224" y="288" width="288" height="64"/>
+  <object id="333" x="224" y="288" width="192" height="64"/>
   <object id="334" x="24" y="288" width="200" height="64"/>
   <object id="345" x="128" y="192" width="64" height="96"/>
   <object id="346" x="224" y="192" width="64" height="96"/>
@@ -273,6 +273,9 @@
   <object id="380" x="1184" y="928" width="32" height="136"/>
   <object id="381" x="920" y="704" width="40" height="48"/>
   <object id="382" x="64" y="160" width="32" height="32"/>
+  <object id="383" x="416" y="288" width="96" height="64"/>
+  <object id="384" x="416" y="352" width="112" height="72"/>
+  <object id="385" x="224" y="352" width="192" height="72"/>
  </objectgroup>
  <objectgroup id="13" name="fires" visible="0">
   <object id="243" name="Fire" type="fire" x="16" y="480">
