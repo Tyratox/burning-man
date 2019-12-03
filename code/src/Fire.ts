@@ -1,6 +1,5 @@
-import { getBody } from "./index";
-
 import { CONSTANTS } from "./controls";
+import { Physics } from "phaser";
 
 class Fire extends Phaser.GameObjects.Arc {
   x: number;
@@ -50,7 +49,10 @@ class Fire extends Phaser.GameObjects.Arc {
     const velocityY = sign2 * Math.random() * CONSTANTS.SMOKE_VELOCITY;
 
     scene.physics.world.enable(circle); //adds body / enables physics
-    getBody(circle)
+
+    //@ts-ignore
+    const body: Physics.Arcade.Body = circle.body;
+    body
       .setCollideWorldBounds(true)
       .setBounce(0.2, 0.2)
       .setVelocityX(velocityX)

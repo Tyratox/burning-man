@@ -1,4 +1,3 @@
-import { getBody } from "./index";
 import randomNormal from "random-normal";
 
 import { CONSTANTS } from "./controls";
@@ -7,10 +6,12 @@ const strictNormal = (mean: number, dev: number) =>
   Math.min(Math.max(randomNormal({ mean, dev }), mean - dev), mean + dev);
 const normalFactor = (value: number, mean: number) => value / mean;
 
-class Dude extends Phaser.GameObjects.Arc {
+class Agent extends Phaser.GameObjects.Arc {
   maxVelocity: number;
   maxAcceleration: number;
   visualRange: number;
+  reactionTime: number;
+
   health: number;
   name: string;
 
@@ -51,19 +52,20 @@ class Dude extends Phaser.GameObjects.Arc {
       CONSTANTS.DUDE_VISUAL_RANGE_STD_DEV
     );
 
+    this.reactionTime = strictNormal(
+      CONSTANTS.MEAN_DUDE_REACTION_TIME,
+      CONSTANTS.DUDE_REACTION_TIME_STD_DEV
+    );
+
     this.health = 4000;
     this.name = name;
-
-    scene.children.add(this); //add the the scene
-    scene.physics.world.enable(this); //adds body / enables physics
-    this.getBody()
-      .setCollideWorldBounds(true)
-      .setBounce(0, 0)
-      .setFriction(0.9, 0.9);
   }
 
   getBody() {
-    return getBody(this);
+    //@ts-ignore
+    const body: Phaser.Physics.Arcade.Body = this.body;
+
+    return body;
   }
 
   getPosition() {
@@ -71,4 +73,4 @@ class Dude extends Phaser.GameObjects.Arc {
   }
 }
 
-export default Dude;
+export default Agent;

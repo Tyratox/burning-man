@@ -8,7 +8,6 @@ class AttractiveTarget extends Phaser.GameObjects.Arc {
     radius = 25
   ) {
     super(scene, x, y, radius, 0, 360, true, 0xff0000, 0.5);
-    scene.children.add(this);
     this.index = index;
   }
 }

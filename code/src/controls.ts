@@ -1,16 +1,4 @@
-import {
-  game,
-  initGame,
-  setCurrentStartTime,
-  setPreviousElapsedTime,
-  toggleDebugObjectsVisibility,
-  toggleNavmeshDebugVisibility,
-  previousElapsedTime,
-  currentElapsedTime,
-  totalNumberOfDudes,
-  numberOfDeadDudes,
-  numberOfSurvivorDudes
-} from ".";
+import { game, initGame, timer, controller } from ".";
 
 export const CONSTANTS = {
   TRIANGLE_HEIGHT: 20,
@@ -46,6 +34,12 @@ export const CONSTANTS = {
   MEAN_DUDE_VISUAL_RANGE: 2000,
   DUDE_VISUAL_RANGE_STD_DEV: 500,
 
+  MEAN_DUDE_REACTION_TIME: 1,
+  DUDE_REACTION_TIME_STD_DEV: 0,
+
+  FIRE_REPULSION: 5000,
+  DUDE_WALKING_FRICTION: 0.995,
+
   RENDER_DEBUG_OBJECTS: true,
   RENDER_NAVMESH_DEBUG: false,
   PATHFINDACTIVE: true
@@ -59,18 +53,20 @@ const onSliderChange = (e: InputEvent) => {
   );
 
   valueField.value = slider.value;
+  //@ts-ignore
   CONSTANTS[slider.id] = parseInt(slider.value);
 };
 
-export const onDOMReadyControlSetup = e => {
+export const onDOMReadyControlSetup = (e: Event) => {
   const rangeSliderContainers = document.querySelectorAll(
     ".sliders .columns > div"
   );
-  for (const sliderContainer of rangeSliderContainers) {
-    const slider: HTMLInputElement = sliderContainer.querySelector(
+
+  for (let i = 0; i < rangeSliderContainers.length; i++) {
+    const slider: HTMLInputElement = rangeSliderContainers[i].querySelector(
       "input[type=range]"
     );
-    const valueField: HTMLInputElement = sliderContainer.querySelector(
+    const valueField: HTMLInputElement = rangeSliderContainers[i].querySelector(
       "input[type=text]"
     );
 
@@ -104,11 +100,11 @@ export const onDOMReadyControlSetup = e => {
 
   pauseButton.addEventListener("click", () => {
     if (game.scene.isPaused("default")) {
-      setCurrentStartTime(game.getTime());
+      timer.setCurrentStartTime(game.getTime());
       game.scene.resume("default");
       pauseButton.innerText = "Pause";
     } else {
-      setPreviousElapsedTime(game.getTime());
+      timer.setPreviousElapsedTime(game.getTime());
       game.scene.pause("default");
       pauseButton.innerText = "Resume";
     }
@@ -121,7 +117,7 @@ export const onDOMReadyControlSetup = e => {
       debugButton.innerText = "Debug Off";
     }
     CONSTANTS.RENDER_DEBUG_OBJECTS = !CONSTANTS.RENDER_DEBUG_OBJECTS;
-    toggleDebugObjectsVisibility();
+    controller.toggleDebugObjectsVisibility();
   });
 
   navmeshDebugButton.addEventListener("click", () => {
@@ -131,7 +127,7 @@ export const onDOMReadyControlSetup = e => {
       navmeshDebugButton.innerText = "Navmesh Debug Off";
     }
     CONSTANTS.RENDER_NAVMESH_DEBUG = !CONSTANTS.RENDER_NAVMESH_DEBUG;
-    toggleNavmeshDebugVisibility();
+    controller.toggleNavmeshDebugVisibility();
   });
 
   pathFindButton.addEventListener("click", () => {
@@ -148,7 +144,7 @@ export const onDOMReadyControlSetup = e => {
     overlay.style.display = "none";
     startButton.style.display = "none";
 
-    setCurrentStartTime(game.getTime());
+    timer.setCurrentStartTime(game.getTime());
     game.scene.resume("default");
   });
 };
@@ -169,10 +165,10 @@ export const simulationFinished = () => {
 
   const values = {
     ...CONSTANTS,
-    TIME: previousElapsedTime + currentElapsedTime,
-    AGENTS_TOTAL: totalNumberOfDudes,
-    AGENTS_DEAD: numberOfDeadDudes,
-    AGENTS_SAFE: numberOfSurvivorDudes
+    TIME: timer.getTotalElapsedTime(),
+    AGENTS_TOTAL: controller.totalNumberOfAgents,
+    AGENTS_DEAD: controller.numberOfDeadAgents,
+    AGENTS_SAFE: controller.numberOfEscapedAgents
   };
 
   const csv =
@@ -197,8 +193,11 @@ export const updateStatistics = () => {
   const nrOfDeaths = document.getElementById("countDeath");
   const nrOfSurvivor = document.getElementById("countSurvivor");
   const deathSurvivorRate = document.getElementById("deathSurvivorRate");
-  nrOfDeaths.innerHTML = "Nr. of Deaths: " + numberOfDeadDudes;
-  nrOfSurvivor.innerHTML = "Nr. of Survivors: " + numberOfSurvivorDudes;
+  nrOfDeaths.innerHTML = "Nr. of Deaths: " + controller.numberOfDeadAgents;
+  nrOfSurvivor.innerHTML =
+    "Nr. of Survivors: " + controller.numberOfEscapedAgents;
   deathSurvivorRate.innerHTML =
-    "Rate: " + (numberOfSurvivorDudes / totalNumberOfDudes) * 100 + " %";
+    "Rate: " +
+    (controller.numberOfEscapedAgents / controller.totalNumberOfAgents) * 100 +
+    " %";
 };
