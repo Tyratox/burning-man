@@ -4,7 +4,7 @@
      "export":
         {
          "format":"json",
-         "target":"default.json"
+         "target":"map3.json"
         }
     },
  "height":17,
@@ -1435,7 +1435,7 @@
         {
          "columns":9,
          "firstgid":1,
-         "image":"..\/tileset\/minimal-tileset.png",
+         "image":"minimal-tileset.png",
          "imageheight":352,
          "imagewidth":288,
          "margin":0,
