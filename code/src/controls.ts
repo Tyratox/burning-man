@@ -184,8 +184,7 @@ export const simulationFinished = () => {
     AGENTS_SAFE: numberOfSurvivorDudes
   };
 
-  const csv = '"' + Object.keys(values).join('", "');
-  '"\n' + '"' + Object.values(values).join('", "') + '"\n';
+  const csv = '"' + Object.keys(values).join('", "') + '"\n' + '"' + Object.values(values).join('", "') + '"\n';
 
   textarea.value = csv;
 };
