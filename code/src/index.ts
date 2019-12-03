@@ -331,8 +331,6 @@ const calculateForces = (scene: Phaser.Scene) => {
     }
     // ---- end section directioncorrecting force ----
 
-    agents[i].getBody().velocity.scale(CONSTANTS.DUDE_WALKING_FRICTION);
-
     // calculate repulison between dudes and all visible fires
     const visibleFires = rayTrace(
       agents[i],
