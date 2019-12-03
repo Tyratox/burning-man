@@ -63,6 +63,7 @@ const repulsiveTargets: TraceableRepulsiveTarget[] = [];
 const wallShape: Phaser.Geom.Rectangle[] = [];
 
 const FIRE_REPULSION = 5000;
+const DUDE_WALKING_FRICTION = 0.995;
 
 export let totalNumberOfDudes = 0;
 export let numberOfDeadDudes = 0;
@@ -580,7 +581,6 @@ const calculateForces = (scene: Phaser.Scene) => {
     }
 
     pushDirection.normalize();
-    console.log("push dir", pushDirection.length());
     const wallpushingForce =
       CONSTANTS.WALL_REPULSION_LINEAR *
       Math.exp(-closestWallDistance / CONSTANTS.WALL_REPULSION_EXPONENTIAL);
@@ -664,7 +664,7 @@ const calculateForces = (scene: Phaser.Scene) => {
       }
     } else {
       // if Pathfinding is deactivated
-      /*const sign = findClosestAttractiveTarget(dudes[i], scene);
+      const sign = findClosestAttractiveTarget(dudes[i], scene);
       //calculate here the desired velocity from the target value only if we have a target
       if (sign.x > 0) {
         //apply direction correcting force
@@ -676,9 +676,11 @@ const calculateForces = (scene: Phaser.Scene) => {
             .subtract(dudes[i].getBody().velocity) // subtract current velocity
             .scale(dudes[i].normalizedFitness / dudes[i].normalizedWeight) //reaction time
         );
-      }*/
+      }
     }
     // ---- end section directioncorrecting force ----
+
+    dudes[i].getBody().velocity.scale(DUDE_WALKING_FRICTION);
 
     // calculate repulison between dudes and all visible fires
     const visibleFires = rayTrace(dudes[i], repulsiveTargets, scene);

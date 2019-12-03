@@ -99,7 +99,7 @@ class Dude extends Phaser.GameObjects.Arc {
     this.getBody()
       .setCollideWorldBounds(true)
       .setBounce(0, 0)
-      .setFriction(0.995, 0.995);
+      .setFriction(0.9, 0.9);
   }
 
   getBody() {
