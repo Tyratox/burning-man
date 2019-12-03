@@ -7,8 +7,8 @@ const strictNormal = (mean: number, dev: number) =>
 const normalFactor = (value: number, mean: number) => value / mean;
 
 class Agent extends Phaser.GameObjects.Arc {
-  maxVelocity: number;
-  maxAcceleration: number;
+  desiredVelocity: number;
+  maxAcceleration: number; // IS NOT USED
   visualRange: number;
   reactionTime: number;
 
@@ -37,13 +37,13 @@ class Agent extends Phaser.GameObjects.Arc {
     this.visitedTargets = [];
     this.nextNode = 0;
 
-    this.maxVelocity = strictNormal(
-      CONSTANTS.MEAN_DUDE_MAX_VELOCITY,
-      CONSTANTS.DUDE_MAX_ACCELERATION_STD_DEV
+    this.desiredVelocity = strictNormal(
+      CONSTANTS.MEAN_DUDE_DESIRED_VELOCITY,
+      CONSTANTS.DUDE_DESIRED_VELOCITY_STD_DEV
     );
 
     this.maxAcceleration = strictNormal(
-      CONSTANTS.MEAN_DUDE_MAX_VELOCITY,
+      CONSTANTS.MEAN_DUDE_MAX_ACCELERATION,
       CONSTANTS.DUDE_MAX_ACCELERATION_STD_DEV
     );
 
