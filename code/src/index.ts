@@ -26,6 +26,7 @@ export let controller: SimulationController;
 const preload: (map: string) => ScenePreloadCallback = map =>
   function(this: Phaser.Scene) {
     //load images if needed
+    this.load.image("agent", "assets/agent.png");
     this.load.image("skull", "assets/skull.png");
     this.load.image("fire", "assets/fire.png");
     this.load.tilemapTiledJSON("map", `assets/maps/${map}.json`);
@@ -66,45 +67,11 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
     .getObjectLayer("signs")
     ["objects"].forEach((sign, index) => controller.addSign(sign, index));
 
-  tilemap.getObjectLayer("doors")["objects"].forEach((door, index) => {
-    const orientationX: number = door.properties.find(
-      (p: { name: string; value: number }) => p.name === "orientationX"
-    ).value;
-    const orientationY: number = door.properties.find(
-      (p: { name: string; value: number }) => p.name === "orientationY"
-    ).value;
-
-    const triangle = this.add.isotriangle(
-      door.x,
-      door.y,
-      CONSTANTS.TRIANGLE_SIZE,
-      CONSTANTS.TRIANGLE_HEIGHT,
-      false,
-      0x3498db,
-      0x3498db,
-      0x2980b9
+  tilemap
+    .getObjectLayer("doors")
+    ["objects"].forEach((door, index) =>
+      controller.addDoor(door, signCount + index)
     );
-
-    controller.doorGroup.add(triangle);
-
-    const directionNorm = Math.sqrt(
-      orientationX * orientationX + orientationY * orientationY
-    );
-
-    triangle.rotation =
-      (orientationX < 0 ? 1 : -1) * Math.acos(orientationY / directionNorm);
-
-    controller.attractiveTargets.push({
-      type: "door",
-      index: signCount + index,
-      position: { x: door.x, y: door.y },
-      orientation: { x: orientationX, y: orientationY }
-    });
-
-    controller.attractiveTargetGroup.add(
-      new AttractiveTarget(signCount + index, door.x, door.y, this)
-    );
-  });
 
   controller.resetAgentCount();
 
@@ -116,32 +83,76 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
   }
 
   // ----- Adding Groups to the Physics Collider Engine -----
+  this.matter.world.on(
+    "collisionactive",
+    (event: Phaser.Physics.Matter.Events.CollisionActiveEvent) => {
+      event.pairs.forEach(({ bodyA, bodyB }) => {
+        if (
+          bodyA.collisionFilter.category === controller.agentGroup ||
+          bodyB.collisionFilter.category === controller.agentGroup
+        ) {
+          const a =
+            bodyA.collisionFilter.category === controller.agentGroup
+              ? bodyA
+              : bodyB;
+          const b = a === bodyA ? bodyB : bodyA;
 
-  this.physics.add.overlap(
-    controller.agentGroup,
-    controller.fireGroup,
-    controller.onAgentDeath
-  );
+          const agent: Agent = a.gameObject;
 
-  this.physics.add.collider(controller.somkeGroup, controller.wallGroup);
-  this.physics.add.overlap(
-    controller.agentGroup,
-    controller.somkeGroup,
-    controller.onSmokeContact
-  );
-  this.physics.add.collider(controller.agentGroup, controller.agentGroup);
-  this.physics.add.collider(controller.agentGroup, controller.wallGroup);
-  this.physics.add.collider(controller.agentGroup, controller.tableGroup);
-  this.physics.add.collider(
-    controller.agentGroup,
-    controller.despawnZoneGroup,
-    controller.onDespawn
-  );
+          //maybe the agent was just destroyed in collisionstart
+          if (!agent) {
+            return;
+          }
 
-  this.physics.add.overlap(
-    controller.agentGroup,
-    controller.attractiveTargetGroup,
-    controller.onHitTarget
+          if (b.collisionFilter.category === controller.attractiveTargetGroup) {
+            const target: AttractiveTarget = b.gameObject;
+            controller.onHitTarget(agent, target);
+            /*const c = this.add.circle(agent.x, agent.y, 5, 0xff0000, 1);
+            this.tweens.add({
+              targets: c,
+              alpha: { from: 1, to: 0 },
+              ease: "Linear",
+              duration: 100,
+              repeat: 0,
+              yoyo: false,
+              onComplete: () => c.destroy()
+            });*/
+          }
+        }
+      });
+    }
+  );
+  this.matter.world.on(
+    "collisionstart",
+    (event: Phaser.Physics.Matter.Events.CollisionStartEvent) => {
+      event.pairs.forEach(({ bodyA, bodyB }) => {
+        if (
+          bodyA.collisionFilter.category === controller.agentGroup ||
+          bodyB.collisionFilter.category === controller.agentGroup
+        ) {
+          const a =
+            bodyA.collisionFilter.category === controller.agentGroup
+              ? bodyA
+              : bodyB;
+          const b = a === bodyA ? bodyB : bodyA;
+
+          const agent: Agent = a.gameObject;
+
+          if (b.collisionFilter.category === controller.attractiveTargetGroup) {
+            const target: AttractiveTarget = b.gameObject;
+            controller.onHitTarget(agent, target);
+          } else if (
+            b.collisionFilter.category === controller.despawnZoneGroup
+          ) {
+            controller.onDespawn(agent);
+          } else if (b.collisionFilter.category === controller.fireGroup) {
+            controller.onAgentDeath(agent);
+          } else if (b.collisionFilter.category === controller.somkeGroup) {
+            //
+          }
+        }
+      });
+    }
   );
   // ----- Initialize Timer -----
   timer.timeLabel = this.add.text(150, 75, "00:00", {
@@ -156,7 +167,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
 
 const calculateForces = (scene: Phaser.Scene) => {
   //@ts-ignore
-  const agents: Agent[] = controller.agentGroup.children.getArray();
+  const agents: Agent[] = controller.agents;
 
   const accelerations = new Array(agents.length)
     .fill(null)
@@ -309,7 +320,7 @@ const calculateForces = (scene: Phaser.Scene) => {
             .subtract(agents[i].getPosition())
             .normalize()
             .scale(agents[i].desiredVelocity)
-            .subtract(agents[i].getBody().velocity) // subtract current velocity
+            .subtract(agents[i].getVelocity()) // subtract current velocity
             .scale(1 / agents[i].reactionTime)
         );
       }
@@ -324,7 +335,7 @@ const calculateForces = (scene: Phaser.Scene) => {
             .subtract(agents[i].getPosition())
             .normalize()
             .scale(agents[i].desiredVelocity)
-            .subtract(agents[i].getBody().velocity) // subtract current velocity
+            .subtract(agents[i].getVelocity()) // subtract current velocity
             .scale(1 / agents[i].reactionTime)
         );
       }
@@ -371,7 +382,7 @@ const calculateForces = (scene: Phaser.Scene) => {
 
       const pushingForce =
         CONSTANTS.DUDE_REPULSION_LINEAR *
-        Math.exp(CONSTANTS.DUDE_REPULSION_EXPONENTIAL / distance);
+        Math.exp(-distance / CONSTANTS.DUDE_REPULSION_EXPONENTIAL);
 
       //the bigger the distance the smaller the pulling force
       const pullingForce = CONSTANTS.DUDE_GROUP_ATTRACTION / distance;
@@ -393,9 +404,9 @@ const calculateForces = (scene: Phaser.Scene) => {
     }
   }
 
-  accelerations.forEach((acceleration, index) =>
-    agents[index].getBody().setAcceleration(acceleration.x, acceleration.y)
-  );
+  accelerations.forEach((acceleration, index) => {
+    agents[index].body.force = acceleration;
+  });
 };
 
 const updateTimer = function() {
@@ -453,10 +464,9 @@ export const initGame = (map = "map") => {
       ]
     },
     physics: {
-      default: "arcade",
-      arcade: {
-        gravity: { x: 0, y: 0 },
-        fps: 30
+      default: "matter",
+      matter: {
+        gravity: { x: 0, y: 0 }
       }
     },
     backgroundColor: 0xffffff
