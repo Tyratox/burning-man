@@ -10,7 +10,7 @@ export const CONSTANTS = {
   DUDE_REPULSION_EXPONENTIAL: 10,
   DUDE_GROUP_ATTRACTION: 0,
 
-  WALL_REPULSION_LINEAR: 20,
+  WALL_REPULSION_LINEAR: 5,
   WALL_REPULSION_EXPONENTIAL: 10,
 
   MAX_SMOKE_RADIUS: 20,
@@ -169,10 +169,10 @@ export const simulationFinished = () => {
   };
 
   const csv =
-    Object.keys(values).join(',') +
-    '\n' +
-    Object.values(values).join(',') +
-    '\n';
+    Object.keys(values).join(",") +
+    "\n" +
+    Object.values(values).join(",") +
+    "\n";
 
   textarea.value = csv;
 };

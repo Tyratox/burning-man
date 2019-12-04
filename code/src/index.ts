@@ -117,6 +117,14 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
               yoyo: false,
               onComplete: () => c.destroy()
             });*/
+          } else if (
+            b.collisionFilter.category === controller.wallGroup ||
+            b.collisionFilter.category === controller.tableGroup
+          ) {
+            if (b.speed === 0) {
+              //if stuck recalculate path
+              agent.path = null;
+            }
           }
         }
       });
