@@ -169,12 +169,10 @@ export const simulationFinished = () => {
   };
 
   const csv =
-    '"' +
-    Object.keys(values).join('", "') +
-    '"\n' +
-    '"' +
-    Object.values(values).join('", "') +
-    '"\n';
+    Object.keys(values).join(',') +
+    '\n' +
+    Object.values(values).join(',') +
+    '\n';
 
   textarea.value = csv;
 };
