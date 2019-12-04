@@ -32,7 +32,7 @@ def plot(dataX, dataY, xLabel, yLabel, name, errX=None, errY=None) :
 # Plot 1: [Time] : [Mean Speed]
 def exOnePlotOne() : 
 	# Nr of Tests with different parameters
-	nrTests = 3
+	nrTests = 9
 	# Nr of Tests with same parameters
 	n = 5
 	# Data Arrays for plot
@@ -56,12 +56,12 @@ def exOnePlotOne() :
 		# Calculate the standard deviation for the y axis
 		stY.append(np.std(time))
 
-	plot(dataX=dataX, dataY=dataY, xLabel="Mean Velocity", yLabel="Time [s]", name="Exp_1_Plot_1", errX=None ,errY=stY)
+	plot(dataX=dataX, dataY=dataY, xLabel="Mean Desired Velocity", yLabel="Time [s]", name="Exp_1_Plot_1", errX=None ,errY=stY)
 
 # Plot 2: [Agents per Time] : [Mean Speed]
 def exTwoPlotOne() :
 	# Nr of Tests with different parameters
-	nrTests = 3
+	nrTests = 9
 	# Nr of Tests with same parameters
 	n = 5
 	# Data Arrays for plot
@@ -88,11 +88,8 @@ def exTwoPlotOne() :
 		dataY.append(np.mean(meanVelocity, dtype=np.float64))
 		# Calculate the standard deviation for the y axis
 		stY.append(np.std(meanVelocity))
-		print(meanVelocity)
-		print(nrOfAgents)
-		print(np.true_divide(meanVelocity, nrOfAgents))
 
-	plot(dataX=dataX, dataY=dataY, xLabel="Agents per Time", yLabel="Mean Velocity", name="Exp_1_Plot_2", errX=None ,errY=None)
+	plot(dataX=dataX, dataY=dataY, xLabel="Escaped Agents per Time", yLabel="Mean Desired Velocity", name="Exp_1_Plot_2", errX=None ,errY=None)
 
 
 # Plot 2: [Nr of Agents escaping per Time / Speed - Ratio] : [Mean Speed]
