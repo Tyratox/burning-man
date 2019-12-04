@@ -273,8 +273,14 @@ As phaser includes a physics engine we can make use of this by simulating the be
 	\end{minipage}
     
 \end{itemize}
+As soon as we know the target of an agent, we can compute the velocity-correcting force, which tries to accelerate the current physical velocity $v^0$ of the agent to the desired velocity $v$. We compute the force by    
+\begin{align*}
+  f_t = m*\frac{v^0-v}{\tau}
+\end{align*}
+where $m$ and $\tau$ are constants, that can be interpreted as the mass and the reactiontime of an agent.
 
 \section{Simulation Results and Discussion}
+To test our tool againts existing papers, we tried to replicate experiments of an existing article \cite{Helbing}. Our experiment 1 was described in \cite{Helbing}, whereas our experiment 2 was shown in the video that belongs to the article \cite{Helbing}.  
 
 Some Ideas for experiments: One door for example 100 dudes. Vary the desired velocity and observe how long it takes until all have passed the door.
 With obstactle in front of the door versus without, observe how long it takes.
@@ -287,6 +293,7 @@ With obstactle in front of the door versus without, observe how long it takes.
 \subsection{Experiment 3}
 
 \subsection{Interpretation of the simulation result}
+When running the simulation several times with a range of different parameters, we can observe some similar behaviour as it is already described in other articles.
 
 \subsubsection{Clogging}
 When running the simulation, one might notice that the agents competing for a door are closer together. This is due to the fact, that all agents are pushing towards the door, and hence pushing them together. It worsens the situation, as the friction between the agents increases, which slows down the escape.  
@@ -294,12 +301,13 @@ When running the simulation, one might notice that the agents competing for a do
 \subsubsection{Keeping the distance}
 Interestingly, we can observe how agents are pushed back into rooms. Sometimes one could even witness how some agents use another path to avoid the crowd. This is actually what we would expect because of the mutual repulsion of the agents. 
 
-\subsubsection{'Faster-is-Slower effect'}% insert citation to the papers
+\subsubsection{'Faster-is-Slower effect'}
 There are already many published papers regarding the social-force-model. Of which many describe the 'Faster-is-Slower effect' \cite{Helbing, Wang}. The 'Faster-is-Slower effect' describes the phenomenon where the escape through an exit door is slower if the agents are pushing harder. When running our simulation on our default map, we did not observe this effect. The chances are, that this is due to the long corridor, where the agents make up time with a higher speed.
 
 \subsection{Adapting the parameters for better results}
 
 \subsection{Finding the model's limits}
+
 
 \subsubsection{Evaluation of the building model}
 \subsubsection{Evaluation of the agent model}
@@ -308,11 +316,15 @@ There are already many published papers regarding the social-force-model. Of whi
 \subsection{Evaluation of the simulation}
 
 \section{Summary and Outlook}
+- agents should only interact via forces if they can see each other (improve using raytracing)
+- use empirical values for the parameters and constants
+- use a more stable physics engine
+- implement a random fluctuating force to prevent deadlocks
 
 %\section{References}
 
 %To add references, search the paper on https://www.researchgate.net/publication/12295370_Simulating_Dynamic_Features_of_Escape_Panic/citation/download
-% and then copy the BibTeX Citation
+% and then copy the BibTeX Citation into the file refs.bib
 
 \bibliographystyle{plain}
 \bibliography{refs}
