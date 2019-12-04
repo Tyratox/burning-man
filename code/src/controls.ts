@@ -35,7 +35,6 @@ export const CONSTANTS = {
   DUDE_REACTION_TIME_STD_DEV: 0,
 
   FIRE_REPULSION: 5000,
-  DUDE_WALKING_FRICTION: 0.995,
 
   RENDER_DEBUG_OBJECTS: true,
   RENDER_NAVMESH_DEBUG: false,
@@ -156,8 +155,12 @@ export const simulationFinished = () => {
 
   const results = document.getElementById("results");
   results.style.display = "block";
-  const textarea: HTMLTextAreaElement = document.querySelector(
-    "#results textarea"
+  const textarea1: HTMLTextAreaElement = document.querySelector(
+    "#results textarea.constants"
+  );
+
+  const textarea2: HTMLTextAreaElement = document.querySelector(
+    "#results textarea.log"
   );
 
   const values = {
@@ -174,7 +177,8 @@ export const simulationFinished = () => {
     Object.values(values).join(",") +
     "\n";
 
-  textarea.value = csv;
+  textarea1.value = csv;
+  textarea2.value = controller.escapeTimestamps.join(",");
 };
 
 export const updateSurvivorPhrase = (phrase: string) => {

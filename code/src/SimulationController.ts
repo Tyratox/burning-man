@@ -5,6 +5,7 @@ import Agent, { strictNormal } from "./Agent";
 import { CONSTANTS, updateSurvivorPhrase } from "./controls";
 import AttractiveTarget from "./AttractiveTarget";
 import Fire from "./Fire";
+import { timer } from ".";
 
 class SimulationController {
   //targets for raytracing
@@ -14,6 +15,7 @@ class SimulationController {
   wallShape: Phaser.Geom.Rectangle[];
 
   agents: Agent[];
+  escapeTimestamps: number[];
 
   //dynamic object groups
   agentGroup: number;
@@ -41,6 +43,7 @@ class SimulationController {
     this.repulsiveTargets = [];
     this.wallShape = [];
     this.agents = [];
+    this.escapeTimestamps = [];
 
     this.totalNumberOfAgents = 0;
     this.numberOfDeadAgents = 0;
@@ -358,6 +361,7 @@ class SimulationController {
 
     agent.destroy();
     this.agents.splice(this.agents.indexOf(agent), 1);
+    this.escapeTimestamps.push(timer.getTotalElapsedTime());
   };
 
   onHitTarget = (agent: Agent, target: AttractiveTarget) => {
