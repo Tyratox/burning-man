@@ -191,6 +191,7 @@ class SimulationController {
       zone.height,
       {
         isStatic: true,
+        isSensor: true,
         collisionFilter: {
           group: 2,
           category: this.despawnZoneGroup,
