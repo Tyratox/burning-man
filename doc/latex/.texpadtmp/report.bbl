@@ -5,10 +5,8 @@ Dirk Helbing, Illés Farkas, and Tamás Vicsek.
 \newblock Simulating dynamic features of escape panic.
 \newblock {\em Nature}, 407:487--490, 09 2000.
 
-\bibitem{Wang}
-Peng Wang.
-\newblock {\em Understanding Social-Force Model in Psychological Principles of
-  Collective Behavior}.
-\newblock PhD thesis, 05 2016.
+\bibitem{Tiled}
+Thorbjørn Lindeijer.
+\newblock https://github.com/bjorn/tiled, last visited on 2019-12-01.
 
 \end{thebibliography}
