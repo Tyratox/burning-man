@@ -288,7 +288,7 @@ To test our tool againt existing papers, we tried to replicate experiments of an
 
 \subsection{Experiment 1}
 
-For the first experiment we replicated the experiments from the paper \cite{Simulating dynamical features of escape panic} from Dirk Helbing, Illés Farkas and Tamás Vicsek in which the agents had to pass a bottleneck in an escape situation. The conclusion was there is an optimal velocty of about $1.5 m/s^-1$ at which all 200 agnets left in the least amount of time. For our model this simulation was quite difficulte to reproduce since our model was highly sensitive towards the friction parameter. This lead to a situation where the agents arranged themselves around the bottleneck in a stable compositon with no progress. This is not representative for a real world escape situation, since humans still react enough reasonable and intelligent under stress to avoid a permanent jam. Therefore all of our statistics were not representative in order to verify this experiment.  
+For the first experiment we replicated the experiments from the paper \textit{Simulating dynamical features of escape panic} from Dirk Helbing, Illés Farkas and Tamás Vicsek in which the agents had to pass a bottleneck in an escape situation. The conclusion was there is an optimal velocity of about $1.5 m/s^-1$ at which all 200 agents left in the least amount of time.
 
 \begin{minipage}{.4\textwidth}
 		\begin{figure}[H]
@@ -308,7 +308,17 @@ For the first experiment we replicated the experiments from the paper \cite{Simu
 		\end{figure}
 	\end{minipage}
 	
-We created a setup similar to that in \cite{Helbing} which is the right image above.
+We created a setup similar to that in \cite{Helbing} which is the right image above but in our model this simulation took different turns. When first trying it, some agents started glitching through the wall as the acting forces were extremely high. This is a known issue in physics engines as high forces imply high acceleration and velocity and we know from physics $s = s_0 + v\cdot t$. If physics engines directly calculate the new position in discrete time steps without verifying the path in between was clear, objects can glitch through walls without causing a collision. To circumvent this issue, we on one hand replaced the whole physics engine with a better one that verifies these cases but also reduced the number of agents. This lead to a new issue, not a physical one but one with the result: Suddenly we couldn't replicate the effect from the paper anymore, higher velocity almost always resulted in better escape times. When adjusting the friction between the agents this behaviour changed again and now most of the time all agents got indefinitely stuck in a situation similar to the one described in \cite{Helbing}. As we cannot create statistics where most of the time everyone gets stuck, it prevented us from having a similar nice statistic as Helbing, Farkas and Vicsek got. When comparing their results with ours, the differences are obvious. Most likely our model failed to replicate some important behaviour that was considered in \cite{Helbing} but it still seems interesting that he paper describes very exact what parameters were chosen for mass, acceleration time, desired velocity and so on but only mentions the friction very briefly, when saying ''if the friction parameter is large enough''\cite{Helbing}. Depending on how this sentence is interpreted, the results our model produced with a large friction parameter might be more similar than first thought and may also result from a different handling of the friction in the physics engines. It might be interesting to have a three-dimensional plot with the escape time over the desired velocity and the friction between the agents. Also the overall question remains whether a situation visible in the left image above can actually be used in respect to the escape time in real life as people would start to fall and others would start climbing and running over them. This wouldn't as drastically decrease the escape time for some but drastically for the ones getting hurt.
+
+Even tough we could not directly verify alls results from \cite{Helbing}, the conclusion that higher escape velocities doesn't lead to faster escapes could be verified.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.75\linewidth]{assets/Exp_1_Plot_1}\\
+	Escape time over mean desired velocity
+\end{figure}
+
+As can be seen in the plot above, even tough the escape time continuously shrinks with increasing velocity, the difference keeps getting smaller and hits a minimum meaning further increasing the desired velocity won't further decrease the escape time. This plot is based on five runs per velocity on the described setting.
 
 \subsection{Experiment 2}
 
