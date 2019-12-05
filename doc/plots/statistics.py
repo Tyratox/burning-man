@@ -51,9 +51,9 @@ def plotMultipleSets(nrSets, color, dataX, dataY, xLabel, yLabel, name, errX, er
 # Plot 1: [Time] : [Mean Speed]
 def expOnePlotOne() : 
 	# Nr of Tests with different parameters
-	nrTests = 6
+	nrTests = 9
 	# Nr of Tests with same parameters
-	n = 3
+	n = 5
 	# Data Arrays for plot
 	dataX = []
 	dataY = []
@@ -195,9 +195,9 @@ def expTwoPlotOne() :
 # Plot 2:
 
 def main() :
-	#expOnePlotOne()
+	expOnePlotOne()
 	#expOnePlotTwo()
-	expTwoPlotOne()
+	#expTwoPlotOne()
 
 
 main()
