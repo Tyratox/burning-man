@@ -363,7 +363,7 @@
   <object id="364" x="1220" y="996" width="56" height="24"/>
   <object id="365" x="1252" y="676" width="24" height="24"/>
  </objectgroup>
- <objectgroup id="5" name="doors">
+ <objectgroup id="5" name="doors" visible="0">
   <object id="149" name="Door" type="door" x="108" y="424">
    <properties>
     <property name="orientationX" type="int" value="0"/>
