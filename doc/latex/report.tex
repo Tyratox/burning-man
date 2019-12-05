@@ -144,22 +144,22 @@
 
 \section{Abstract}
 
-This paper describes a model for the behaviour of people in the event of an emergency situation and it's simulation. The model tries to incorporate the general repulsion of people standing too close, the formation of groups in panic situations, the placement of exit signs and many other factors such as different speeds. In order to make observations on the defined model, it is simulated using a physics engine written in javascript that makes it accessible from any place at any time and allows for reproducible and verifiable results. The paper defines a general parameterized model of the environment and the agents which, with the right choice of simulation parameters, may even allow for a safety evaluation of specific settings. Simulations using this model were able to verify results of other papers but also put them into perspective.
+This paper describes a model for the behaviour of people in the event of an emergency situation and it's simulation. The model incorporates the general repulsion of people standing too close, the formation of groups in panic situations, the placement of exit signs and many other factors such as different speeds. In order to make observations on the defined model, it is simulated using a physics engine written in javascript that makes it accessible from any place at any time and allows for reproducible and verifiable results. The paper defines a general parameterized model of the environment and the agents which, with the right choice of simulation parameters, may even allow for a safety evaluation of specific settings. Simulations using this model were able to verify results of other papers but also put them into perspective.
 
 \section{Introduction and Motivations}
 
-This paper was created during the course \textit{Agent-Based Modeling and Social System Simulation} held by Dr. Nino Antulov-Fantulin and Thomas Asikis at ETH Zurich. The goal was to create a project matching the title of the course meaning the modelling of a complex system where humans are the agents. A complex system is in contrast to complicated system not per se hard to implement but rather consists of many simple small parts that on themselves act based on simple rules. The fact that there are a lot of these so-called agents gives rise to behaviours of the whole system that are not always easy to predict or even understand even if the simple rules of a single agent are well-known. As computers keep getting faster and new technology is developed every day, simulations are a good way of understanding these complex systems by playing with the available parameters while looking for emerging patterns and then interpreting the implications for the real world.
+This paper was created during the course \textit{Agent-Based Modeling and Social System Simulation} held by Dr. Nino Antulov-Fantulin and Thomas Asikis at ETH Zurich. The goal was to create a project in the field of modelling of complex systems with humans as agents. A complex system is in contrast to complicated system not per se hard to implement but rather consists of many simple small parts that on themselves act based on simple rules. The fact that there are a lot of agents gives rise to behaviours of the whole system that are not always easy to predict or even easy understandle even tough it is based on simple rules. As computers keep getting faster and new technology is developed every day, simulations are a good way of understanding these complex systems by playing with the available parameters while looking for emerging patterns and then interpreting the implications for the real world.
 
 \section{Description of the Model}
 
-For readability this chapter is split as the definition of the environment is to some extent independent of the agent's model.
+For the sake of simpicity this chapter is split into the definiton of the environment model and the agent model, since the environment model is to some extend independent of the agents mdoel. 
 
 \subsection{Environment model}
 
-Before agents can react to a fire an environment has to be created which in our case is a building. The environment model consists of walls, obstacles, doors and signs all of which are objects the agent interacts with. Walls are the most important part as they give the environment a shape and restricts the agent's movement. The same goes for obstacles, the reason why walls and obstacles are separated in our model is that the agent use a raytracing algorithm for finding a path and obstacles such as tables may prevent an agent from moving but do not interfere with their vision. Next are the doors and signs which also have similar roles. As it is the case in real life, safety signs guide an agent to the closest exit where agents are able to escape. Doors have the same effect on agents but represent something different as they're not a physical object but rather represent the agent's memory of where they entered a room. Both signs and doors are directional in our model as both, safety signs and doors, should only be used in one direction when escaping a building.
+Before agents can react to a fire an environment has to be created which in our case is a building. The environment model consists of walls, obstacles, doors and signs all of which are objects the agent interacts with. Walls are the most important part as they give the environment a shape and restrictions to the agent's movements. The same goes for obstacles, the reason why walls and obstacles are separated in our model is that the agent use a raytracing algorithm for finding a path and obstacles such as tables may prevent an agent from moving but do not interfere with their vision. Next are the doors and signs which also have similar roles. As it is the case in real life, safety signs guide an agent to the closest exit where agents are able to escape. Doors have the same effect on agents but represent something different as they're not a physical object but rather represent the agent's memory of where they entered a room. Both signs and doors are directional in our model as both, safety signs and doors, should only be used in one direction when escaping a building.
 
 \subsection{Agent model}
-For the agent model a so-called social force model is used. In short agents behave like particles in newtonian physics. Every agent has a mass, position and velocity and and the intentions and interactions of the agents are represented by forces. The agents are approximated as a circle in the physics engine where each agent has different intrinsic properties that are randomly generated using a normal distribution using a mean and a standard deviation. On one hand the circle radius of the agents is varied representing the different shoulder widths as it was done in \cite{Helbing}. In contrast to this paper, the desired velocity is chosen from a normal distribution as well as this seems more reasonable than all agents having exactly the same desired velocity. In addition we also randomly choose a reaction time that determines how fast an agent does get moving into a given direction.
+The agent model is implemented as a social force model. In short agents behave like particles in newtonian physics. Every agent has a mass, position and velocity. The intentions and interactions between agents and between them and their environment are represented by forces. An agent is approximated as a circle in the physics engine. Each one is created with different intrinsic properties that are randomly generated using a normal distribution. Some of these parameters are adustable via the mean value and the standard deviation. The circle diameter of an agent represents the different shoulder widths as it was also done in \cite{Helbing}. In contrast to this paper, we chose the desired velocity from a normal distribution as this seemed more reasonable to us since not every agent in the real world has the same fitness. In addition we also randomly choose a reaction time that determines how fast an agent can change its direction.
 
 After the generation of these random values, the agents are a sole product of their environment and their behaviour is based on a set of simple rules.
 
@@ -178,15 +178,15 @@ After the generation of these random values, the agents are a sole product of th
 
     \item Target attraction
     
-    Last but definitely not least the agents need a task. In the best case, they should try to reach one of the defined escape zones in order to safe themselves. In real life, safety signs guide people to these safe zones so the agents are instructed to always be on the lookout for visible signs guiding them to safety, so we do the same in our model and guide agents to the closest visible safety sign or door. In addition agents will remember what signs and doors they have already passed and won't go into the direction of the same sign or door twice. Should be signs and doors be placed in a strange order, this behaviour ensures that agents won't go into the wrong direction twice. An exception is made to this rule if an agent doesn't have a target anymore. Then they ''forget'' everything they visited before and start from scratch. This allows for some more complex behaviours such as an agent being pushed back into the room he just was in because of other agents rushing the hallway. If the memory wasn't cleared, the agent now wouldn't leave the room a second time which of course would be a real bad behaviour.
+    Last but definitely not least the agents need a task. In the best case, they should try to reach one of the defined escape zones in order to safe themselves. In real life, safety signs guide people to these safe zones so the agents are instructed to always be on the lookout for visible signs guiding them to safety, so we do the same in our model and guide agents to the closest visible safety sign or door. In addition agents should remember what signs and doors they have already passed and won't go into the direction of the same sign or door twice. An exception is made to this rule if an agent doesn't have a target anymore. Then they their memory of the visited doors and signs gets cleared and they start from scratch. This allows for some more complex behaviours such as an agent finding again the nearest sign od door after being pushed back into the same room he just had left. If the memory wasn't cleared, the agent wouldn't be able to leave the room a second time which of does not correspond to natural human behaviour.
 \end{itemize}
 
 \section{Implementation}
 
-The implementation of this model is done in javascript using a game library called phaser that already includes a physics engine and has means of drawing the result onto a \texttt{HTML} canvas meaning the whole simulation can easily be rendered on a webpage and doesn't require any setup.
+The implementation of this model is done in javascript using a game library called Phaser that already includes a physics engine and has means of drawing the result onto a \texttt{HTML} canvas meaning the whole simulation can easily be rendered on a webpage and doesn't require any setup.
 
 \subsection{Environment construction}
-As people are at least to some extent the product of their environment, it is very important that the simulations does not have a fixed environment in which all simulations take place. In fact it is one of the most important parameters when looking at the results, i.e. how many people survived a fire emergency. People in a totally enclosed room have no chance of escaping whereas agents sitting next to an escape zone will have no issues. To make the change of this parameter as accessible as possible, the implementation uses an open source format called \texttt{Tiled's map format} (TMX).
+As people are at least to some extent the product of their environment, it is very important that the simulations does not have a fixed environment in which all simulations take place. In fact it is one of the most important parameters when looking at the results, i.e. how many people survived a fire emergency. People in a totally enclosed room have no chance of escaping whereas agents sitting next to an escape zone probably will have no issues. To make the change of this parameter as accessible as possible, the implementation uses an open source format called \texttt{Tiled's map format} (TMX).
 
 \begin{figure}[H]
 	\centering
@@ -194,11 +194,11 @@ As people are at least to some extent the product of their environment, it is ve
 	The editing screen of Tiled
 \end{figure}
 
-Using this editor anyone with basic computer skills is able to adjust the given examples or of course define their own setting. This makes the model much more accessible and allows anyone to make their own tests using this model.
+As this editor is very simple to use, everyone with a basic understanding of computer is able to adjust the given examples or to define their own setting. This makes the model much more accessible and allows anyone to fit our model to their own needs and interests.
 
 \subsection{Agent behaviour}
 
-As phaser includes a physics engine we can make use of this by simulating the behaviour of the agents based on forces acting on them where the final movement is the vector addition of all these forces. Phaser has an \texttt{update} function that is called every time a new frame is calculated. which is perfectly suited for such a task. The different behavioural rules are implemented as follows
+As phaser includes a physics engine we can make use of this by simulating the behaviour of the agents based on forces acting on them where the resulting movement is the sum over all force vectors. Phaser has an \texttt{update} function that gets called every time a new frame is calculated. which is perfectly suited for a task like our model. The different behavioural rules are implemented as follows
 
 \begin{itemize}
     \item Wall repulsion
@@ -207,13 +207,13 @@ As phaser includes a physics engine we can make use of this by simulating the be
 
     \item Agent repulsion
     
-    Agent repulsion can be implemented rather easily: for every pair of agents a force
+    Agent repulsion can be implemented rather easily: for every pair of agents there acts a force 
     
     \begin{align*}
     	f_r = c_1 \cdot e^{-\frac{d}{c_2}}
     \end{align*}
     
-    where $c_1$ and $c_2$ are adjustable parameters but constant for the two agents and $d$ is the distance between the two agents. As the force is proportional to $e^{-d}$, the force is exponentially decreasing when linearly increasing the distance, i.e. exponentially increasing when linearly decreasing it. The initial values for $c_1$ and $c_2$ were empirically determined and are dependant on phaser's internal units.
+    pulling them away from each other, where $c_1$ and $c_2$ are adjustable parameters but constant for the two agents. $d$ is the distance between the two agents. As the force is proportional to $e^{-d}$, it is exponentially decreasing with a linear increase of the distance. The initial values for $c_1$ and $c_2$ were empirically determined and are dependant on phaser's internal units.
 
 %    \item Agent attraction
 %    
@@ -227,7 +227,7 @@ As phaser includes a physics engine we can make use of this by simulating the be
 
     \item Target attraction
     
-    For checking what signs are visible, we iterate over all of them and use a technique called raytracing. This means we draw a line from the agent's position to the sign's position and check whether this line intersects any wall defined in the environment.
+    To verify which signs are visible, we use a technique called raytracing. Our raytracing algorithm works by iterating over all signs and doors and computing if a given sign/door is visible for an agent. This means a line gets drawn from an agent's position to a sign and it gets validated whether this line intersects with a wall defined in the environment. The following part describes some scenarios in which the algorithm works.
     
     \begin{minipage}{.1\textwidth}	
 	\vfill\hfill
@@ -250,9 +250,9 @@ As phaser includes a physics engine we can make use of this by simulating the be
 	\end{figure}
 	\end{minipage}
     \\\\
-	In the first figure above the agent is surrounded by walls meaning a line between the agent and the sign would intersect the front wall and thus in this case the agent wouldn't move towards the sign.
+	  In the first figure above the agent is surrounded by walls (drawn in black) meaning a line between the agent and the sign would intersect the front wall and thus the agent wouldn't move towards the sign.
     
-    If that's not the case, the sign is indeed visible and we can apply a force into the direction of the sign. This works fine until you introduce obstacles drawn in gray instead of black which stands for a wall. Obstacles collide with the agent as de walls, meaning the agent won't ''climb'' over it, the difference is that the agent can see ''through'' or over an obstacle. A good example for obstacles are tables.
+    If that's not the case, the sign is indeed visible and we can apply a force into the direction of the sign. This works fine until one introduces obstacles (drawn in gray). Obstacles collide with the agent as do walls. The difference is that the agent can see through or over an obstacle and therefore an agent sees a sign or a door behind an obstacle. A good example for obstacle is a table.
 	
 	\begin{minipage}{.4\textwidth}
 		\begin{figure}[H]
@@ -272,13 +272,13 @@ As phaser includes a physics engine we can make use of this by simulating the be
 		\end{figure}
 	\end{minipage}
 	
-	Now the issue with directly applying a force to the agent into the direction of the ray becomes obvious, the agent will get stuck as it cannot move through the wall. To circumvent this issue, a so called pathfinding algorithm is used, once the agent sees a sign. Now the agent doesn't just move into the targets direction but rather finds a way to the target and this way is able to walk around obstacles. The pathfinding algorithm works by generating an ordered list of points that the agent can follow to get to the target position.
+	Now the issue with directly applying a force to the agent into the direction of the ray becomes more clear. An agent can get stuck as it cannot move through the obstacle. To circumvent this issue, we take us of a pathfinding algorithm once the agent sees a sign. Now the agent doesn't just move into the targets direction but rather finds a way to the target, surpassing obstacles that lay in their path. The pathfinding algorithm works by generating an ordered list of points that the agent can follow to get from their current position to the target position.
 	
-	As soon as we know the target of an agent, we can compute the velocity-correcting force, which tries to accelerate the current physical velocity $v_0$ of the agent to the desired velocity $v$. We compute the force by    
+	As soon as we know the target of an agent, we can compute the velocity-correcting force, which tries to accelerate the current physical velocity $v_0$ of the agent to the desired velocity $v$. The force gets computed by    
 	\begin{align*}
 	  f_t = m \cdot \frac{v_0-v}{\tau}
 	\end{align*}
-	where $m$ and $\tau$ are constants, that can be interpreted as the mass and the reaction time of an agent. In our simulation the $m$ is chooses based on the randomly chosen radius and $\tau$ is defined per agent and can be used directly.
+	where $m$ and $\tau$ are constants. They can be interpreted as the mass and the reaction time of an agent. In our simulation the $m$ is choosen based on their radius and $\tau$ is a constant defined per agent.
     
 \end{itemize}
 
