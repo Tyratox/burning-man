@@ -6,14 +6,14 @@ import csv
 
 # Read n lines in the specified csv file and filter data at index of the specified tag
 def getData(start, end, file, tag) :
-	Data = []
+	data = []
 
 	with open(file, newline='') as csvfile:
 		curr = list(csv.reader(csvfile, delimiter=','))
 		for i in range(start, end):
 			index = curr[0].index(tag)
-			Data.append(float(curr[i][index]))
-	return Data
+			data.append(float(curr[i][index]))
+	return data
 
 # -------------------- Plot functions --------------------
 
@@ -31,9 +31,10 @@ def plot(dataX, dataY, xLabel, yLabel, name, errX=None, errY=None) :
 	fileName = name + ".svg"
 	plt.savefig(fileName)
 
-def plotMultipleSets(nrSets, color, dataX, dataY, xLabel, yLabel, name, errX, errY, lables) :
+# Plot Data for multiple Graphs with optional x and y error and saves file as name.svg
+def plotMultipleSets(nrGraphs, color, dataX, dataY, xLabel, yLabel, name, errX=None, errY=None, lables) :
 	plt.figure(figsize=[11, 8])
-	for i in range(0, nrSets) :
+	for i in range(0, nrGraphs) :
 		plt.errorbar(dataX[i], dataY[i], fmt=color[i], yerr=errY[i], elinewidth=1, capsize=5, label=lables[i])
 
 	# Naming Axes and Title
@@ -116,7 +117,7 @@ def expOnePlotTwo() :
 
 	plot(dataX=dataX, dataY=dataY, xLabel="Escaped Agents per Time", yLabel="Mean Desired Velocity", name="Exp_1_Plot_2", errX=stX ,errY=None)
 
-# Plot 2: [Nr of Agents escaping per Time / Speed - Ratio] : [Mean Speed]
+# Test
 def expOnePlotTwo2() :
 	# Nr of Tests with different primary parameter
 	nrTests = 6
@@ -145,18 +146,17 @@ def expOnePlotTwo2() :
 		# Add the data for all n runs with the same primary parameters to the y axis
 		dataY.append(meanVelocity)
 
-	plotMultipleSets(nrSets=n, color=color, dataX=dataX, dataY=dataY, xLabel="Escaped Agents per Time", yLabel="Mean Desired Velocity", name="Exp_1_Plot_2_V2", errX=None ,errY=None)
-
-
-# Plot 3:  (Time - Mean Velocity)
+	plotMultipleSets(nrGraphs=n, color=color, dataX=dataX, dataY=dataY, xLabel="Escaped Agents per Time", yLabel="Mean Desired Velocity", name="Exp_1_Plot_2_V2", errX=None ,errY=None)
 
 # -------------------- Experiment 2 --------------------
 
 # Plot 1: [Time] : [Mean Speed]
 def expTwoPlotOne() : 
-	# Nr of Tests with different primary parameter
+	# Total Nr of Graphs
+	totalNrGraphs = 4
+	# Nr of Tests within a run
 	nrTests = 3
-	# Nr of Tests with different secondary parameter
+	# Nr of runs for Graph i
 	n = 2
 	# Data Arrays for plot
 	dataX = []
@@ -164,10 +164,10 @@ def expTwoPlotOne() :
 	# Standard deviation for x and y axis
 	stX = []
 	stY = []
-	color = ['ro-', 'bo-', 'go-', 'yo-', 'ro-', 'ro-', 'ro-', 'ro-']
-	lables = ['Wide Hallway', 'Narrow Hallway', 'Narrow Hallway, large Exit']
+	color = ['ro-', 'bo-', 'go-', 'co-', 'ro-', 'ro-', 'ro-', 'ro-']
+	lables = ['Wide Hallway, Wide Exit', 'Narrow Hallway, Narrow Exit', 'Narrow Hallway, Large Exit', 'Wide Hallway, Narrow Exit']
 
-	for i in range(0, nrTests) :
+	for i in range(0, totalNrGraphs) :
 		currX = []
 		currYstd = []
 		currY = []
@@ -190,14 +190,14 @@ def expTwoPlotOne() :
 		# Add the data for all n runs with the same primary parameters to the y axis
 		dataY.append(currY)
 
-	plotMultipleSets(nrSets=nrTests, color=color, dataX=dataX, dataY=dataY, xLabel="Mean Desired Velocity", yLabel="Time [s]", name="Exp_2_Plot_1", errX=stX ,errY=stY, lables=lables)
+	plotMultipleSets(nrGraphs=totalNrGraphs, color=color, dataX=dataX, dataY=dataY, xLabel="Mean Desired Velocity", yLabel="Time [s]", name="Exp_2_Plot_1", errX=stX ,errY=stY, lables=lables)
 
-# Plot 2:
+
+# -------------------- Plotting all Experiments --------------------
 
 def main() :
 	expOnePlotOne()
-	#expOnePlotTwo()
-	#expTwoPlotOne()
-
+	expOnePlotTwo()
+	expTwoPlotOne()
 
 main()
