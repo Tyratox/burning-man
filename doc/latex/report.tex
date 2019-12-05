@@ -319,38 +319,80 @@ Even tough we could not directly verify the results from \cite{Helbing}, the con
 
 Even tough the escape time continuously shrinks with increasing velocity, the difference keeps getting smaller and hits a minimum. In other words a further increase in the desired velocity won't  decrease the escape time as much. This plot is based on five runs per velocity on the described setting.
 
+%\subsection{Experiment 2}
+
 \subsection{Experiment 2}
 
-\subsection{Experiment 3}
+As our model is capable of handling much more complex situations and complex systems are one of the main topics of the course this paper is written in, we  thought it might be interesting to test the results of the first experiment in a more complex setting. As the environment we chose a simplified version of the ETH polysnack at noon (1), a modified version with a narrow hallway and a narrow exit (2) and two version in between; one with a narrow hallway and a wide exit (3) and one with a wide hallway and a narrow exit (4).
 
-\subsection{Interpretation of the simulation result}
-When running the simulation several times with a range of different parameters, we can observe some similar behaviour as it is already described in other articles.
+\begin{minipage}{.5\textwidth}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=.9\linewidth]{assets/polysnack}\\
+		ETH polysnack
+	\end{figure}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=.9\linewidth]{assets/polysnack-modified}\\
+	ETH polysnack with a narrow hallway\\
+	and a narrow exit
+\end{figure}
+\end{minipage}
 
-\subsubsection{Clogging}
-When running the simulation, one might notice that the agents competing for a door are closer together. This is due to the fact, that all agents are pushing towards the door, and hence pushing them together. It worsens the situation, as the friction between the agents increases, which slows down the escape.  
-    
-\subsubsection{Keeping the distance}
-Interestingly, we can observe how agents are pushed back into rooms. Sometimes one could even witness how some agents use another path to avoid the crowd. This is actually what we would expect because of the mutual repulsion of the agents. 
+\begin{minipage}{.5\textwidth}
+\begin{figure}[H]
+		\centering
+		\includegraphics[width=.9\linewidth]{assets/polysnack-experimental}\\
+		ETH polysnack with a narrow hallway\\
+		and a narrow exit
+	\end{figure}
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=.9\linewidth]{assets/polysnack-experimental-2}\\
+	ETH polysnack with a wide hallway\\
+	and a narrow exit
+\end{figure}
+\end{minipage}
 
-\subsubsection{'Faster-is-Slower effect'}
-There are already many published papers regarding the social-force-model. Of which many describe the 'Faster-is-Slower effect' \cite{Helbing, Wang}. The 'Faster-is-Slower effect' describes the phenomenon where the escape through an exit door is slower if the agents are pushing harder. When running our simulation on our default map, we did not observe this effect. The chances are, that this is due to the long corridor, where the agents make up time with a higher speed.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{assets/Exp_2_Plot_1}\\
+	Trend of results of different runs in the three settings
+\end{figure}
 
-\subsection{Adapting the parameters for better results}
+As expected the first variation has much lower overall escape time than the second variation dude to the larger exits and wider hallway. What might be interesting is that the third and fourth variations shown in green and x above, are in between the first two. This might be intuitive to some but before running the experiment one could have also guessed that the wide hallway in combination with the narrow exit might lead to some clogging as the throughput suddenly drops. When visually looking at the progress this actually happens but because the hallway is quite long, the time advantage they get from the long hallway with the larger speed more than compensates for the clogging at the exit. When looking at the statistic above, one can observe a large standard deviation for variation (2) which exactly results from this clogging effect that sometimes takes place. As in our model most initial parameters are chosen from a normal distribution, the results vary much more and thus clogging doesn't happen every time. All in all this might not perfectly judge the whole situation correctly as escape time is just one thing but as mention before clogging can result in real bad injuries and is less desirable than being a few seconds faster in a simulation.
 
-\subsection{Finding the model's limits}
+%\subsection{Interpretation of the simulation result}
+%When running the simulation several times with a range of different parameters, we can observe some similar behaviour as it is already described in other articles.
+%
+%\subsubsection{Clogging}
+%When running the simulation, one might notice that the agents competing for a door are closer together. This is due to the fact, that all agents are pushing towards the door, and hence pushing them together. It worsens the situation, as the friction between the agents increases, which slows down the escape.  
+%    
+%\subsubsection{Keeping the distance}
+%Interestingly, we can observe how agents are pushed back into rooms. Sometimes one could even witness how some agents use another path to avoid the crowd. This is actually what we would expect because of the mutual repulsion of the agents. 
+%
+%\subsubsection{'Faster-is-Slower effect'}
+%There are already many published papers regarding the social-force-model. Of which many describe the 'Faster-is-Slower effect' \cite{Helbing, Wang}. The 'Faster-is-Slower effect' describes the phenomenon where the escape through an exit door is slower if the agents are pushing harder. When running our simulation on our default map, we did not observe this effect. The chances are, that this is due to the long corridor, where the agents make up time with a higher speed.
+%
+%\subsection{Adapting the parameters for better results}
+%
+%\subsection{Finding the model's limits}
 
 
 \subsubsection{Evaluation of the building model}
+The building model seems pretty solid and wasn't really an issue during our simulations. Also the possibility of having a graphical editor is very handy. Depending on the emergency situation it might be interesting to extend the building model to support fire, smoke or maliciously acting agents such as terrorists. A lot of work was already done in supporting fire, smoke and their impact on sight is accessible when working with the code but it wasn't used in any experiment as the features weren't stable in time.
+
 \subsubsection{Evaluation of the agent model}
+The agent model on the other hand isn't perfect to say the least. It served the simulations pretty well and the graphical results were mostly nice too look at but the social force model has it's limitations. We tried to circumvent some of these limitations with additional raytracing and pathfinding algorithms but the result wasn't perfect. Also there are a lot of undefined parameters in our simulation that weren't fixed to a specific value because of some analysis other than our empirical analysis of what works and what not. The underlying physics engine supports much more that could be made use of but as time was limited it wasn't possible within the scope of this paper. In addition, tracking the forces on the human body and simulating agents falling over would be necessary to model an emergency situation better, especially if clogging takes place. Also the repulsion force between the agents should only apply if the two agents actually see each as otherwise two people standing next to the same wall but in two different rooms will have a pretty strong forces acting on them which of course doesn't represent the reality accurately. For this to be possible, the performance of the raytracing implementation would have to be improved as it would run $O(n^2)$ times every frame (where $n$ is the number of agents). Further improvements would be a force representing the agent's urge to build groups and follow other people. Part of this was already implemented but also wasn't finished in time so it couldn't be used in the final experiments.
+
 %The target attraction probably could have been modeled in a better way, instead of simply applying a force into the direction of the target, a real pathfinding algorithm could try to find the fastest way to the target that may involve walking around obstacles. In the current implementation agents fail to walk to the target if they are boxed in into the direction of the target.
 
-\subsection{Evaluation of the simulation}
-
 \section{Summary and Outlook}
-- agents should only interact via forces if they can see each other (improve using raytracing)
-- use empirical values for the parameters and constants
-- use a more stable physics engine
-- implement a random fluctuating force to prevent deadlocks
+Even though the experiments didn't yield the results we had hoped for, one can draw interesting conclusion from them and they show where such a social force model reaches its limits. What definitely is different in this project compared to many others is the reproducibility, we really like the idea of having a simulation that can be run right in the web browser and thus the experiments are easily verifiable by others. One mistake we did as a group was to focus too much time on the model itself. As none of us had a lot of experience in building a solid social system simulation, it took us way too long to implement it in a way we were confident with. In the end agents are just are simulated particles in newtonian physics but we wanted to actually build a good model for simulating real people which made us implement everything several times and thus wasting time. Just the map format itself was revised at least ten times! But in conclusion one can say that the modelling and the simulation of this scenario was very fascinating and a lot of fun for everyone involved. Even though many ideas were already mention in the chapter about the model evaluation, we would like to mention that the model could further be improved to support many of the things we mentioned, the resource that was preventing us from doing it was in the end just time. One could start building this simulation more accurately, maybe even in proportions to actual SI units, one could improve the performance of the raytracing algorithm and ensure the agents only act repulsive forces on each other if they actually see each other and one could finish implementing one of the many planned features such as fires, smoke or group formation. But still, we're proud of what we built and hope this project can be used by others and will be further developed.
 
 %\section{References}
 

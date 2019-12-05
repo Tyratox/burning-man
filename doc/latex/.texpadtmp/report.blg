@@ -3,37 +3,38 @@ Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: /Users/mac/synced-data/Dokumente/ETHZ/Semester-3/Agent Based Modelling/burning-man/doc/latex/.texpadtmp/report.aux
 The style file: plain.bst
 Database file #1: ../refs.bib
-Warning--empty school in Wang
+Warning--entry type for "Tiled" isn't style-file defined
+--line 11 of file ../refs.bib
 You've used 2 entries,
             2118 wiz_defined-function locations,
-            512 strings with 4437 characters,
-and the built_in function-call counts, 571 in all, are:
-= -- 54
+            510 strings with 4418 characters,
+and the built_in function-call counts, 561 in all, are:
+= -- 49
 > -- 25
 < -- 0
 + -- 10
 - -- 8
-* -- 44
-:= -- 108
-add.period$ -- 6
+* -- 36
+:= -- 99
+add.period$ -- 5
 call.type$ -- 2
 change.case$ -- 9
 chr.to.int$ -- 0
-cite$ -- 3
-duplicate$ -- 20
-empty$ -- 41
+cite$ -- 2
+duplicate$ -- 18
+empty$ -- 49
 format.name$ -- 8
-if$ -- 110
+if$ -- 114
 int.to.chr$ -- 0
 int.to.str$ -- 2
 missing$ -- 1
-newline$ -- 13
+newline$ -- 12
 num.names$ -- 4
-pop$ -- 8
+pop$ -- 16
 preamble$ -- 1
 purify$ -- 8
 quote$ -- 0
-skip$ -- 13
+skip$ -- 14
 stack$ -- 0
 substring$ -- 31
 swap$ -- 2
@@ -41,8 +42,8 @@ text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 8
-warning$ -- 1
+warning$ -- 0
 while$ -- 5
 width$ -- 3
-write$ -- 23
+write$ -- 20
 (There was 1 warning)
