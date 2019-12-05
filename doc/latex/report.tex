@@ -144,16 +144,11 @@
 
 \section{Abstract}
 
-This paper describes a model for the behaviour of people in the event of fire and it's simulation. The model tries to incorporate the general repulsion of people standing too close, the formation of groups in panic situations, the placement of exit signs and many other factors such as different speeds. In order to make observations on the defined model, it is simulated using a physics engine using javascript that makes it accessible from any place at any time and allows for reproducible and verifiable results. The paper defines a general parameterized model of the environment and the agents which, with the right choice of simulation parameters, even allow for a safety evaluation of specific settings. Simulations using this model were able to verify results of other papers but also put them into perspective.
+This paper describes a model for the behaviour of people in the event of an emergency situation and it's simulation. The model tries to incorporate the general repulsion of people standing too close, the formation of groups in panic situations, the placement of exit signs and many other factors such as different speeds. In order to make observations on the defined model, it is simulated using a physics engine written in javascript that makes it accessible from any place at any time and allows for reproducible and verifiable results. The paper defines a general parameterized model of the environment and the agents which, with the right choice of simulation parameters, may even allow for a safety evaluation of specific settings. Simulations using this model were able to verify results of other papers but also put them into perspective.
 
 \section{Introduction and Motivations}
 
-This paper was created during the course \textit{Agent-Based Modeling and Social System Simulation} held by Dr. Nino Antulov-Fantulin and Thomas Asikis at ETH Zurich. The goal was to create a project matching the title of the course meaning the modelling of a complex system where humans are the agents. A complex system is in contrast to complicated system not per se hard to implement but rather consists of many simple small parts that on themselves act based on simple rules. The fact that there are a lot of these so-called agents gives rise to behaviours of the whole system that are not always easy to predict or even understand even if the simple rules of a single agent are well-known. As computers keep getting faster and new technology is developed every day, simulations are a good way of understanding these complex systems by playing with the available parameters while looking for emerging patterns and applying them to the real world.
-
-In particular this paper describes and simulates the event of fire in a building that tries to incorporate many parameters an evacuation in real life depends on. When developing the model and simulation it was a primary goal to have every constant that was either empirically chosen or arbitrarily set to be an adjustable parameter. This allows the simulation of a much larger set of situations that may be needed in real life. Even the building is dynamic and can be changed by creating an appropriate file describing it. In the future it may even be possible to automate this process and directly parse a pdf ground plan which would allow even more people to take advantage of this model by testing their building for possible issues in the event of fire.
-
-We also would like to add a side note about the project title \textit{burning man}. When thinking about a project idea, it was clear quickly that an emergency situation would be rather interesting to all of us but we didn't immediately know where the evacuation should take place, in a small house, a large building or an event such as a festival. As burning man is the name of a famous festival in Nevada that takes place in the middle of a desert. After some discussions we settled for the evacuation of a building in the case of fire and when thinking about a new name, we realized the name is still kind of fitting and even funny if you have a little bit of dark humour. As software projects often have similar names we thought we'd just leave it that way though it should be made clear that the aim of this project is of course to reduce the number of 'burning men'.
-
+This paper was created during the course \textit{Agent-Based Modeling and Social System Simulation} held by Dr. Nino Antulov-Fantulin and Thomas Asikis at ETH Zurich. The goal was to create a project matching the title of the course meaning the modelling of a complex system where humans are the agents. A complex system is in contrast to complicated system not per se hard to implement but rather consists of many simple small parts that on themselves act based on simple rules. The fact that there are a lot of these so-called agents gives rise to behaviours of the whole system that are not always easy to predict or even understand even if the simple rules of a single agent are well-known. As computers keep getting faster and new technology is developed every day, simulations are a good way of understanding these complex systems by playing with the available parameters while looking for emerging patterns and then interpreting the implications for the real world.
 
 \section{Description of the Model}
 
@@ -161,12 +156,10 @@ For readability this chapter is split as the definition of the environment is to
 
 \subsection{Environment model}
 
-Before agents can react to a fire an environment has to be created which in our case is a building but is in general not restricted to buildings and could thus also be applied to other settings such as a festival. As the environment is one of the parameters that in a successful model should be easy to change, a subset of a preexisting format definition is used. The environment consists of the so-called object layers \texttt{signs}, \texttt{agents}, \texttt{doors}, \texttt{physical-walls}, \texttt{navmesh} and \texttt{despawn-zones}. The \texttt{signs} and \texttt{doors} layers contain points indicating the position of the safety signs and the doors. They are separate as they represent different things. The safety signs represent actual signs that the agents follow should they be visible. The location of the doors on the other hand are remembered by the agents and thus do not have to be visible for the agent to know it's location. In addition both signs can have the two properties \texttt{orientationX} and \texttt{orientationY} indicating the direction of a $180$ degree angle from which the sign is visible. Another property signs can have is \texttt{radius} which, if defined, overrides the default radius for marking a sign as visited. The reasons will be made clear in the description of the agent model. The \texttt{agents} layer also consists of points indicating the spawn points of the agents. \texttt{physical-walls}, as the name might suggest, defines the location of the walls using rectangles. This layer is used for giving the environment a shape as the agents cannot walk through these walls. In addition this layer is used for the raytracing algorithm as the agents should not be able to see signs if there's a wall in between but more to that in the agent model description. The \texttt{navmesh} layer defines the navigation mesh mode of rectangles. This mesh defines the points an agent can use for navigation when walking into the direction of a sign or a door. The details of this navigation mesh are also described in the next section about the agent model. Last but not least there's the \texttt{despawn-zones} layer where rectangles are used to define areas that will, when colliding with an agent, remove it from the simulation and count them as in safety.
+Before agents can react to a fire an environment has to be created which in our case is a building. The environment model consists of walls, obstacles, doors and signs all of which are objects the agent interacts with. Walls are the most important part as they give the environment a shape and restricts the agent's movement. The same goes for obstacles, the reason why walls and obstacles are separated in our model is that the agent use a raytracing algorithm for finding a path and obstacles such as tables may prevent an agent from moving but do not interfere with their vision. Next are the doors and signs which also have similar roles. As it is the case in real life, safety signs guide an agent to the closest exit where agents are able to escape. Doors have the same effect on agents but represent something different as they're not a physical object but rather represent the agent's memory of where they entered a room. Both signs and doors are directional in our model as both, safety signs and doors, should only be used in one direction when escaping a building.
 
 \subsection{Agent model}
-For the agent model a so-called social force model is used. In short agents behave like particles in newtonian physics. Every agent has a mass, position and velocity and on every agent act a bunch of forces resulting in an acceleration according to the famous $F=m\cdot a$. The agents representing the people are approximated as a circle in the physics engine where each agent has different intrinsic properties, most of which are generated randomly based on a normal distribution with selected mean and standard deviation values. To have more realistic values we cap the random distribution within the standard deviation as the actual probability of some value far away would otherwise not be zero, just very small.
-
-First we calculate the basic properties \texttt{weight, fitness} and \texttt{age} based on the described capped normal distribution. The radius or size of the agent is then also chosen from the capped normal distrubution but is then also multiplied with the \textit{normalized} \texttt{weight} and divided by the \textit{normalized} \texttt{fitness}. By \textit{normalized} we refer to the proportion of the random value to the mean for the given value. This factor $\frac{1}{\texttt{|agility|}} = \frac{\texttt{|weight|}}{\texttt{|fitness|}}$ (the $|\cdot|$ refers to the \textit{normalized} value) or rather its inverse is also used when generating the \texttt{maxVelocity} and the \texttt{maxAcceleration}, both of these values are multipled with this factor \texttt{agility} after being randomly chosen from the respective capped normal distrubution. As visual sight is a very important in emergency situations for finding safety signs and can also be disturbed by for example smoke, the property \texttt{visualRange} is also generated from another capped normal distribution whose result is then divided by the \textit{normalized} age.
+For the agent model a so-called social force model is used. In short agents behave like particles in newtonian physics. Every agent has a mass, position and velocity and and the intentions and interactions of the agents are represented by forces. The agents are approximated as a circle in the physics engine where each agent has different intrinsic properties that are randomly generated using a normal distribution using a mean and a standard deviation. On one hand the circle radius of the agents is varied representing the different shoulder widths as it was done in \cite{Helbing}. In contrast to this paper, the desired velocity is chosen from a normal distribution as well as this seems more reasonable than all agents having exactly the same desired velocity. In addition we also randomly choose a reaction time that determines how fast an agent does get moving into a given direction.
 
 After the generation of these random values, the agents are a sole product of their environment and their behaviour is based on a set of simple rules.
 
@@ -177,15 +170,15 @@ After the generation of these random values, the agents are a sole product of th
 
     \item Agent repulsion
     
-    For the same reason people do not like to stand close to each other, especially not in emergency situations. To model this, the agents will thus move away from each other if their distance is small.
+    For the same reason people do not like to stand close to each other, especially not in emergency situations. The closer the distance is, the greater is the applied force on every pair of agents to move away from each other.
 
-    \item Agent attraction
-    
-    Even tough people do not like to stand close to each other, they still tend to form groups and do not like to act on their own. Thus the agents are instructed to move closer together as long as the distance between them is in the acceptable range.
+%    \item Agent attraction
+%    
+%    Even tough people do not like to stand close to each other, they still tend to form groups and do not like to act on their own. Thus the agents are instructed to move closer together as long as the distance between them is in the acceptable range.
 
     \item Target attraction
     
-    Last but definitely not least, the agents have to do something and not just stand around. In the best case, the agents should try to reach one of the defined escape zones. In real life, safety signs guide people to these safe zones so the agents are instructed to always be on the lookout for visible signs guiding them to safety. In real life not all small rooms do have safety signs in them as for humans the only viable option in an emergency is to first leave the room they're in. As the agents should follow this behaviour, doors function similar to signs except that they do not have to be visible. This allows to simulate some kind of memory of the agents and enables them to leave the room even without have seen a safety sign. Another type of memory that is simulated is the remembrance of already visited signs and doors as real humans will not follow the same sign twice if the direction the sign points in didn't lead to an exit the first time around. An exception is made to this, when an agent doesn't have any target anymore they ''forget'' everything they visited before and start from scratch. This allows for some more complex behaviours such as an agent being pushed back into the room he just was in because of other agents rushing the hallway. If the memory wasn't cleared, the agent now wouldn't leave the room a second time which of course would be a real bad behaviour.
+    Last but definitely not least the agents need a task. In the best case, they should try to reach one of the defined escape zones in order to safe themselves. In real life, safety signs guide people to these safe zones so the agents are instructed to always be on the lookout for visible signs guiding them to safety, so we do the same in our model and guide agents to the closest visible safety sign or door. In addition agents will remember what signs and doors they have already passed and won't go into the direction of the same sign or door twice. Should be signs and doors be placed in a strange order, this behaviour ensures that agents won't go into the wrong direction twice. An exception is made to this rule if an agent doesn't have a target anymore. Then they ''forget'' everything they visited before and start from scratch. This allows for some more complex behaviours such as an agent being pushed back into the room he just was in because of other agents rushing the hallway. If the memory wasn't cleared, the agent now wouldn't leave the room a second time which of course would be a real bad behaviour.
 \end{itemize}
 
 \section{Implementation}
@@ -201,7 +194,7 @@ As people are at least to some extent the product of their environment, it is ve
 	The editing screen of Tiled
 \end{figure}
 
-Using this editor anyone with basic computer skills is able to adjust the given examples or of course define their own settings enabling people using this model as a basic evaluation method of the safety in a case of fire.
+Using this editor anyone with basic computer skills is able to adjust the given examples or of course define their own setting. This makes the model much more accessible and allows anyone to make their own tests using this model.
 
 \subsection{Agent behaviour}
 
@@ -220,39 +213,46 @@ As phaser includes a physics engine we can make use of this by simulating the be
     	f_r = c_1 \cdot e^{-\frac{d}{c_2}}
     \end{align*}
     
-    where $c_1$ and $c_2$ are adjustable parameters but constant for the two agents and $d$ is the distance between the two agents. As the force is proportional to $e^{-d}$, the force is exponentially decreasing when linearly increasing the distance, i.e. exponentially increasing when linearly decreasing it. The initial values for $c_1$ and $c_2$ were empirically determined and are dependant on phasers units and on the agent attraction force.
+    where $c_1$ and $c_2$ are adjustable parameters but constant for the two agents and $d$ is the distance between the two agents. As the force is proportional to $e^{-d}$, the force is exponentially decreasing when linearly increasing the distance, i.e. exponentially increasing when linearly decreasing it. The initial values for $c_1$ and $c_2$ were empirically determined and are dependant on phaser's internal units.
 
-    \item Agent attraction
-    
-    The agent attraction force is, in contrast to the agent repulsion force, linearly dependant on the distance $d$
-    
-    \begin{align*}
-    	f_a = c_3 / d
-    \end{align*}
-    
-    but of course directed in the opposite direction of $f_r$. As $f_r$ is exponentially dependant on $d$ and $f_a$ just linearly there is a distance $d_0$ for which the two forces are in balance and the two agents will stay in place if no other force would act on them.
+%    \item Agent attraction
+%    
+%    The agent attraction force is, in contrast to the agent repulsion force, linearly dependant on the distance $d$
+%    
+%    \begin{align*}
+%    	f_a = c_3 / d
+%    \end{align*}
+%    
+%    but of course directed in the opposite direction of $f_r$. As $f_r$ is exponentially dependant on $d$ and $f_a$ just linearly there is a distance $d_0$ for which the two forces are in balance and the two agents will stay in place if no other force would act on them.
 
     \item Target attraction
     
-    For checking what signs are visible, we iterate over all of them and use a technique called raytracing. This means we draw a line from the agent's position to the sign's position and check whether this line intersects any rectangle defined in the environments \texttt{physical-walls} layer. 
+    For checking what signs are visible, we iterate over all of them and use a technique called raytracing. This means we draw a line from the agent's position to the sign's position and check whether this line intersects any wall defined in the environment.
     
-    \begin{figure}[H]
+    \begin{minipage}{.1\textwidth}	
+	\vfill\hfill
+	\end{minipage}
+    \begin{minipage}{.3\textwidth}
+		\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.25\linewidth]{assets/raytrace-blocked}\\
+		\includegraphics[width=1\linewidth]{assets/raytrace-blocked}\\
 		An agent's vision blocked by a wall
 	\end{figure}
-	
-	In the figure above the agent is surrounded by walls meaning a line between the agent and the sign would intersect the front wall and thus in this case the agent wouldn't move towards the sign.
-	
-	\begin{figure}[H]
+	\end{minipage}
+	\begin{minipage}{.2\textwidth}	
+	\vfill\hfill
+	\end{minipage}
+	\begin{minipage}{.3\textwidth}
+		\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.25\linewidth]{assets/raytrace-visible}\\
+		\includegraphics[width=1\linewidth]{assets/raytrace-visible}\\
 		An agent's sight of a sign visualized by a red ''ray''
 	\end{figure}
+	\end{minipage}
+    \\\\
+	In the first figure above the agent is surrounded by walls meaning a line between the agent and the sign would intersect the front wall and thus in this case the agent wouldn't move towards the sign.
     
     If that's not the case, the sign is indeed visible and we can apply a force into the direction of the sign. This works fine until you introduce obstacles drawn in gray instead of black which stands for a wall. Obstacles collide with the agent as de walls, meaning the agent won't ''climb'' over it, the difference is that the agent can see ''through'' or over an obstacle. A good example for obstacles are tables.
-	
-	Now the issue with directly applying a force to the agent into the direction of the ray becomes obvious, the agent will get stuck as it cannot move through the wall. To circumvent this issue, an so called pathfinding algorithm is used, once the agent sees a sign. Now the agent doesn't just move into the targets direction but rather finds a way to the target and this way is able to walk around obstacles. The way this pathfinding algorithm works is by using the \texttt{navmesh} layer in the environment definition that is made up of rectangles which the agent can use as a path. It then creates an ordered list of points that the agent can follow in order to get to the target position.
 	
 	\begin{minipage}{.4\textwidth}
 		\begin{figure}[H]
@@ -271,22 +271,53 @@ As phaser includes a physics engine we can make use of this by simulating the be
 			Agent boxed in obstacles using pathfinding
 		\end{figure}
 	\end{minipage}
+	
+	Now the issue with directly applying a force to the agent into the direction of the ray becomes obvious, the agent will get stuck as it cannot move through the wall. To circumvent this issue, a so called pathfinding algorithm is used, once the agent sees a sign. Now the agent doesn't just move into the targets direction but rather finds a way to the target and this way is able to walk around obstacles. The pathfinding algorithm works by generating an ordered list of points that the agent can follow to get to the target position.
+	
+	As soon as we know the target of an agent, we can compute the velocity-correcting force, which tries to accelerate the current physical velocity $v_0$ of the agent to the desired velocity $v$. We compute the force by    
+	\begin{align*}
+	  f_t = m \cdot \frac{v_0-v}{\tau}
+	\end{align*}
+	where $m$ and $\tau$ are constants, that can be interpreted as the mass and the reaction time of an agent. In our simulation the $m$ is chooses based on the randomly chosen radius and $\tau$ is defined per agent and can be used directly.
     
 \end{itemize}
-As soon as we know the target of an agent, we can compute the velocity-correcting force, which tries to accelerate the current physical velocity $v^0$ of the agent to the desired velocity $v$. We compute the force by    
-\begin{align*}
-  f_t = m*\frac{v^0-v}{\tau}
-\end{align*}
-where $m$ and $\tau$ are constants, that can be interpreted as the mass and the reactiontime of an agent.
 
 \section{Simulation Results and Discussion}
-To test our tool againts existing papers, we tried to replicate experiments of an existing article \cite{Helbing}. Our experiment 1 was described in \cite{Helbing}, whereas our experiment 2 was shown in the video that belongs to the article \cite{Helbing}.  
-
-Some Ideas for experiments: One door for example 100 dudes. Vary the desired velocity and observe how long it takes until all have passed the door.
-With obstactle in front of the door versus without, observe how long it takes.
-
+To verify our model we tested our tool against an existing paper. We tried to replicate the experiment of first part of the article \textit{Simulating dynamical features of escape panic} \cite{Helbing}. The second experiment was our main purpose of our model, to simulate the stream of agents located in different rooms of a real building. For this case we took a part of the ETH main building.
 
 \subsection{Experiment 1}
+
+For the first experiment we replicated the experiments from the paper \textit{Simulating dynamical features of escape panic} from Dirk Helbing, Illes Farkas and Tamas Vicsek in which the agents had to pass a bottleneck in an escape situation. The conclusion was that there is an optimal velocity of about $1.5 m/s^-1$ at which all 200 agents left in the least amount of time.
+
+\begin{minipage}{.4\textwidth}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=1\linewidth]{assets/helbling-experiment-1}\\
+			Setup from \cite{Helbing}
+		\end{figure}
+	\end{minipage}
+	\begin{minipage}{.2\textwidth}	
+	\vfill\hfill
+	\end{minipage}
+	\begin{minipage}{.4\textwidth}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=.75\linewidth]{assets/experiment-1}\\
+			This paper's setup
+		\end{figure}
+	\end{minipage}
+	
+We created a setup similar to that in \cite{Helbing} which is the right image above but in our model this simulation took different turns. When first trying it, some agents started glitching through the wall as the acting forces were extremely high. This is a known issue in physics engines as high forces imply high acceleration and velocity. The path an agent took in a timestep $\delta t$ can be described as $s_1 = s_0 + v\cdot \delta t$.  Since physics engines calculate the new position in discrete time steps without verifying if the path from $s_0$ to $s_1$ could have been taken, glitches like the one discribed occur. To circumvent this issue, we on one hand replaced the whole physics engine with a better one that verifies these cases but also reduced the number of agents. This lead to a new issue that suddenly we couldn't replicate the effect from the paper anymore. Higher velocity almost always resulted in better escape times. When adjusting the friction between the agents this behaviour changed again and now most of the time all agents got stuck in a situation similar to the one described in \cite{Helbing} ecept that in our case they were stuck indefinitely. As we cannot create statistics where most of the time everyone gets stuck, it prevented us from having a similar statistic as Helbing, Farkas and Vicsek got. When comparing their results with ours, the differences are obvious. Most likely our model failed to replicate some important behaviour that was considered in \cite{Helbing} but it still seems interesting that the paper describes very exactly all parameters chosen for mass, acceleration time, desired velocity, etc. but only mentions the friction very briefly by stating: ''if the friction parameter is large enough''\cite{Helbing}. Depending on how this sentence is interpreted, the results our model produced with a large friction parameter might be more similar than first thought and may also result from a different handling of the friction in the physics engines. For further studies it would be interesting to have a three-dimensional plot with the escape time over the desired velocity and the friction between the agents. Thus the overall question remains, whether a situation visible in the left image above can actually be used in respect to the escape time in real life.
+
+Even tough we could not directly verify the results from \cite{Helbing}, the conclusion that higher escape velocities doesn't necessarily result in a shorter escape time could be verified.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.75\linewidth]{assets/Exp_1_Plot_1}\\
+	Escape time over mean desired velocity
+\end{figure}
+
+Even tough the escape time continuously shrinks with increasing velocity, the difference keeps getting smaller and hits a minimum. In other words a further increase in the desired velocity won't  decrease the escape time as much. This plot is based on five runs per velocity on the described setting.
 
 \subsection{Experiment 2}
 

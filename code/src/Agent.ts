@@ -89,7 +89,7 @@ class Agent extends Phaser.GameObjects.Ellipse {
       sleepThreshold: 60,
       density: 50,
       restitution: 0,
-      friction: 10,
+      friction: 0.3,
       frictionStatic: 0.5,
       frictionAir: 0.01,
 

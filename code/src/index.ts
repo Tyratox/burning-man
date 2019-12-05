@@ -123,7 +123,7 @@ const create: SceneCreateCallback = function(this: Phaser.Scene) {
           ) {
             if (b.speed === 0) {
               //if stuck recalculate path
-              agent.path = null;
+              // agent.path = null;
             }
           }
         }

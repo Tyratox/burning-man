@@ -4,14 +4,14 @@ export const CONSTANTS = {
   TRIANGLE_HEIGHT: 20,
   TRIANGLE_SIZE: 10,
 
-  DUDE_COUNT_CAP: 100,
+  DUDE_COUNT_CAP: 1000,
 
   DUDE_REPULSION_LINEAR: 5,
   DUDE_REPULSION_EXPONENTIAL: 10,
   DUDE_GROUP_ATTRACTION: 0,
 
   WALL_REPULSION_LINEAR: 5,
-  WALL_REPULSION_EXPONENTIAL: 10,
+  WALL_REPULSION_EXPONENTIAL: 8,
 
   MAX_SMOKE_RADIUS: 20,
   MIN_SMOKE_RADIUS: 10,
@@ -26,7 +26,7 @@ export const CONSTANTS = {
   DUDE_DESIRED_VELOCITY_STD_DEV: 0.5,
 
   MEAN_DUDE_RADIUS: 20,
-  DUDE_RADIUS_STD_DEV: 5,
+  DUDE_RADIUS_STD_DEV: 2,
 
   MEAN_DUDE_VISUAL_RANGE: 2000,
   DUDE_VISUAL_RANGE_STD_DEV: 500,
@@ -50,7 +50,7 @@ const onSliderChange = (e: InputEvent) => {
 
   valueField.value = slider.value;
   //@ts-ignore
-  CONSTANTS[slider.id] = parseInt(slider.value);
+  CONSTANTS[slider.id] = parseFloat(slider.value);
 };
 
 export const onDOMReadyControlSetup = (e: Event) => {
