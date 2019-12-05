@@ -17,8 +17,13 @@
     <div id="static-sliders" class="sliders">
       <h2>Static settings</h2>
       <select id="map-selector">
-        <option selected value="map">ETH Polysnack</option>
-        <option value="modified-polysnack">ETH Polysnack (bad)</option>
+        <option selected value="polysnack-real">ETH Polysnack</option>
+        <option value="polysnack-modified-real"
+          >ETH Polysnack (modified)</option
+        >
+        <option selected value="polysnack-experimental"
+          >ETH Polysnack (experimental)</option
+        >
         <option value="map1">Experiment 1</option>
         <option value="map2">Experiment 2</option>
         <option value="map3">Normal Passage</option>
@@ -32,8 +37,8 @@
             type="range"
             autocomplete="off"
             min="1"
-            max="100"
-            value="100"
+            max="1000"
+            value="1000"
             step="1"
           />
           <input type="text" autocomplete="off" readonly />
@@ -205,8 +210,8 @@
             type="range"
             autocomplete="off"
             min="0"
-            max="2000"
-            value="30"
+            max="50"
+            value="5"
             step="1"
           />
           <input type="text" autocomplete="off" readonly />
@@ -218,8 +223,8 @@
             type="range"
             autocomplete="off"
             min="1"
-            max="1000"
-            value="500"
+            max="50"
+            value="8"
             step="10"
           />
           <input type="text" autocomplete="off" readonly />
