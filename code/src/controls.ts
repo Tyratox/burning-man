@@ -50,7 +50,7 @@ const onSliderChange = (e: InputEvent) => {
 
   valueField.value = slider.value;
   //@ts-ignore
-  CONSTANTS[slider.id] = parseInt(slider.value);
+  CONSTANTS[slider.id] = parseFloat(slider.value);
 };
 
 export const onDOMReadyControlSetup = (e: Event) => {
