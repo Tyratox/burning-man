@@ -1,39 +1,55 @@
 import { CONSTANTS } from "./controls";
 import { Physics } from "phaser";
+import SimulationController from "./SimulationController";
 
 class Fire extends Phaser.GameObjects.Arc {
   x: number;
   y: number;
-  group: Phaser.GameObjects.Group;
   smokeParticles: Phaser.GameObjects.GameObject[];
   fire: Phaser.GameObjects.GameObject;
-  scene: Phaser.Scene;
+  controller: SimulationController;
 
-  constructor(
-    scene: Phaser.Scene,
-    x: number,
-    y: number,
-    group: Phaser.GameObjects.Group
-  ) {
-    super(scene, x, y, CONSTANTS.FIRE_RADIUS, 0, 360, true, 0xfc581a, 1);
-    scene.children.add(this);
+  constructor(x: number, y: number, controller: SimulationController) {
+    super(
+      controller.scene,
+      x,
+      y,
+      CONSTANTS.FIRE_RADIUS,
+      0,
+      360,
+      true,
+      0xfc581a,
+      1
+    );
 
     //🔥 emoji
-    scene.add.sprite(x, y, "fire");
+    controller.scene.add.sprite(x, y, "fire");
     this.setVisible(false);
 
-    this.scene = scene;
+    this.scene = controller.scene;
     this.x = x;
     this.y = y;
     this.smokeParticles = new Array();
-    this.group = group;
+    this.controller = controller;
 
-    scene.time.addEvent({
+    controller.scene.time.addEvent({
       delay: CONSTANTS.SMOKE_EMISSION_RATE,
       callback: () => this.spawn(this.scene),
       callbackScope: this,
       repeat: -1
     });
+
+    controller.scene.matter.add.gameObject(this, {
+      label: "Fire",
+      shape: "circle",
+      chamfer: null,
+
+      isStatic: true,
+      isSensor: false
+    });
+
+    this.setCollisionCategory(controller.fireGroup);
+    this.setCollidesWith([controller.agentGroup]);
   }
 
   spawn(scene: Phaser.Scene) {
@@ -48,17 +64,16 @@ class Fire extends Phaser.GameObjects.Arc {
     const velocityX = sign1 * Math.random() * CONSTANTS.SMOKE_VELOCITY;
     const velocityY = sign2 * Math.random() * CONSTANTS.SMOKE_VELOCITY;
 
-    scene.physics.world.enable(circle); //adds body / enables physics
+    this.controller.scene.matter.add.gameObject(circle, {
+      label: "Smoke",
+      shape: "circle",
+      chamfer: null,
 
-    //@ts-ignore
-    const body: Physics.Arcade.Body = circle.body;
-    body
-      .setCollideWorldBounds(true)
-      .setBounce(0.2, 0.2)
-      .setVelocityX(velocityX)
-      .setVelocityY(velocityY);
+      isStatic: true,
+      isSensor: false
+    });
 
-    this.group.add(circle);
+    this.body.force = { x: velocityX, y: velocityY };
     // Delete faded smoke particles
     scene.tweens.add({
       targets: circle,

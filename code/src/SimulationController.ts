@@ -334,7 +334,8 @@ class SimulationController {
   };
 
   addFire = (fire: Phaser.Types.Tilemaps.TiledObject) => {
-    //this.fireGroup.add(new Fire(this.scene, fire.x, fire.y, this.somkeGroup));
+    /*const f = new Fire(fire.x, fire.y, this);
+    this.scene.children.add(f); //add to the scene*/
   };
 
   onAgentDeath = (agent: Agent) => {
