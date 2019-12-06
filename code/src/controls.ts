@@ -89,6 +89,7 @@ export const onDOMReadyControlSetup = (e: Event) => {
   const previewImage: HTMLImageElement = document.getElementById(
     "preview-image"
   );
+  previewImage.src = "/assets/maps/polysnack-real.png";
 
   initButton.addEventListener("click", () => {
     staticSliders.style.display = "none";
@@ -151,7 +152,6 @@ export const onDOMReadyControlSetup = (e: Event) => {
   });
 
   mapSelector.addEventListener("change", () => {
-    console.log("wohoo");
     previewImage.src =
       "assets/maps/" +
       mapSelector.options[mapSelector.selectedIndex].value +
