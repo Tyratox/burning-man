@@ -148,7 +148,7 @@ This paper describes a model for the behaviour of people in the event of an emer
 
 \section{Introduction and Motivations}
 
-This paper was created during the course \textit{Agent-Based Modeling and Social System Simulation} held by Dr. Nino Antulov-Fantulin and Thomas Asikis at ETH Zurich. The goal was to create a project in the field of modelling of complex systems with humans as agents. A complex system is in contrast to complicated system not per se hard to implement but rather consists of many simple small parts that on themselves act based on simple rules. The fact that there are a lot of agents gives rise to behaviours of the whole system that are not always easy to predict or even easy understande even though it is based on simple rules. As computers keep getting faster and new technology is developed every day, simulations are a good way of understanding these complex systems by playing with the available parameters while looking for emerging patterns and then interpreting the implications for the real world.
+This paper was created during the course \textit{Agent-Based Modeling and Social System Simulation} held by Dr. Nino Antulov-Fantulin and Thomas Asikis at ETH Zurich. The goal was to create a project in the field of modelling of complex systems with humans as agents. A complex system is in contrast to complicated system not per se hard to implement but rather consists of many simple small parts that on themselves act based on simple rules. The fact that there are a lot of agents gives rise to behaviours of the whole system that are not always easy to predict or even easy to understand even though it is based on simple rules. As computers keep getting faster and new technology is developed every day, simulations are a good way of understanding these complex systems by playing with the available parameters while looking for emerging patterns and then interpreting the implications for the real world.
 
 \section{Description of the Model}
 
@@ -174,7 +174,7 @@ After the generation of these random values, the agents are a sole product of th
 
 %    \item Agent attraction
 %    
-%    Even tough people do not like to stand close to each other, they still tend to form groups and do not like to act on their own. Thus the agents are instructed to move closer together as long as the distance between them is in the acceptable range.
+%    Even though people do not like to stand close to each other, they still tend to form groups and do not like to act on their own. Thus the agents are instructed to move closer together as long as the distance between them is in the acceptable range.
 
     \item Target attraction
     
@@ -309,7 +309,7 @@ For the first experiment we replicated the experiments from the paper \textit{Si
 	
 We created a setup similar to that in \cite{Helbing} which is the right image above but in our model this simulation took different turns. When first trying it, some agents started glitching through the wall as the acting forces were extremely high. This is a known issue in physics engines as high forces imply high acceleration and velocity. The path an agent took in a timestep $\delta t$ can be described as $s_1 = s_0 + v\cdot \delta t$.  Since physics engines calculate the new position in discrete time steps without verifying if the path from $s_0$ to $s_1$ could have been taken, glitches like the one described occur. To circumvent this issue, we replaced the whole physics engine with a better one that verifies these cases but also reduced the number of agents. This lead to a new issue that suddenly we couldn't replicate the effect from the paper anymore. Higher velocity almost always resulted in better escape times. When adjusting the friction between the agents this behaviour changed again and now most of the time all agents got stuck in a situation similar to the one described in \cite{Helbing} except that in our case they were stuck indefinitely. As we cannot create statistics where most of the time everyone gets stuck, it prevented us from having a similar statistic as Helbing, Farkas and Vicsek got. When comparing their results with ours, the differences are obvious. Most likely our model failed to replicate some important behaviour that was considered in \cite{Helbing} but it still seems interesting that the paper describes very exactly all parameters chosen for mass, acceleration time, desired velocity, etc. but only mentions the friction very briefly by stating: ''if the friction parameter is large enough''\cite{Helbing}. Depending on how this sentence is interpreted, the results our model produced with a large friction parameter might be more similar than first thought and may also result from a different handling of the friction in the physics engines. For further studies it would be interesting to have a three-dimensional plot with the escape time over the desired velocity and the friction between the agents. Thus the overall question remains, whether a situation visible in the left image above can actually be used in respect to the escape time in real life.
 
-Even tough we could not directly verify the results from \cite{Helbing}, the conclusion that higher escape velocities doesn't necessarily result in a shorter escape time could be verified.
+Even though we could not directly verify the results from \cite{Helbing}, the conclusion that higher escape velocities doesn't necessarily result in a shorter escape time could be verified.
 
 \begin{figure}[H]
 	\centering
@@ -317,7 +317,7 @@ Even tough we could not directly verify the results from \cite{Helbing}, the con
 	Escape time over mean desired velocity
 \end{figure}
 
-Even tough the escape time continuously shrinks with increasing velocity, the difference keeps getting smaller and hits a minimum. In other words a further increase in the desired velocity won't  decrease the escape time as much. This plot is based on five runs per velocity on the described setting.
+Even though the escape time continuously shrinks with increasing velocity, the difference keeps getting smaller and hits a minimum. In other words a further increase in the desired velocity won't  decrease the escape time as much. This plot is based on five runs per velocity on the described setting.
 
 %\subsection{Experiment 2}
 
