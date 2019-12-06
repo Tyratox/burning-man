@@ -51,20 +51,20 @@ After the generation of these random values, the agents are a sole product of th
 ## Fundamental Questions
 
 1. What is the relation between the desired speed of the individuals and the time it takes until all agents are rescued. More specifically: Is there an optimal desired speed, that leads to the fastest rescue of all agents.
-2. Does it improve the rescue time if the agents tend to stay together?
+2. What is the impact of the door width and hallway width on the evacuationtime?
 
 ## Expected Results
 
 1. Expected result: There is an optimal speed, such that the rescue time is worse for both a lower speed and a higher speed.
-2. Expected result: The group is much slower if the agents want to be close to each other.
+2. Expected result: The more space the people have the better.
 
 ## References 
 
-Dirk Helbing, Illés Farkas, and Tamás Vicsek:
-Simulating dynamical features of escape panic
-Nature 407, 487-490 (2000)
+[1] Richard Davey. Phaser. https://github.com/photonstorm/phaser, last visited on 2019-12-01.
 
-Wang, Peng. (2016). Understanding Social-Force Model in Psychological Principles of Collective Behavior. 
+[2] Dirk Helbing, Illés Farkas, and Tamás Vicsek. Simulating dynamic features of escape panic. Nature, 407:487–490, 09 2000.
+
+[3] Thorbjrn Lindeijer. Tiled. https://github.com/bjorn/tiled, last visited on 2019-12-01.
 
 ## Research Methods
 
