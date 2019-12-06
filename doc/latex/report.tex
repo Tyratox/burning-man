@@ -12,6 +12,7 @@
 \usepackage{xcolor}
 \usepackage[nottoc,numbib]{tocbibind}
 \usepackage{float}
+\usepackage{pdfpages}
 
 \definecolor{codeRed}{RGB}{231,76,60}
 \definecolor{codeBlue}{RGB}{52,152,219}
@@ -64,64 +65,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section*{Agreement for free-download}
-\bigskip
 
+\includepdf[page={1}]{download-agreement}
 
-\bigskip
-
-
-\large We hereby agree to make our source code for this project freely available for download from the web pages of the SOMS chair. Furthermore, we assure that all source code is written by ourselves and is not violating any copyright restrictions.
-
-\begin{center}
-
-\bigskip
-
-
-\bigskip
-
-
-\begin{tabular}{@{}p{3.3cm}@{}p{6cm}@{}@{}p{6cm}@{}}
-\begin{minipage}{3cm}
-
-\end{minipage}
-&
-\begin{minipage}{6cm}
-\vspace{2mm} \large Nico Hauser
- \vspace{\baselineskip}
-
-\end{minipage}
-&
-\begin{minipage}{6cm}
-
-\large Andri Horat
-
-\end{minipage}
-\\
-\\
-\\
-\\
-\\
-\begin{minipage}{3cm}
-
-\end{minipage}
-&
-\begin{minipage}{6cm}
-\vspace{2mm} \large Elias Schmid
-
- \vspace{\baselineskip}
-
-\end{minipage}
-&
-\begin{minipage}{6cm}
-
-\large Jonas Spieler
-
-\end{minipage}
-\end{tabular}
-
-
-\end{center}
 \newpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -186,15 +132,15 @@ After the generation of these random values, the agents are a sole product of th
 The implementation of this model is done in javascript using a game library called Phaser \cite{Phaser} that already includes a physics engine and has means of drawing the result onto a \texttt{HTML} canvas meaning the whole simulation can easily be rendered on a webpage and doesn't require any setup.
 
 \subsection{Environment construction}
-As people are at least to some extent the product of their environment, it is very important that the simulations does not have a fixed environment in which all simulations take place. In fact it is one of the most important parameters when looking at the results, i.e. how many people survived a fire emergency. People in a totally enclosed room have no chance of escaping whereas agents sitting next to an escape zone probably will have no issues. To make the change of this parameter as accessible as possible, the implementation uses an open source format called \texttt{Tiled's map format} (TMX). \cite{Tiled}
+As people are at least to some extent the product of their environment, it is very important that the simulations does not have a fixed environment in which all simulations take place. In fact it is one of the most important parameters when looking at the results, i.e. how many people survived a fire emergency. People in a totally enclosed room have no chance of escaping whereas agents sitting next to an escape zone probably will have no issues. To make the change of this parameter as accessible as possible, the implementation uses an open source format called \texttt{Tiled's map format} (TMX). \cite{Tiled} As the name implies, this format can be edited using the open source editor named Tiled.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{assets/tiled-editor}\\
-	The editing screen of Tiled
+	The editing screen of Tiled \cite{Tiled}
 \end{figure}
 
-As this editor is very simple to use, everyone with a basic understanding of computer is able to adjust the given examples or to define their own setting. This makes the model much more accessible and allows anyone to fit our model to their own needs and interests.
+This editor is very simple to use and everyone with a basic understanding of computer is able to adjust the given examples or to define their own setting. This makes the model much more accessible and allows anyone to fit our model to their own needs and interests.
 
 \subsection{Agent behaviour}
 
@@ -397,7 +343,7 @@ The agent model on the other hand isn't perfect to say the least. It served the 
 %The target attraction probably could have been modelled in a better way, instead of simply applying a force into the direction of the target, a real pathfinding algorithm could try to find the fastest way to the target that may involve walking around obstacles. In the current implementation agents fail to walk to the target if they are boxed in into the direction of the target.
 
 \section{Summary and Outlook}
-Even though the experiments didn't yield the results we had hoped for, one can draw interesting conclusion from them and they show where such a social force model reaches its limits. What definitely is different in this project compared to many others is the reproducibility, we really like the idea of having a simulation that can be run right in the web browser and thus the experiments are easily verifiable by others. One mistake we did as a group was to focus too much time on the model itself. As none of us had a lot of experience in building a solid social system simulation, it took us way too long to implement it in a way we were confident with. In the end agents are just are simulated particles in newtonian physics but we wanted to actually build a good model for simulating real people which made us implement everything several times and thus wasting time. Just the map format itself was revised at least ten times! But in conclusion one can say that the modelling and the simulation of this scenario was very fascinating and a lot of fun for everyone involved. Even though many ideas were already mention in the chapter about the model evaluation, we would like to mention that the model could further be improved to support many of the things we mentioned, the resource that was preventing us from doing it was in the end just time. One could start building this simulation more accurately, maybe even in proportions to actual SI units, one could improve the performance of the raytracing algorithm and ensure the agents only act repulsive forces on each other if they actually see each other and one could finish implementing one of the many planned features such as fires, smoke or group formation. But still, we're proud of what we built and hope this project can be used by others and will be further developed.
+Even though the experiments didn't yield the results we had hoped for, one can draw interesting conclusion from them and they show where such a social force model reaches its limits. What definitely is different in this project compared to many others is the reproducibility, we really like the idea of having a simulation that can be run right in the web browser and thus the experiments are easily verifiable by others. One mistake we did as a group was to focus too much time on the model itself. As none of us had a lot of experience in building a solid social system simulation, it took us way too long to implement it in a way we were confident with. In the end agents just are simulated particles in newtonian physics but we wanted to actually build a good model for simulating real people which made us implement everything several times and thus wasting time. Just the map format itself was revised at least ten times! But in conclusion one can say that the modelling and the simulation of this scenario was very fascinating and a lot of fun for everyone involved. Even though many ideas were already mention in the chapter about the model evaluation, we would like to mention that the model could further be improved to support many of the things we mentioned, the resource that was preventing us from doing it was in the end just time. One could start building this simulation more accurately, maybe even in proportions to actual SI units, one could improve the performance of the raytracing algorithm and ensure the agents only act repulsive forces on each other if they actually see each other and one could finish implementing one of the many planned features such as fires, smoke or group formation. But still, we're proud of what we built and hope this project can be used by others and will be further developed.
 
 %\section{References}
 
@@ -406,6 +352,10 @@ Even though the experiments didn't yield the results we had hoped for, one can d
 
 \bibliographystyle{plain}
 \bibliography{refs}
+
+\newpage
+
+\includepdf[page={1}]{declaration-originality}
 
 \end{document}  
 

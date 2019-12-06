@@ -9,7 +9,7 @@ Warning--entry type for "Phaser" isn't style-file defined
 --line 18 of file ../refs.bib
 You've used 3 entries,
             2118 wiz_defined-function locations,
-            514 strings with 4508 characters,
+            514 strings with 4516 characters,
 and the built_in function-call counts, 775 in all, are:
 = -- 70
 > -- 32
