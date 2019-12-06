@@ -89,7 +89,6 @@ export const onDOMReadyControlSetup = (e: Event) => {
   const previewImage: HTMLImageElement = document.getElementById(
     "preview-image"
   );
-  previewImage.src = "assets/maps/polysnack-real.png";
 
   initButton.addEventListener("click", () => {
     staticSliders.style.display = "none";
