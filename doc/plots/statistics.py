@@ -20,7 +20,7 @@ def getData(start, end, file, tag) :
 # Plot Data with optional x and y error and saves file as name.svg
 def plot(dataX, dataY, xLabel, yLabel, name, errX=None, errY=None) :
 	plt.figure(figsize=[11, 8])
-	plt.errorbar(dataX, dataY, xerr=errX, yerr=errY, fmt='rx', elinewidth=1, capsize=5)
+	plt.errorbar(dataX, dataY, xerr=errX, yerr=errY, fmt='ro', elinewidth=1, capsize=5)
 
 	# Naming Axes and Title
 	plt.ylabel(yLabel)
@@ -32,7 +32,7 @@ def plot(dataX, dataY, xLabel, yLabel, name, errX=None, errY=None) :
 	plt.savefig(fileName)
 
 # Plot Data for multiple Graphs with optional x and y error and saves file as name.svg
-def plotMultipleSets(nrGraphs, color, dataX, dataY, xLabel, yLabel, name, errX=None, errY=None, lables) :
+def plotMultipleSets(nrGraphs, color, dataX, dataY, xLabel, yLabel, name, lables, errX=None, errY=None) :
 	plt.figure(figsize=[11, 8])
 	for i in range(0, nrGraphs) :
 		plt.errorbar(dataX[i], dataY[i], fmt=color[i], yerr=errY[i], elinewidth=1, capsize=5, label=lables[i])
