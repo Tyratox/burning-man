@@ -1,12 +1,18 @@
 \begin{thebibliography}{1}
 
+\bibitem{Phaser}
+Richard Davey.
+\newblock Phaser.
+\newblock https://github.com/photonstorm/phaser, last visited on 2019-12-01.
+
 \bibitem{Helbing}
-Dirk Helbing, Illés Farkas, and Tamás Vicsek.
+Dirk Helbing, Ill\'{e}s Farkas, and Tam\'{a}s Vicsek.
 \newblock Simulating dynamic features of escape panic.
 \newblock {\em Nature}, 407:487--490, 09 2000.
 
 \bibitem{Tiled}
-Thorbjørn Lindeijer.
+Thorbj{\o}rn Lindeijer.
+\newblock Tiled.
 \newblock https://github.com/bjorn/tiled, last visited on 2019-12-01.
 
 \end{thebibliography}
