@@ -5,45 +5,47 @@ The style file: plain.bst
 Database file #1: ../refs.bib
 Warning--entry type for "Tiled" isn't style-file defined
 --line 11 of file ../refs.bib
-You've used 2 entries,
+Warning--entry type for "Phaser" isn't style-file defined
+--line 18 of file ../refs.bib
+You've used 3 entries,
             2118 wiz_defined-function locations,
-            510 strings with 4418 characters,
-and the built_in function-call counts, 561 in all, are:
-= -- 49
-> -- 25
+            514 strings with 4508 characters,
+and the built_in function-call counts, 775 in all, are:
+= -- 70
+> -- 32
 < -- 0
-+ -- 10
-- -- 8
-* -- 36
-:= -- 99
-add.period$ -- 5
-call.type$ -- 2
-change.case$ -- 9
++ -- 13
+- -- 10
+* -- 41
+:= -- 135
+add.period$ -- 9
+call.type$ -- 3
+change.case$ -- 14
 chr.to.int$ -- 0
-cite$ -- 2
-duplicate$ -- 18
-empty$ -- 49
-format.name$ -- 8
-if$ -- 114
+cite$ -- 3
+duplicate$ -- 25
+empty$ -- 71
+format.name$ -- 10
+if$ -- 161
 int.to.chr$ -- 0
-int.to.str$ -- 2
+int.to.str$ -- 3
 missing$ -- 1
-newline$ -- 12
-num.names$ -- 4
-pop$ -- 16
+newline$ -- 18
+num.names$ -- 6
+pop$ -- 26
 preamble$ -- 1
-purify$ -- 8
+purify$ -- 11
 quote$ -- 0
-skip$ -- 14
+skip$ -- 19
 stack$ -- 0
-substring$ -- 31
-swap$ -- 2
+substring$ -- 36
+swap$ -- 3
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 8
+type$ -- 12
 warning$ -- 0
-while$ -- 5
-width$ -- 3
-write$ -- 20
-(There was 1 warning)
+while$ -- 7
+width$ -- 4
+write$ -- 31
+(There were 2 warnings)
