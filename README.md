@@ -6,8 +6,8 @@
 ## Information
 
 * An working online version of the simulation can be found at https://tyratox.github.io/burning-man/
-* The newest version of the report can be found at https://github.com/Tyratox/burning-man/raw/master/doc/latex/report.pdf
-* The presentation is available at https://github.com/
+* The newest version of the report can be found at https://github.com/Tyratox/burning-man/raw/master/doc/latex/report.pdf, the decleration of originality at https://github.com/Tyratox/burning-man/raw/master/doc/latex/declaration-originality.pdf.
+* The presentation is available at https://github.com/Tyratox/burning-man/presentation/
 
 ## General Introduction
 
