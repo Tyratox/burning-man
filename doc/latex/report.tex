@@ -183,10 +183,10 @@ After the generation of these random values, the agents are a sole product of th
 
 \section{Implementation}
 
-The implementation of this model is done in javascript using a game library called Phaser that already includes a physics engine and has means of drawing the result onto a \texttt{HTML} canvas meaning the whole simulation can easily be rendered on a webpage and doesn't require any setup.
+The implementation of this model is done in javascript using a game library called Phaser \cite{Phaser} that already includes a physics engine and has means of drawing the result onto a \texttt{HTML} canvas meaning the whole simulation can easily be rendered on a webpage and doesn't require any setup.
 
 \subsection{Environment construction}
-As people are at least to some extent the product of their environment, it is very important that the simulations does not have a fixed environment in which all simulations take place. In fact it is one of the most important parameters when looking at the results, i.e. how many people survived a fire emergency. People in a totally enclosed room have no chance of escaping whereas agents sitting next to an escape zone probably will have no issues. To make the change of this parameter as accessible as possible, the implementation uses an open source format called \texttt{Tiled's map format} (TMX).
+As people are at least to some extent the product of their environment, it is very important that the simulations does not have a fixed environment in which all simulations take place. In fact it is one of the most important parameters when looking at the results, i.e. how many people survived a fire emergency. People in a totally enclosed room have no chance of escaping whereas agents sitting next to an escape zone probably will have no issues. To make the change of this parameter as accessible as possible, the implementation uses an open source format called \texttt{Tiled's map format} (TMX). \cite{Tiled}
 
 \begin{figure}[H]
 	\centering
@@ -198,7 +198,7 @@ As this editor is very simple to use, everyone with a basic understanding of com
 
 \subsection{Agent behaviour}
 
-As phaser includes a physics engine we can make use of this by simulating the behaviour of the agents based on forces acting on them where the resulting movement is the sum over all force vectors. Phaser has an \texttt{update} function that gets called every time a new frame is calculated. which is perfectly suited for a task like our model. The different behavioural rules are implemented as follows
+As Phaser includes a physics engine we can make use of this by simulating the behaviour of the agents based on forces acting on them where the resulting movement is the sum over all force vectors. Phaser has an \texttt{update} function that gets called every time a new frame is calculated. which is perfectly suited for a task like our model. The different behavioural rules are implemented as follows
 
 \begin{itemize}
     \item Wall repulsion
