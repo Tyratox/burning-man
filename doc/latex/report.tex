@@ -144,7 +144,7 @@
 
 \section{Abstract}
 
-This paper describes a model for the behaviour of people in the event of an emergency situation and it's simulation. The model incorporates the general repulsion of people standing too close, the formation of groups in panic situations, the placement of exit signs and many other factors such as different speeds. In order to make observations on the defined model, it is simulated using a physics engine written in javascript that makes it accessible from any place at any time and allows for reproducible and verifiable results. The paper defines a general parameterized model of the environment and the agents which, with the right choice of simulation parameters, may even allow for a safety evaluation of specific settings. Simulations using this model were able to verify results of other papers but also put them into perspective.
+This paper describes a model for the behaviour of people in the event of an emergency situation and it's simulation. The model incorporates the general repulsion of people standing too close, the formation of groups in panic situations, the placement of exit signs and many other factors such as different speeds. In order to make observations on the defined model, it is simulated using a physics engine written in javascript that makes it accessible from any place at any time and allows for reproducible and verifiable results. The paper defines a general parameterised model of the environment and the agents which, with the right choice of simulation parameters, may even allow for a safety evaluation of specific settings. Simulations using this model were able to verify results of other papers but also put them into perspective.
 
 \section{Introduction and Motivations}
 
@@ -201,9 +201,15 @@ As this editor is very simple to use, everyone with a basic understanding of com
 As Phaser includes a physics engine we can make use of this by simulating the behaviour of the agents based on forces acting on them where the resulting movement is the sum over all force vectors. Phaser has an \texttt{update} function that gets called every time a new frame is calculated. which is perfectly suited for a task like our model. The different behavioural rules are implemented as follows
 
 \begin{itemize}
-    \item Wall repulsion
+      \item Wall repulsion
     
-    -
+    The wall repulsion acting on an agent is calculated based on the minimal distance between the agent and all walls. The force pushing the agent away from the wall is defined as
+    
+    \begin{align*}
+    	f_w = c_1 \cdot e^{-\frac{d}{c_2}}
+    \end{align*}
+ 
+where $d$ is the vector pointing from the point on the wall to the position of the agent and $c_1$ and $c_2$ are adjustable parameters.
 
     \item Agent repulsion
     
@@ -213,7 +219,7 @@ As Phaser includes a physics engine we can make use of this by simulating the be
     	f_r = c_1 \cdot e^{-\frac{d}{c_2}}
     \end{align*}
     
-    pulling them away from each other, where $c_1$ and $c_2$ are adjustable parameters but constant for the two agents. $d$ is the distance between the two agents. As the force is proportional to $e^{-d}$, it is exponentially decreasing with a linear increase of the distance. The initial values for $c_1$ and $c_2$ were empirically determined and are dependent on phaser's internal units.
+    pulling them away from each other, where $c_1$ and $c_2$ are adjustable parameters but constant for the two agents. $d$ is the vector difference between the two agents. As the force is proportional to $e^{-d}$, it decreases exponentially with respect to the distance. The initial values for $c_1$ and $c_2$ were empirically determined and are dependent on Phaser's internal units.
 
 %    \item Agent attraction
 %    
@@ -329,14 +335,14 @@ As our model is capable of handling much more complex situations and complex sys
 	\begin{figure}[H]
 		\centering
 		\includegraphics[width=.9\linewidth]{assets/polysnack}\\
-		ETH polysnack
+		ETH Polysnack
 	\end{figure}
 \end{minipage}
 \begin{minipage}{.5\textwidth}
 	\begin{figure}[H]
 	\centering
 	\includegraphics[width=.9\linewidth]{assets/polysnack-modified}\\
-	ETH polysnack with a narrow hallway\\
+	ETH Polysnack with a narrow hallway\\
 	and a narrow exit
 \end{figure}
 \end{minipage}
@@ -345,7 +351,7 @@ As our model is capable of handling much more complex situations and complex sys
 \begin{figure}[H]
 		\centering
 		\includegraphics[width=.9\linewidth]{assets/polysnack-experimental}\\
-		ETH polysnack with a narrow hallway\\
+		ETH Polysnack with a narrow hallway\\
 		and a narrow exit
 	\end{figure}
 \end{minipage}
@@ -353,7 +359,7 @@ As our model is capable of handling much more complex situations and complex sys
 	\begin{figure}[H]
 	\centering
 	\includegraphics[width=.9\linewidth]{assets/polysnack-experimental-2}\\
-	ETH polysnack with a wide hallway\\
+	ETH Polysnack with a wide hallway\\
 	and a narrow exit
 \end{figure}
 \end{minipage}
