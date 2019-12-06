@@ -83,6 +83,12 @@ export const onDOMReadyControlSetup = (e: Event) => {
   const navmeshDebugButton = document.getElementById("navmeshDebug");
   const pathFindButton = document.getElementById("pathFinding");
   const overlay: HTMLDivElement = document.querySelector(".wrapper .overlay");
+  const mapSelector: HTMLSelectElement = document.querySelector(
+    "#map-selector"
+  );
+  const previewImage: HTMLImageElement = document.getElementById(
+    "preview-image"
+  );
 
   initButton.addEventListener("click", () => {
     staticSliders.style.display = "none";
@@ -142,6 +148,14 @@ export const onDOMReadyControlSetup = (e: Event) => {
 
     timer.setCurrentStartTime(game.getTime());
     game.scene.resume("default");
+  });
+
+  mapSelector.addEventListener("change", () => {
+    console.log("wohoo");
+    previewImage.src =
+      "assets/maps/" +
+      mapSelector.options[mapSelector.selectedIndex].value +
+      ".png";
   });
 };
 
